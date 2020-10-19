@@ -1,0 +1,50 @@
+FUNCTION-POOL ZEARC_FG001.                  "MESSAGE-ID ..
+
+*tables : zeinv_t043.
+
+type-pools : icon .
+
+data  : go_alv     type ref to cl_salv_table,
+        gr_column  type ref to cl_salv_column,
+        gr_columns type ref to cl_salv_columns_table.
+data    gt_list type zearc_tt001 with header line.
+*data   gt_g_list type zearc_tt002 with header line .
+data   gv_link(100) type c .
+
+data : go_html_container       TYPE REF TO cl_gui_custom_container,
+       go_htmlviewer           TYPE REF TO cl_gui_html_viewer,
+       go_toolbar_container    TYPE REF TO cl_gui_custom_container.
+
+
+* Logo data ..
+data: g_last_graph_container type scrfname,
+      g_last_graph_name      type w3objid.
+
+*&---------------------------------------------------------------------*
+*&      form  set_col_visible
+*&---------------------------------------------------------------------*
+form set_col_visible  using if_column.
+*
+  gr_column ?= gr_columns->get_column( if_column ).
+  gr_column->set_visible( value  = if_salv_c_bool_sap=>false ).
+
+endform.
+
+*&---------------------------------------------------------------------*
+*&      form  set_col_position
+*&---------------------------------------------------------------------*
+form set_col_position  using  if_column if_postn .
+*
+
+
+*  gr_column->set_column_position( columnname = if_column
+*                                  position   = if_postn   ).
+
+  gr_columns = go_alv->get_columns( ).
+  gr_columns->set_column_position(  columnname = if_column
+                                    position   = if_postn  ).
+
+endform.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2020. Sap Release 740

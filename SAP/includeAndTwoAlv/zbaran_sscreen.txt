@@ -1,0 +1,23 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_SSCREEN
+*&---------------------------------------------------------------------*
+
+SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-001.
+PARAMETERS:p_BUKRS LIKE bkpf-BUKRS OBLIGATORY,
+           p_BELNR LIKE bkpf-BELNR OBLIGATORY,
+           p_GJAHR LIKE bkpf-GJAHR OBLIGATORY.
+SELECT-OPTIONS:so_BLART FOR bkpf-BLART,
+               so_BLDAT FOR bkpf-BLDAT.
+SELECTION-SCREEN END OF BLOCK blok1.
+SELECTION-SCREEN BEGIN OF BLOCK blok2 WITH FRAME TITLE text-002.
+PARAMETERS:rad1 RADIOBUTTON GROUP grp,
+           rad2 RADIOBUTTON GROUP grp,
+           rad3 RADIOBUTTON GROUP grp.
+PARAMETERS:p_KUNNR LIKE kna1-KUNNR,
+           p_LIFNR LIKE lfa1-LIFNR,
+           p_SAKNR LIKE ska1-SAKNR.
+SELECTION-SCREEN END OF BLOCK blok2.
+SELECTION-SCREEN BEGIN OF BLOCK blok3 WITH FRAME TITLE text-003.
+PARAMETERS:chb1 AS CHECKBOX DEFAULT 'X',
+           chb2 AS CHECKBOX DEFAULT 'X'.
+SELECTION-SCREEN END OF BLOCK blok3.

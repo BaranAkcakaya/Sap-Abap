@@ -1,0 +1,383 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK027
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK027.
+*TYPE-POOLS: truxs, slis.
+*PARAMETERS : p_add_f  TYPE c LENGTH 50.
+*TYPES: BEGIN OF ty_dest,
+*         place_f TYPE c LENGTH 50,
+*         lat_f   TYPE c LENGTH 20,
+*         lng_f   TYPE c LENGTH 20,
+*       END OF ty_dest.
+*DATA: gt_dest     TYPE STANDARD TABLE OF ty_dest.
+*START-OF-SELECTION .
+*  PERFORM get_long_lat.
+*END-OF-SELECTION .
+*  PERFORM display_lat_longitude.
+*FORM get_long_lat .
+*  DATA:
+*    lv_http_client TYPE REF TO if_http_client,
+*    lv_content     TYPE string.
+*  PERFORM create_http_client CHANGING lv_http_client.
+*  PERFORM http_client_request_get_method USING lv_http_client.
+*  PERFORM http_client_send USING lv_http_client.
+*  PERFORM http_client_receive USING lv_http_client CHANGING lv_content.
+*  PERFORM get_coordinates USING lv_content.
+*ENDFORM.
+*FORM create_http_client CHANGING p_http_client TYPE REF TO if_http_client.
+*  DATA: lv_http_url TYPE string.
+*  CONCATENATE
+*    'https://geocode-maps.yandex.ru/1.x/?apikey=c8941893-17c3-4fb2-81c5-b00c442468a0&geocode='
+*    p_add_f
+*    INTO lv_http_url .
+*  CALL METHOD cl_http_client=>create_by_url
+*    EXPORTING
+*      url                = lv_http_url
+**      url                = 'https://maps.googleapis.com/maps/api/geocode/xml?address=Kad%C4%B1k%C3%B6y&key=AIzaSyDdkxMGHO9GCJsX6DcJSGVASwXQH_61MMc'
+*    IMPORTING
+*      client             = p_http_client
+*    EXCEPTIONS
+*      argument_not_found = 1
+*      plugin_not_active  = 2
+*      internal_error     = 3
+*      OTHERS             = 4.
+*
+*ENDFORM.
+*FORM http_client_request_get_method USING p_http_client TYPE REF TO if_http_client.
+*  p_http_client->request->set_header_field( name = '~request_method' value = 'GET' ).
+*ENDFORM.
+*FORM http_client_send USING p_http_client TYPE REF TO if_http_client.
+*  p_http_client->send( ).
+*ENDFORM.
+*FORM http_client_receive  USING    p_http_client TYPE REF TO if_http_client
+*                          CHANGING p_p_content   TYPE string.
+*  CALL METHOD p_http_client->RECEIVE
+*    EXCEPTIONS
+*      http_communication_failure = 1
+*      http_invalid_state         = 2
+*      http_processing_failed     = 3
+*      OTHERS                     = 4.
+*  p_p_content = p_http_client->response->GET_CDATA( ).
+*
+*ENDFORM.
+*FORM get_coordinates  USING    p_p_content TYPE string.
+*  DATA: lv_url  TYPE c LENGTH 255,
+*        ls_dest TYPE ty_dest,
+*        moff    TYPE syst-tabix,
+*        moff1   TYPE syst-tabix,
+*        lv_len  TYPE syst-tabix,
+*        lv_lat  TYPE c LENGTH 20,
+*        lv_lng  TYPE c LENGTH 20.
+*
+*  DO .
+*    FIND '<location>' IN SECTION OFFSET moff OF p_p_content IGNORING CASE MATCH OFFSET moff .
+*    IF sy-subrc = 0 .
+*      moff = moff + 10 .
+*      FIND '</location>' IN SECTION OFFSET moff OF p_p_content IGNORING CASE MATCH OFFSET moff1 .
+*      lv_len = moff1 - moff .
+*      FIND '<lat>' IN SECTION OFFSET moff OF p_p_content IGNORING CASE MATCH OFFSET moff .
+*      IF sy-subrc = 0 .
+*        moff = moff + 5 .
+*        FIND '</lat>' IN SECTION OFFSET moff OF p_p_content IGNORING CASE MATCH OFFSET moff1 .
+*        lv_len = moff1 - moff .
+*        lv_lat = p_p_content+moff(lv_len) .
+*        ls_dest-place_f = p_add_f .
+*        ls_dest-lat_f = lv_lat.
+*      ENDIF.
+*      FIND '<lng>' IN SECTION OFFSET moff OF p_p_content IGNORING CASE MATCH OFFSET moff .
+*      IF sy-subrc = 0 .
+*        moff = moff + 5 .
+*        FIND '</lng>' IN SECTION OFFSET moff OF p_p_content IGNORING CASE MATCH OFFSET moff1 .
+*        lv_len = moff1 - moff .
+*        lv_lng = p_p_content+moff(lv_len) .
+*        ls_dest-lng_f = lv_lng.
+*      ENDIF.
+*    ELSE.
+*      EXIT.
+*    ENDIF.
+*  ENDDO .
+*  APPEND ls_dest TO gt_dest.
+*  CLEAR:ls_dest .
+*ENDFORM.
+*FORM display_lat_longitude .
+*  DATA:
+*    lr_alv       TYPE REF TO cl_salv_table,
+*    lr_columns   TYPE REF TO cl_salv_columns_table,
+*    lr_column    TYPE REF TO cl_salv_column,
+*    lr_functions TYPE REF TO cl_salv_functions_list,
+*    lr_display   TYPE REF TO cl_salv_display_settings,
+*    lr_layout    TYPE REF TO cl_salv_layout,
+*    ls_key       TYPE salv_s_layout_key,
+*    lr_sorts     TYPE REF TO cl_salv_sorts.
+*
+*  IF lines( gt_dest ) > 0.
+*    TRY.
+*        CALL METHOD cl_salv_table=>factory
+*          IMPORTING
+*            r_salv_table = lr_alv
+*          CHANGING
+*            t_table      = gt_dest.
+*
+*        lr_functions = lr_alv->get_functions( ).
+*        lr_functions->set_all( ).
+*        lr_columns = lr_alv->get_columns( ).
+*
+*        CALL METHOD lr_columns->get_column
+*          EXPORTING
+*            columnname = 'PLACE_F'
+*          RECEIVING
+*            value      = lr_column.
+*        CALL METHOD lr_column->set_short_text
+*          EXPORTING
+*            value = ''.
+*        CALL METHOD lr_column->set_medium_text
+*          EXPORTING
+*            value = ''.
+*        CALL METHOD lr_column->set_long_text
+*          EXPORTING
+*            value = 'Place Name'.
+*        CALL METHOD lr_columns->get_column
+*          EXPORTING
+*            columnname = 'LAT_F'
+*          RECEIVING
+*            value      = lr_column.
+*        CALL METHOD lr_column->set_short_text
+*          EXPORTING
+*            value = ''.
+*        CALL METHOD lr_column->set_medium_text
+*          EXPORTING
+*            value = ''.
+*        CALL METHOD lr_column->set_long_text
+*          EXPORTING
+*            value = 'Latitude'.
+*        CALL METHOD lr_columns->get_column
+*          EXPORTING
+*            columnname = 'LNG_F'
+*          RECEIVING
+*            value      = lr_column.
+*        CALL METHOD lr_column->set_short_text
+*          EXPORTING
+*            value = ''.
+*        CALL METHOD lr_column->set_medium_text
+*          EXPORTING
+*            value = ''.
+*        CALL METHOD lr_column->set_long_text
+*          EXPORTING
+*            value = 'Longitude'.
+*
+*        lr_columns->set_optimize( ).
+*        lr_sorts = lr_alv->get_sorts( ).
+*        lr_sorts->clear( ).
+*        lr_layout = lr_alv->get_layout( ).
+*        ls_key-report = sy-repid.
+*        lr_layout->set_key( ls_key ).
+*        lr_layout->set_default( ' ' ).
+*        lr_layout->set_save_restriction( cl_salv_layout=>restrict_none ).
+*        lr_display = lr_alv->get_display_settings( ).
+*        lr_display->set_striped_pattern( cl_salv_display_settings=>true ).
+*        lr_alv->display( ).
+*
+*      CATCH cx_salv_msg.
+*        WRITE: 'Error displaying grid CX_SALV_MSG!'(001).
+*      CATCH cx_salv_not_found.
+*        WRITE: 'Error displaying grid CX_SALV_NOT_FOUND!'(002).
+*      CATCH cx_salv_data_error.
+*        WRITE: 'Error displaying grid CX_SALV_DATA_ERROR!'(003).
+*      CATCH cx_salv_existing.
+*        WRITE: 'Error displaying grid CX_SALV_EXISTING!'(004).
+*    ENDTRY.
+*  ELSE.
+*    MESSAGE 'No data to display' TYPE 'I'.
+*    LEAVE LIST-PROCESSING.
+*  ENDIF.
+*ENDFORM.
+
+*&---------------------------------------------------------------------*
+*& Smart Form
+*&---------------------------------------------------------------------*
+DATA: i_otf TYPE itcoo OCCURS 0 WITH HEADER LINE,
+      i_tline TYPE TABLE OF tline WITH HEADER LINE,
+      i_receivers TYPE TABLE OF somlreci1 WITH HEADER LINE,
+      i_record LIKE solisti1 OCCURS 0 WITH HEADER LINE,
+* Objects to send mail.
+      i_objpack LIKE sopcklsti1 OCCURS 0 WITH HEADER LINE,
+      i_objtxt LIKE solisti1 OCCURS 0 WITH HEADER LINE,
+      i_objbin LIKE solisti1 OCCURS 0 WITH HEADER LINE,
+      i_reclist LIKE somlreci1 OCCURS 0 WITH HEADER LINE,
+* Work Area declarations
+      wa_objhead TYPE soli_tab,
+      w_ctrlop TYPE ssfctrlop,
+      w_compop TYPE ssfcompop,
+      w_return TYPE ssfcrescl,
+      wa_doc_chng TYPE sodocchgi1,
+      w_data TYPE sodocchgi1,
+      wa_buffer TYPE string, "To convert from 132 to 255
+* Variables declarations
+      v_form_name TYPE rs38l_fnam,
+      v_len_in LIKE sood-objlen,
+      v_len_out LIKE sood-objlen,
+      v_len_outn TYPE i,
+      v_lines_txt TYPE i,
+      v_lines_bin TYPE i.
+
+CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+  EXPORTING
+    formname           = 'ZTABLO_IRSALIYE'
+  IMPORTING
+    fm_name            = v_form_name
+  EXCEPTIONS
+    no_form            = 1
+    no_function_module = 2
+    OTHERS             = 3.
+IF sy-subrc <> 0.
+  MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+w_ctrlop-getotf = 'X'.
+w_ctrlop-no_dialog = 'X'.
+w_compop-tdnoprev = 'X'.
+CALL FUNCTION v_form_name
+  EXPORTING
+    control_parameters = w_ctrlop
+    output_options     = w_compop
+    user_settings      = 'X'
+  IMPORTING
+    job_output_info    = w_return
+  EXCEPTIONS
+    formatting_error   = 1
+    internal_error     = 2
+    send_error         = 3
+    user_canceled      = 4
+    OTHERS             = 5.
+IF sy-subrc <> 0.
+  MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+i_otf[] = w_return-otfdata[].
+CALL FUNCTION 'CONVERT_OTF'
+  EXPORTING
+    format                = 'PDF'
+    max_linewidth         = 132
+  IMPORTING
+    bin_filesize          = v_len_in
+  TABLES
+    otf                   = i_otf
+    lines                 = i_tline
+  EXCEPTIONS
+    err_max_linewidth     = 1
+    err_format            = 2
+    err_conv_not_possible = 3
+    OTHERS                = 4.
+IF sy-subrc <> 0.
+ENDIF.
+LOOP AT i_tline.
+  TRANSLATE i_tline USING '~'.
+  CONCATENATE wa_buffer i_tline INTO wa_buffer.
+ENDLOOP.
+TRANSLATE wa_buffer USING '~'.
+DO.
+  i_record = wa_buffer.
+  APPEND i_record.
+  SHIFT wa_buffer LEFT BY 255 PLACES.
+  IF wa_buffer IS INITIAL.
+    EXIT.
+  ENDIF.
+ENDDO.
+* Attachment
+REFRESH: i_reclist,
+          i_objtxt,
+          i_objbin,
+          i_objpack.
+CLEAR wa_objhead.
+i_objbin[] = i_record[].
+* Create Message Body Title and Description
+i_objtxt = 'test with pdf-Attachment!'.
+APPEND i_objtxt.
+DESCRIBE TABLE i_objtxt LINES v_lines_txt.
+READ TABLE i_objtxt INDEX v_lines_txt.
+wa_doc_chng-obj_name = 'smartform'.
+wa_doc_chng-expiry_dat = sy-datum + 10.
+wa_doc_chng-obj_descr = 'smartform'.
+wa_doc_chng-sensitivty = 'F'.
+wa_doc_chng-doc_size = v_lines_txt * 255.
+* Main Text
+CLEAR i_objpack-transf_bin.
+i_objpack-head_start = 1.
+i_objpack-head_num = 0.
+i_objpack-body_start = 1.
+i_objpack-body_num = v_lines_txt.
+i_objpack-doc_type = 'RAW'.
+APPEND i_objpack.
+* Attachment (pdf-Attachment)
+i_objpack-transf_bin = 'X'.
+i_objpack-head_start = 1.
+i_objpack-head_num = 0.
+i_objpack-body_start = 1.
+DESCRIBE TABLE i_objbin LINES v_lines_bin.
+READ TABLE i_objbin INDEX v_lines_bin.
+i_objpack-doc_size = v_lines_bin * 255 .
+i_objpack-body_num = v_lines_bin.
+i_objpack-doc_type = 'PDF'.
+i_objpack-obj_name = 'smart'.
+i_objpack-obj_descr = 'test'.
+APPEND i_objpack.
+CLEAR i_reclist.
+i_reclist-receiver = 'nareshreddy.k@gmail.com'.
+i_reclist-rec_type = 'U'.
+APPEND i_reclist.
+CALL FUNCTION 'SO_NEW_DOCUMENT_ATT_SEND_API1'
+  EXPORTING
+    document_data              = wa_doc_chng
+    put_in_outbox              = 'X'
+    commit_work                = 'X'
+  TABLES
+    packing_list               = i_objpack
+    object_header              = wa_objhead
+    contents_bin               = i_objbin
+    contents_txt               = i_objtxt
+    receivers                  = i_reclist
+  EXCEPTIONS
+    too_many_receivers         = 1
+    document_not_sent          = 2
+    document_type_not_exist    = 3
+    operation_no_authorization = 4
+    parameter_error            = 5
+    x_error                    = 6
+    enqueue_error              = 7
+    OTHERS                     = 8.
+IF sy-subrc <> 0.
+  WRITE:/ 'Error When Sending the File', sy-subrc.
+ELSE.
+  WRITE:/ 'Mail sent'.
+ENDIF.
+*i_objpack-transf_bin = ' '.
+*i_objpack-head_start = 000000000000001.
+*i_objpack-head_num = 000000000000001.
+*i_objpack-body_start = 000000000000002.
+*i_objpack-body_num = 000000000000010.
+*i_objpack-doc_type = 'RAW'.
+*APPEND i_objpack.
+*
+*CALL FUNCTION 'SO_NEW_DOCUMENT_ATT_SEND_API1'
+*  EXPORTING
+*    document_data              = wa_doc_chng
+*    put_in_outbox              = 'X'
+*  TABLES
+*    packing_list               = i_objpack
+*    object_header              = wa_objhead
+*    contents_bin               = i_objbin
+*    contents_txt               = i_objtxt
+*    receivers                  = i_reclist
+*  EXCEPTIONS
+*    too_many_receivers         = 1
+*    document_not_sent          = 2
+*    document_type_not_exist    = 3
+*    operation_no_authorization = 4
+*    parameter_error            = 5
+*    x_error                    = 6
+*    enqueue_error              = 7
+*    OTHERS                     = 8.

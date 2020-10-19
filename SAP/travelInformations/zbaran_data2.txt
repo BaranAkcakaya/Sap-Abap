@@ -1,0 +1,19 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_DATA2
+*&---------------------------------------------------------------------*
+TABLES:SPFLI.
+*       sflight,
+*       saplane.
+
+TYPE-POOLs:slis.
+
+DATA:gt_fcat    TYPE slis_t_fieldcat_alv,
+     gs_layout  TYPE slis_layout_alv.
+DATA:gt_fcat1   TYPE slis_t_fieldcat_alv,
+     gs_layout1 TYPE slis_layout_alv.
+DATA:gt_fcat2   TYPE slis_t_fieldcat_alv,
+     gs_layout2 TYPE slis_layout_alv.
+
+DATA:gt_sapln TYPE STANDARD TABLE OF saplane WITH HEADER LINE,
+     gt_sflgh TYPE STANDARD TABLE OF sflight WITH HEADER LINE,
+     gt_spfli TYPE STANDARD TABLE OF SPFLI   WITH HEADER LINE.

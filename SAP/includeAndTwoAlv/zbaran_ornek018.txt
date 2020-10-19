@@ -1,0 +1,38 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK018
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK018.
+INCLUDE zbaran_data.
+INCLUDE zbaran_sscreen.
+INCLUDE zbaran_get_data.
+INCLUDE zbaran_alv1.
+INCLUDE zbaran_alv2.
+INCLUDE zbaran_sevent.
+
+
+*Selection texts
+*----------------------------------------------------------
+* CHB1         ACIK KALEM
+* CHB2         DENKLESMIS KALEM
+* P_BELNR D       .
+* P_BUKRS D       .
+* P_GJAHR D       .
+* P_KUNNR D       .
+* P_LIFNR D       .
+* P_SAKNR D       .
+* RAD1         MUSTERÝ NO
+* RAD2         SATICI NO
+* RAD3         HESAP NO
+* SO_BLART D       .
+* SO_BLDAT D       .
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   LUTFEN CHEKBOX ALANINI DOLDURUN

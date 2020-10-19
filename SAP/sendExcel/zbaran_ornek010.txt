@@ -1,0 +1,149 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK10
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT ZBARAN_ORNEK010.
+*&---------------------------------------------------------------------*
+*&Excel send data
+*&---------------------------------------------------------------------*
+TYPE-pools:truxs.
+PARAMETERS:p_dosya TYPE rlgrap-filename.
+
+TYPES:BEGIN OF t_tab,
+      deger1(5) TYPE c,
+      deger2(20) TYPE c,
+      deger3(20) TYPE c,
+      deger4(5) TYPE c,
+      deger5(5) TYPE c,
+      deger6(5) TYPE c,
+      END OF t_tab.
+
+DATA:t_yukle  TYPE STANDARD TABLE OF t_tab,
+     wa_yukle TYPE t_tab ,
+     it_type  TYPE truxs_t_text_data.
+
+at SELECTION-SCREEN on VALUE-REQUEST FOR p_dosya.
+
+CALL FUNCTION 'F4_FILENAME'
+ EXPORTING
+   FIELD_NAME          = 'p_dosya'
+ IMPORTING
+   FILE_NAME           = p_dosya.
+
+ START-OF-SELECTION.
+
+CALL FUNCTION 'TEXT_CONVERT_XLS_TO_SAP'
+  EXPORTING
+    i_tab_raw_data             = it_type
+    i_filename                 = p_dosya
+  TABLES
+    i_tab_converted_data       = t_yukle
+ EXCEPTIONS
+   CONVERSION_FAILED          = 1
+   OTHERS                     = 2.
+
+IF sy-subrc NE 0.
+MESSAGE ID sy-msgid
+TYPE sy-msgty
+NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+
+END-OF-SELECTION.
+
+TYPE-POOLS:slis.
+
+*DATA:gt_malzeme TYPE TABLE OF balhdr,
+*     gt_fcat    TYPE slis_t_fieldcat_alv,
+*     gs_layout  TYPE slis_layout_alv.
+
+LOOP AT t_yukle INTO wa_yukle.
+
+  WRITE:/ wa_yukle-deger1,
+          wa_yukle-deger2,
+          wa_yukle-deger3,
+          wa_yukle-deger4,
+          wa_yukle-deger5,
+          wa_yukle-deger6.
+  SORT T_YUKLE DESCENDING BY deger1.
+ENDLOOP.
+*****************************************************************
+**TYPES:BEGIN OF gt_veri_tipi,
+**      sno       TYPE i,
+**      ad(10)    TYPE c,
+**      soyad(10) TYPE c,
+**      tel       TYPE i,
+**      maas      TYPE i,
+**      END OF gt_veri_tipi.
+**TYPES:gt_veri_tipi_tablo TYPE SORTED TABLE OF gt_veri_tipi WITH UNIQUE KEY sno.
+**
+**DATA:BEGIN OF gt_veri,
+**      sno    TYPE i,
+**      ad     TYPE c,
+**      soyad  TYPE c,
+**      tel    TYPE i,
+**      maas   TYPE i,
+**      END OF gt_veri.
+"BURDAKÝ VERÝ STRUCTURE TARZINDA BIR VERI VE ÝSLEM YAPMAMIZA OLANAK SAGLIYOR.DAHA SONRA TABLOYA GONDERIYOTUZ".
+**DATA:gt_veri_1     TYPE gt_veri_tipi,
+**     gt_veri_tablo TYPE gt_veri_tipi_tablo.
+**
+**gt_veri_1-sno   = '1000'.
+**gt_veri_1-ad    = 'hasan'.
+**gt_veri_1-soyad = 'mert'.
+**gt_veri_1-tel   = '123123123'.
+**gt_veri_1-maas  = '9000'.
+**APPEND gt_veri_1 TO gt_veri_tablo.
+**
+**gt_veri_1-sno   = '1001'.
+**gt_veri_1-ad    = 'can'.
+**gt_veri_1-soyad = 'duz'.
+**gt_veri_1-tel   = '145645666'.
+**gt_veri_1-maas  = '8000'.
+**APPEND gt_veri_1 TO gt_veri_tablo.
+**
+**gt_veri_1-sno   = '1002'.
+**gt_veri_1-ad    = 'baran'.
+**gt_veri_1-soyad = 'net'.
+**gt_veri_1-tel   = '987987987'.
+**gt_veri_1-maas  = '11000'.
+**APPEND gt_veri_1 TO gt_veri_tablo.
+**
+**gt_veri_1-sno   = '1003'.
+**gt_veri_1-ad    = 'arif'.
+**gt_veri_1-soyad = 'mehmet'.
+**gt_veri_1-tel   = '123143224'.
+**gt_veri_1-maas  = '7000'.
+**APPEND gt_veri_1 TO gt_veri_tablo.
+**
+**gt_veri_1-sno   = 1004.
+**gt_veri_1-ad    = 'hakan'.
+**gt_veri_1-soyad = 'mercimek'.
+**gt_veri_1-tel   = 123123443.
+**gt_veri_1-maas  = 9001.
+**APPEND gt_veri_1 TO gt_veri_tablo.
+**
+**LOOP AT gt_veri_tablo INTO gt_veri_1.
+**  WRITE:/ gt_veri_1-sno,
+**          gt_veri_1-ad,
+**          gt_veri_1-soyad,
+**          gt_veri_1-tel,
+**          gt_veri_1-maas.
+**ENDLOOP.
+*********************************************************************
+***TABLES: MARA.
+***
+*** DATA: ITAB LIKE MARA OCCURS 0 WITH HEADER LINE.
+***
+*** SELECT * FROM MARA INTO TABLE ITAB UP TO 100 ROWS.
+***
+***CALL FUNCTION 'WS_DOWNLOAD'
+***  EXPORTING
+***    FILENAME = 'DosyaAdi.xls'
+***    FILETYPE = 'DAT'
+***  TABLES
+***    DATA_TAB = ITAB.

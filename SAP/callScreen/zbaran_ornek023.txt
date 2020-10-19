@@ -1,0 +1,215 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK023
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK023.
+
+DATA:p_temp(9)   TYPE i,
+     p_temp1(9)  TYPE i VALUE is INITIAL,
+     p_temp2(9)  TYPE i,
+     p_sonuc(9)  TYPE i,
+     p_isaret    TYPE c,
+     p_mod       TYPE i,
+     P_SCREEN(9) TYPE c,
+     p_sayac1    TYPE i VALUE 0,
+     p_sayac     TYPE i value 0,
+     p_girdi(10)    TYPE c,
+     pgirdi(10)      TYPE c.
+
+call SCREEN 1000 .
+
+*MODULE status_1000 OUTPUT.
+*  set PF-STATUS 'ZSTANDARD1'.
+*  set TITLEBAR 'TITLEBAR'.
+*ENDMODULE.
+
+MODULE user_command_1000 INPUT.
+perform sayi.
+perform isaret.
+ENDMODULE.
+
+form sayi.
+  pgirdi = p_girdi.
+CASE sy-UCOMM.
+  WHEN 'P_SAYI'.
+    p_temp = 0.
+    perform sayý_bir.
+  WHEN 'P_SAYI1'.
+    p_temp = 1.
+    perform sayý_bir.
+  WHEN 'P_SAYI2'.
+    p_temp = 2.
+    perform sayý_bir.
+  WHEN 'P_SAYI3'.
+    p_temp = 3.
+    perform sayý_bir.
+  WHEN 'P_SAYI4'.
+    p_temp = 4.
+    perform sayý_bir.
+  WHEN 'P_SAYI5'.
+    p_temp = 5.
+    perform sayý_bir.
+  WHEN 'P_SAYI6'.
+    p_temp = 6.
+    perform sayý_bir.
+  WHEN 'P_SAYI7'.
+    p_temp = 7.
+    perform sayý_bir.
+  WHEN 'P_SAYI8'.
+    p_temp = 8.
+    perform sayý_bir.
+  WHEN 'P_SAYI9'.
+    p_temp = 9.
+    perform sayý_bir.
+ENDCASE.
+endform.
+
+form  sayý_bir.
+TRY .
+  p_temp1  = p_temp1 && p_temp.
+CATCH cx_sy_conversion_overflow .
+  p_temp1 = 0.
+ENDTRY.
+*"cx_sy_conversion_overflow
+*p_temp1  = p_temp1 && p_temp.
+P_SCREEN = p_temp1.
+endform.
+
+form isaret.
+*IF p_sayac = 1 and ( sy-UCOMM = 'P_SAYI'  OR
+*                     sy-UCOMM = 'P_SAYI1' OR
+*                     sy-UCOMM = 'P_SAYI2' OR
+*                     sy-UCOMM = 'P_SAYI3' OR
+*                     sy-UCOMM = 'P_SAYI4' OR
+*                     sy-UCOMM = 'P_SAYI5' OR
+*                     sy-UCOMM = 'P_SAYI6' OR
+*                     sy-UCOMM = 'P_SAYI7' OR
+*                     sy-UCOMM = 'P_SAYI8' OR
+*                     sy-UCOMM = 'P_SAYI9').
+*
+*p_sayac1 = 1.
+*ENDIF.
+
+*IF p_sayac = 1.
+**  if p_sayac1 = 1.
+**    MESSAGE 'sadece bir islem yapýlabýlýr...' TYPE 'E'.
+*  if sy-UCOMM = 'P_CIKIS'.
+*  exit.
+*  ELSEif sy-UCOMM = 'p_DEL'.
+*  clear p_temp.
+*  clear p_temp2.
+*  clear p_isaret.
+*  clear p_temp1.
+*  CLEAR P_SCREEN.
+*  CLEAR p_sayac.
+*  CLEAR p_sayac1.
+*  else.
+*    MESSAGE 'isaret degistirilemez...!' TYPE 'E'.
+*
+*  endif.
+*ENDIF.
+
+if p_sayac = 0.
+case sy-UCOMM.
+when 'P_TOP'.
+  p_isaret = '+'.
+  p_temp2  = p_temp1.
+  p_sayac = 1.
+  clear p_temp1.
+  clear p_temp.
+when 'P_CIK'.
+  p_isaret = '-'.
+  p_temp2  = p_temp1.
+  p_sayac = 1.
+  clear p_temp1.
+  clear p_temp.
+when 'P_CARP'.
+  p_isaret = '*'.
+  p_temp2  = p_temp1.
+  p_sayac = 1.
+  clear p_temp1.
+  clear p_temp.
+when 'P_BOL'.
+  p_isaret = '/'.
+  p_temp2  = p_temp1.
+  p_sayac = 1.
+  clear p_temp1.
+  clear p_temp.
+when 'P_UST'.
+  p_isaret = '^'.
+  p_temp2  = p_temp1.
+  p_sayac = 1.
+  clear p_temp1.
+  clear p_temp.
+endcase.
+endif.
+case sy-UCOMM.
+when 'P_CIKIS'.
+  exit.
+when 'P_ESIT'.
+  perform islem.
+*  clear p_temp1.
+  clear p_temp.
+  CLEAR p_sayac.
+  CLEAR p_sayac1.
+when 'P_SIL'.
+  perform sil.
+when 'P_DEL'.
+  clear p_temp.
+  clear p_temp2.
+  clear p_isaret.
+  clear p_temp1.
+  CLEAR P_SCREEN.
+  CLEAR p_sayac.
+  CLEAR p_sayac1.
+ENDCASE.
+ENDFORM.
+
+form islem.
+  CASE p_isaret.
+    WHEN '+'.
+      p_sonuc = p_temp2 + p_temp1.
+    when '-'.
+      p_sonuc = p_temp2 - p_temp1.
+    when '*'.
+      p_sonuc = p_temp2 * p_temp1.
+      if p_sonuc > 1000000000.
+        MESSAGE 'sayý cok buyuk...' TYPE 'E'.
+      endif.
+    when '/'.
+      IF p_temp1 = 0.
+        message '0 a bolunme hatasý...' TYPE 'E'.
+      else.
+        p_sonuc = p_temp2 / p_temp1.
+      ENDIF.
+    when '^'.
+      p_sonuc = p_temp2 ** p_temp1.
+  ENDCASE.
+  P_SCREEN = p_sonuc.
+  p_temp1 = p_sonuc.
+ENDFORM.
+
+form sil.
+p_mod = p_temp1 mod 10.
+p_temp1 = ( p_temp1 - p_mod ) / 10.
+p_screen = p_temp1 .
+endform.
+
+module status_1000 output.
+  set pf-status 'ZSTANDARD1'.
+  case sy-ucomm.
+    when 'BACK' or 'EXIT' or 'CANCEL'or'P_CIKIS'. "gui'ler için tanýmlama
+      leave to screen 0.
+  endcase.
+  set titlebar 'TITLEBAR'.
+endmodule.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   sayý cok buyuk...

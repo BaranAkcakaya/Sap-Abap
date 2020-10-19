@@ -1,0 +1,115 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK9
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT ZBARAN_ORNEK009.
+
+*&---------------------------------------------------------------------*
+*& Loan calculation
+*&---------------------------------------------------------------------*
+DATA:fiyat TYPE i,
+     ay    TYPE i,
+     sonuc TYPE i.
+
+SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-001.
+PARAMETERS:p_deger1 TYPE i,
+           p_deger2 AS LISTBOX VISIBLE LENGTH 10.
+SELECTION-SCREEN END OF BLOCK blok1.
+
+TYPE-POOLS: vrm.
+DATA: name TYPE vrm_id,
+      list TYPE vrm_values,
+      value LIKE LINE OF list.
+
+AT SELECTION-SCREEN OUTPUT.
+  name = 'p_deger2'.
+  value-key = '1'.
+  value-text = '1-6 AY'.
+  APPEND value TO list.
+  value-key = '2'.
+  value-text = '6-12 AY'.
+  APPEND value TO list.
+  value-key = '3'.
+  value-text = '12-24 AY'.
+  APPEND value TO list.
+  value-key = '4'.
+  value-text = '24-60 AY'.
+  APPEND value TO list.
+  value-key = '5'.
+  value-text = '60-120 AY'.
+  APPEND value TO list.
+  value-key = '6'.
+  value-text = '120-240 AY'.
+  APPEND value TO list.
+  CALL FUNCTION 'VRM_SET_VALUES'EXPORTING
+      id     = name
+      values = list.
+
+fiyat = p_deger1.
+
+CASE p_deger2.
+  WHEN '1'.
+    sonuc = fiyat + ( fiyat * '0.001' ) * 6.
+    ay    = sonuc / 6.
+   WHEN '2'.
+    sonuc = fiyat + ( fiyat * '0.002' ) * 12.
+    ay    = sonuc / 12.
+     WHEN '3'.
+    sonuc = fiyat + ( fiyat * '0.003' ) * 24.
+    ay    = sonuc / 24.
+     WHEN '4'.
+    sonuc = fiyat + ( fiyat * '0.004' ) * 60.
+    ay    = sonuc / 60.
+     WHEN '5'.
+    sonuc = fiyat + ( fiyat * '0.006' ) * 120.
+    ay    = sonuc / 120.
+     WHEN '6'.
+    sonuc = fiyat + ( fiyat * '0.008' ) * 240.
+    ay    = sonuc / 240.
+ENDCASE.
+
+START-OF-SELECTION.
+
+
+data:BEGIN OF gt_tab1 occurs 0,
+     bnkad    like ZBARAN_EV_TAB-bnkad,
+     tplmal   like ZBARAN_EV_TAB-tplmal,
+     fzorn    like ZBARAN_EV_TAB-fzorn,
+     aylkodm  like ZBARAN_EV_TAB-aylkodm,
+     end of gt_tab1.
+data: gs_01 like gt_tab1.
+
+gs_01-bnkad   ='ziraat'.
+gs_01-tplmal  = sonuc.
+gs_01-fzorn   ='1.38'.
+gs_01-aylkodm = ay.
+INSERT gs_01 INTO TABLE gt_tab1.
+
+gs_01-bnkad   ='halk'.
+gs_01-tplmal  = sonuc.
+gs_01-fzorn   ='1.38'.
+gs_01-aylkodm = ay.
+INSERT gs_01 INTO TABLE gt_tab1.
+
+gs_01-bnkad   ='ýcbc'.
+gs_01-tplmal  = sonuc.
+gs_01-fzorn   ='1.47'.
+gs_01-aylkodm = ay.
+INSERT gs_01 INTO TABLE gt_tab1.
+
+LOOP AT gt_tab1 INTO gs_01.
+WRITE:/ gs_01-bnkad,
+        gs_01-tplmal,
+        gs_01-fzorn,
+        gs_01-aylkodm.
+endloop.
+
+
+*Selection texts
+*----------------------------------------------------------
+* P_DEGER1         kredi
+* P_DEGER2         ay

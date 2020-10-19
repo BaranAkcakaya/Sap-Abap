@@ -1,0 +1,760 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK022
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK022.
+TABLES:zbaran_fatura,
+       icon,
+       zbaran_kisi.
+
+ data: begin of s occurs 0,
+       txt(300) type c,
+       end of s.
+type-pools:slis.
+
+*types:BEGIN OF gt_fatura.
+*      INCLUDE STRUCTURE zbaran_fatura.
+*types:icon TYPE c,
+*      check(1) TYPE c,
+*      END OF gt_fatura.
+
+*TYPES:BEGIN OF gt_kisi,
+*      kunnr TYPE zbaran_kisi-kunnr,
+*      lifnr TYPE ZBARAN_KISI-LIFNR,
+*      vkn   TYPE ZBARAN_KISI-VKN,
+*      tc    TYPE ZBARAN_KISI-tc,
+*      name1 TYPE ZBARAN_KISI-name1,
+*      name2 TYPE ZBARAN_KISI-name2,
+*      telf1 TYPE ZBARAN_KISI-telf1,
+*      mail  TYPE ZBARAN_KISI-mail,
+*      adrnr TYPE ZBARAN_KISI-ADRNR,
+*      stcd2 TYPE ZBARAN_KISI-STCD2,
+*      END OF gt_kisi.
+
+types: begin of gt_fatura ,
+        mark                    ,
+        icon      TYPE c,
+        faturano  TYPE ZBARAN_FATURA-faturano,
+        lifnr     TYPE ZBARAN_FATURA-lifnr,
+        kunnr     TYPE ZBARAN_FATURA-kunnr,
+        otutar    TYPE ZBARAN_FATURA-otutar ,
+        vergit    TYPE ZBARAN_FATURA-vergit,
+        vergisizt TYPE ZBARAN_FATURA-vergisizt,
+        GJAHR     TYPE ZBARAN_FATURA-gjahr,
+        ftarihi   TYPE ZBARAN_FATURA-ftarihi,
+        fuýyk     TYPE ZBARAN_FATURA-fuýyk,
+        vkn       TYPE ZBARAN_FATURA-vkn,
+        statu     TYPE ZBARAN_FATURA-statu,
+        durum     TYPE ZBARAN_FATURA-durum,
+        vkn2(5)   TYPE i,
+        mail      TYPE icon-id,
+        sform     TYPE icon-id,
+       end of gt_fatura.
+
+types:BEGIN OF gt_mail,
+      mandt TYPE zbaran_mail-MANDT,
+      lifnr TYPE zbaran_mail-LIFNR,
+      name1 TYPE zbaran_mail-name1,
+      name2 TYPE zbaran_mail-name2,
+      posta TYPE zbaran_mail-posta,
+      unvan TYPE zbaran_mail-UNVAN,
+      END OF gt_mail.
+
+data:"gt_fatura  TYPE standard TABLE OF zbaran_fatura WITH HEADER LINE,
+     gt_kisi     TYPE standard TABLE OF zbaran_kisi  WITH HEADER LINE,
+     it_mail     TYPE STANDARD TABLE OF ZBARAN_MAIL  WITH HEADER LINE,
+     it_fatura   TYPE STANDARD TABLE OF gt_fatura    WITH HEADER LINE,
+     it_fatcp    TYPE STANDARD TABLE OF gt_fatura    WITH HEADER LINE,
+     it_changes  TYPE STANDARD TABLE OF gt_fatura,
+     wa_mail     TYPE gt_mail,
+     wa_fatura   TYPE gt_fatura.
+
+DATA:t_objbin   TYPE TABLE OF soli,
+     t_objtxt   TYPE TABLE OF soli,
+     t_objhead  TYPE TABLE OF soli,
+     t_reclist  TYPE TABLE OF SOMLRECI1,
+     t_objpack  type TABLE OF  sopcklsti1 WITH HEADER LINE.
+*     t_lines    TYPE i.
+
+DATA:w_objtxt   TYPE soli,
+     w_objbin   TYPE soli,
+     w_reclist  TYPE SOMLRECI1,
+     w_objpack  TYPE SOPCKLSTI1 occurs 0 WITH HEADER LINE,
+     w_docdata  TYPE sodocchgi1,
+*     w_buffer   TYPE STRING,
+     w_lines    TYPE i.
+"smart forms pdf icin
+*DATA:i_otf TYPE itcoo occurs 0,
+*     i_tline TYPE TABLE OF tline WITH HEADER LINE,
+*     i_record LIKE soli occurs 0 WITH HEADER LINE,
+*      w_ctrlop TYPE ssfctrlop,
+*      w_compop TYPE ssfcompop,
+*      w_return TYPE ssfcrescl.
+
+DATA:begin of t_mail occurs 0,
+     receiver LIKE ZBARAN_mail-POSTA,
+     END OF t_mail.
+data w_mail LIKE LINE OF t_mail.
+
+data:gt_fcat    TYPE SLIS_T_FIELDCAT_ALV,
+     gt_fcat1   TYPE SLIS_T_FIELDCAT_ALV,
+     gs_layout  TYPE SLIS_LAYOUT_ALV,
+     gs_layout1 TYPE SLIS_LAYOUT_ALV.
+
+selection-SCREEN BEGIN OF BLOCK blok WITH FRAME TITLE text-001.
+select-options:so_secim for ZBARAN_FATURA-FATURANO.
+selection-screen end of BLOCK blok.
+
+START-OF-SELECTION.
+
+perform avl_oku.
+
+DATA:wa_fatcp TYPE gt_fatura,
+     wa_fatcptmp TYPE ZBARAN_FATURA.
+     it_fatcp[] = it_fatura[].
+     CLEAR IT_CHANGES[].
+
+LOOP AT it_fatura INTO wa_fatura.
+  CALL FUNCTION 'QF05_RANDOM_INTEGER'
+ EXPORTING
+   RAN_INT_MAX         = 55556
+   RAN_INT_MIN         = 1
+ IMPORTING
+   RAN_INT             = wa_fatura-VKN
+ EXCEPTIONS
+   INVALID_INPUT       = 1
+   OTHERS              = 2.
+IF SY-SUBRC <> 0.
+ MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+ENDIF.
+    MODIFY it_fatura FROM wa_fatura.
+    read TABLE it_fatcp INTO wa_fatcp INDEX sy-tabix.
+    IF wa_fatcp ne wa_fatura.
+      APPEND wa_fatura to it_changes.
+      move-CORRESPONDING wa_fatura TO wa_fatcptmp.
+      modify zbaran_fatura FROM wa_fatcptmp.
+    ENDIF.
+    CLEAR wa_fatcp.
+  ENDLOOP.
+
+LOOP AT it_fatura INTO wa_fatura.
+  wa_fatura-durum = 0.
+  modify it_fatura FROM wa_fatura.
+  clear wa_fatura.
+ENDLOOP.
+
+LOOP AT it_fatura INTO wa_fatura.
+  wa_fatura-MAIL = '@5H@'.
+  wa_fatura-sform = '@0H@'.
+  MODIFY it_fatura from wa_fatura.
+  clear wa_fatura.
+ENDLOOP.
+
+LOOP AT it_fatura INTO wa_fatura.
+  wa_fatura-vkn2 = 0.
+  modify it_fatura FROM wa_fatura.
+  clear wa_fatura.
+ENDLOOP.
+
+LOOP AT it_fatura INTO wa_fatura.
+  if wa_fatura-durum > 3.
+    MESSAGE '0-1-2-3 DEGERLERÝNDEN BÝRÝNÝ GÝRÝN...!'TYPE'S'.
+  ELSE.
+    if wa_fatura-durum = 1.
+      wa_fatura-statu = 1.
+    elseif wa_fatura-DURUM = 2.
+      wa_fatura-statu = 2.
+    elseif wa_fatura-durum = 3.
+      wa_fatura-statu = 3.
+    ENDIF.
+  endif.
+ENDLOOP.
+
+LOOP AT it_fatura INTO wa_fatura.
+  if wa_fatura-DURUM is INITIAL.
+  if wa_fatura-vkn lt 15000.
+    wa_fatura-statu = 1.
+  elseif wa_fatura-vkn gt 32499.
+    wa_fatura-statu = 3.
+  else.
+    wa_fatura-statu = 2.
+  ENDIF.
+  MODIFY it_fatura FROM wa_fatura.
+  clear wa_fatura.
+  ENDIF.
+ENDLOOP.
+
+LOOP AT it_fatura INTO wa_fatura.
+  if wa_fatura-STATU eq 1.
+    wa_fatura-icon = 1."kýrmýzý ýsýk
+  elseif wa_fatura-STATU eq 2.
+    wa_fatura-icon = 2."sarý  ýsýk
+  elseif wa_fatura-statu = 3.
+    wa_fatura-icon = 3."yesil ýsýk
+  endif.
+  modify it_fatura FROM wa_fatura.
+  clear wa_fatura.
+ENDLOOP.
+
+perform avl_duzen.
+perform avl_yaz.
+
+form avl_oku.
+select * from zbaran_fatura INTO CORRESPONDING FIELDS OF TABLE it_fatura
+where faturano in so_secim.
+endform.
+
+form avl_duzen.
+gs_layout-zebra = 'X'.
+gs_layout-colwýdth_optýmýze ='X'.
+gs_layout-lights_fieldname ='ICON'.
+gs_layout-BOX_FIELDNAME  = 'MARK'.
+ENDFORM.
+
+form avl_yaz.
+data:lv_repid LIKE sy-repid,
+     lv_tabname TYPE SLIS_TABNAME VALUE 'iT_FATURA',
+     ls_fcat    TYPE SLIS_FIELDCAT_ALV,
+     lv_strname LIKE dd02l-tabname VALUE 'ZBARAN_FATURA'.
+
+REFRESH:gt_fcat.
+CLEAR:ls_fcat.
+
+*ls_fcat-row_pos = '1'.
+*ls_fcat-col_pos = '1'.
+*ls_fcat-fieldname = 'CHECK'.
+*ls_fcat-TABNAME = 'iT_FATURA'.
+*ls_fcat-CHECKBOX = 'X'.
+*ls_fcat-EDIT = 'X'.
+*ls_fcat-SELTEXT_M = 'CHECKBOX'.
+*APPEND LS_FCAT TO GT_FCAT.
+*CLEAR ls_fcat.
+
+ls_fcat-row_pos = '16'.
+ls_fcat-col_pos = '16'.
+ls_fcat-fieldname = 'MAIL'.
+ls_fcat-TABNAME = 'iT_FATURA'.
+ls_fcat-ICON = 'X'.
+ls_fcat-SELTEXT_S = 'MAÝL'.
+ls_fcat-SELTEXT_m = 'MAÝL GON'.
+APPEND LS_FCAT TO GT_FCAT.
+CLEAR ls_fcat.
+
+ls_fcat-row_pos = '17'.
+ls_fcat-col_pos = '17'.
+ls_fcat-fieldname = 'SFORM'.
+ls_fcat-TABNAME = 'iT_FATURA'.
+ls_fcat-ICON = 'X'.
+ls_fcat-SELTEXT_S = 'SMART'.
+ls_fcat-SELTEXT_m = 'SMARTFORMS'.
+APPEND LS_FCAT TO GT_FCAT.
+CLEAR ls_fcat.
+
+ls_fcat-row_pos = '15'.
+ls_fcat-col_pos = '15'.
+ls_fcat-fieldname = 'VKN2'.
+ls_fcat-TABNAME = 'iT_FATURA'.
+ls_fcat-EDIT = 'X'.
+ls_fcat-SELTEXT_M = 'PUAN'.
+APPEND LS_FCAT TO GT_FCAT.
+CLEAR ls_fcat.
+
+LV_REPID = sy-repid.
+it_fatcp[] = it_fatura[].
+
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid
+   I_INTERNAL_TABNAME           = lv_tabname
+   I_STRUCTURE_NAME             = lv_strname
+  CHANGING
+    ct_fieldcat                 = gt_fcat[]
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+LOOP AT gt_fcat INTO ls_fcat.
+  CASE ls_fcat-fieldname.
+    when 'KUNNR'.
+      LS_FCAT-SELTEXT_S = 'MUSTERI'.
+      LS_FCAT-SELTEXT_M = 'MUSTERINO'.
+      ls_fcat-edit = 'X'.
+      MODIFY GT_FCAT FROM LS_FCAT INDEX SY-TABIX.
+    when 'MARK'.
+      ls_fcat-NO_OUT = 'X'.
+    WHEN 'FUIYK'.
+      LS_FCAT-SELTEXT_S = 'KISI'.
+      LS_FCAT-SELTEXT_M = 'KISILER'.
+      LS_FCAT-SELTEXT_L = 'KISI BILGISI'.
+      MODIFY GT_FCAT FROM LS_FCAT INDEX SY-TABIX.
+    WHEN 'FATURANO'.
+      LS_FCAT-SELTEXT_S = 'FA.NO'.
+      LS_FCAT-SELTEXT_M = 'FATURA NO'.
+      LS_FCAT-SELTEXT_L = 'FATURA NUMARASI'.
+      modify gt_fcat FROM ls_fcat INDEX sy-tabix.
+    WHEN 'OTUTAR'.
+      LS_FCAT-SELTEXT_S = 'V.H.T'.
+      LS_FCAT-SELTEXT_M = 'V.H.TUT'.
+      LS_FCAT-SELTEXT_L = 'V.HV.TUTARI'.
+      modify gt_fcat FROM ls_fcat INDEX sy-tabix.
+    WHEN 'VERGIT'.
+      LS_FCAT-SELTEXT_S = 'V.TUT'.
+      LS_FCAT-SELTEXT_M = 'V.TUTAR'.
+      LS_FCAT-SELTEXT_L = 'VER.TUTARI'.
+      modify gt_fcat FROM ls_fcat INDEX sy-tabix.
+    WHEN 'VERGISIZT'.
+      LS_FCAT-SELTEXT_S = 'T.TUT'.
+      LS_FCAT-SELTEXT_M = 'TOPL.TUTA'.
+      LS_FCAT-SELTEXT_L = 'TOPLAM TUTAR'.
+      modify gt_fcat FROM ls_fcat INDEX sy-tabix.
+    when 'VKN'.
+      LS_FCAT-SELTEXT_S = 'PUAN'.
+*      ls_fcat-EDIT      = 'X'.
+      modify gt_fcat FROM ls_fcat INDEX sy-tabix.
+    when 'DURUM'.
+      ls_fcat-edit = 'X'.
+      LS_FCAT-SELTEXT_S = 'DURUM'.
+      modify gt_fcat FROM ls_fcat INDEX sy-tabix.
+    WHEN 'STATU'.
+      LS_FCAT-SELTEXT_S = 'DUR'.
+      LS_FCAT-SELTEXT_M = 'DURUM'.
+      modify gt_fcat FROM ls_fcat INDEX sy-tabix.
+  ENDCASE.
+ENDLOOP.
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+   i_callback_program                = lv_repid
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'fatura bilgisi'
+   I_CALLBACK_PF_STATUS_SET          = 'MY_STATUS'
+   i_callback_user_command           = 'USER_COMMAND'
+   IS_LAYOUT                         = gs_layout
+   IT_FIELDCAT                       = gt_fcat[]
+  TABLES
+    t_outtab                         = it_fatura
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.
+
+form my_status USING r_extab TYPE slis_t_extab.
+  set PF-STATUS 'ZSTANDARD' EXCLUDING R_EXTAB.
+ENDFORM.
+
+form user_command  USING r_ucomm LIKE sy-ucomm rs_selfield TYPE SLIS_SELFIELD .
+  "alv yi refresh ediyoruz...
+  data: ref_grid type ref to cl_gui_alv_grid, l_valid type c.
+  if ref_grid is initial.
+    call function 'GET_GLOBALS_FROM_SLVC_FULLSCR'
+      importing
+        e_grid = ref_grid.
+  endif.
+  if not ref_grid is initial.
+    call method ref_grid->check_changed_data
+      importing
+        e_valid = l_valid.
+  endif.
+  rs_selfield-refresh = 'X'.
+  if not ref_grid is initial.
+    call method ref_grid->refresh_table_display( ) .
+  endif.
+
+  CASE r_ucomm.
+    when '&BUT'.
+      LOOP AT it_fatura INTO wa_fatura.
+        if wa_fatura-durum > 3.
+          MESSAGE '0-1-2-3 DEGERLERÝNDEN BÝRÝNÝ GÝRÝN...!'TYPE'E'.
+        endif.
+      ENDLOOP.
+      message 'kaydediliyor...' TYPE 'S'.
+      PERFORM save_data.
+    WHEN '&MAIL'.
+      read TABLE it_fatura INTO wa_fatura ."INDEX RS_SELFIELD-TABINDEX.
+        loop at it_fatura INTO wa_fatura.
+          if wa_fatura-MARK = 'X' and wa_fatura-statu = 3.
+             RS_SELFIELD-VALUE = wa_fatura-LIFNR.
+              set PARAMETER ID 'LIF2' FIELD RS_SELFIELD-VALUE.
+              PERFORM mail_gonder.
+              wa_fatura-MAIL = '@01@'.
+              MODIFY it_fatura from wa_fatura.
+              clear wa_fatura.
+              MESSAGE 'MAILLER GONDERILDI..!' TYPE 'S'.
+          else.
+              wa_fatura-MAIL = '@5H@'.
+              MODIFY it_fatura from wa_fatura.
+              clear wa_fatura.
+          ENDIF.
+        endloop.
+    WHEN '&IC1'.
+      CASE RS_SELFIELD-FIELDNAME.
+        WHEN 'LIFNR'.
+          set PARAMETER ID 'LIF' FIELD RS_SELFIELD-VALUE.
+          PERFORM avl2.
+        WHEN 'SFORM'.
+          read TABLE it_fatura INTO wa_fatura INDEX RS_SELFIELD-TABINDEX.
+          RS_SELFIELD-VALUE = wa_fatura-LIFNR.
+          move-CORRESPONDING wa_fatura TO wa_fatcptmp.
+          modify zbaran_sform FROM wa_fatcptmp.
+          clear wa_fatcptmp.
+          perform smarforms_cagir.
+          LOOP AT it_fatura INTO wa_fatura.
+            IF wa_fatura-lifnr eq RS_SELFIELD-VALUE.
+              wa_fatura-SFORM = '@01@'.
+              MODIFY it_fatura from wa_fatura.
+              CLEAR wa_fatura.
+            ENDIF.
+          ENDLOOp.
+          delete  FROM zbaran_sform.
+      ENDCASE.
+  ENDCASE.
+  endform.
+
+FORM smarforms_cagir.
+DATA :fm_name TYPE rs38l_fnam,
+      it_vbak TYPE TABLE OF vbak.
+
+SELECT * FROM vbak into TABLE it_vbak
+  WHERE vbeln GE '0100000004'
+  AND vbeln LE '0100000010'.
+
+
+CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+  EXPORTING
+    formname = 'ZBARAN_SMARTFORMS002'
+  IMPORTING
+    FM_NAME = fm_name
+  EXCEPTIONS
+    NO_FORM = 1
+    NO_FUNCTION_MODULE = 2
+    OTHERS = 3.
+
+CALL FUNCTION fm_name
+  TABLES
+    it_vbak = it_vbak
+  EXCEPTIONS
+    FORMATTING_ERROR = 1
+    INTERNAL_ERROR = 2
+    SEND_ERROR = 3
+    USER_CANCELED = 4
+    OTHERS = 5.
+ENDFORM.
+
+form save_data.
+  DATA:wa_fatcp TYPE gt_fatura,
+       wa_fatcptmp TYPE ZBARAN_FATURA.
+  CLEAR IT_CHANGES[].
+
+  LOOP AT IT_FATURA INTO WA_FATURA.
+    read TABLE it_fatcp INTO wa_fatcp INDEX sy-tabix.
+    IF wa_fatcp ne wa_fatura.
+      APPEND wa_fatura to it_changes.
+      move-CORRESPONDING wa_fatura TO wa_fatcptmp.
+      modify zbaran_fatura FROM wa_fatcptmp.
+
+          LOOP AT it_fatura INTO wa_fatura.
+            if wa_fatura-vkn2 is not INITIAL.
+            if wa_fatura-vkn2 > 55556.
+              MESSAGE '0-55556 ARASINDA BIR SAYI GIRIN...!'TYPE'E'.
+            ENDIF.
+            if wa_fatura-vkn2 < 15000.
+              wa_fatura-statu = 1.
+              wa_fatura-vkn = wa_fatura-vkn2.
+            MODIFY it_fatura FROM wa_fatura.
+            clear wa_fatura.
+            elseif wa_fatura-vkn2 > 32500.
+              wa_fatura-statu = 3.
+              wa_fatura-vkn = wa_fatura-vkn2.
+            MODIFY it_fatura FROM wa_fatura.
+            clear wa_fatura.
+            else.
+              wa_fatura-statu = 2.
+              wa_fatura-vkn = wa_fatura-vkn2.
+            MODIFY it_fatura FROM wa_fatura.
+            clear wa_fatura.
+            endif.
+            ENDIF.
+          ENDLOOP.
+
+          LOOP AT it_fatura INTO wa_fatura.
+            if wa_fatura-durum is INITIAL.
+            if wa_fatura-vkn lt 15000.
+              wa_fatura-statu = 1.
+            elseif wa_fatura-vkn gt 32499.
+              wa_fatura-statu = 3.
+            else.
+              wa_fatura-statu = 2.
+            ENDIF.
+            MODIFY it_fatura FROM wa_fatura.
+            clear wa_fatura.
+            ENDIF.
+          ENDLOOP.
+
+          LOOP AT it_fatura INTO wa_fatura.
+            if wa_fatura-vkn2 is INITIAL.
+            if wa_fatura-durum > 3.
+              MESSAGE '0-1-2-3 DEGERLERÝNDEN BÝRÝNÝ GÝRÝN...!'TYPE'S'.
+            ELSE.
+              if wa_fatura-durum = 1.
+                wa_fatura-statu = 1.
+                  CALL FUNCTION 'QF05_RANDOM_INTEGER'
+                     EXPORTING
+                       RAN_INT_MAX         = 15000
+                       RAN_INT_MIN         = 1
+                     IMPORTING
+                       RAN_INT             = wa_fatura-VKN
+                     EXCEPTIONS
+                       INVALID_INPUT       = 1
+                       OTHERS              = 2.
+                    IF SY-SUBRC <> 0.
+                     MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+                             WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+                    ENDIF.
+              elseif wa_fatura-DURUM = 2.
+                wa_fatura-statu = 2.
+                  CALL FUNCTION 'QF05_RANDOM_INTEGER'
+                     EXPORTING
+                       RAN_INT_MAX         = 32500
+                       RAN_INT_MIN         = 15001
+                     IMPORTING
+                       RAN_INT             = wa_fatura-VKN
+                     EXCEPTIONS
+                       INVALID_INPUT       = 1
+                       OTHERS              = 2.
+                    IF SY-SUBRC <> 0.
+                     MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+                             WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+                    ENDIF.
+              elseif wa_fatura-durum = 3.
+                wa_fatura-statu = 3.
+                  CALL FUNCTION 'QF05_RANDOM_INTEGER'
+                     EXPORTING
+                       RAN_INT_MAX         = 55556
+                       RAN_INT_MIN         = 32501
+                     IMPORTING
+                       RAN_INT             = wa_fatura-VKN
+                     EXCEPTIONS
+                       INVALID_INPUT       = 1
+                       OTHERS              = 2.
+                    IF SY-SUBRC <> 0.
+                     MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+                             WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+                    ENDIF.
+            endif.
+            modify it_fatura FROM wa_fatura.
+            clear wa_fatura.
+            endif.
+            ENDIF.
+          ENDLOOP.
+
+          LOOP AT it_fatura INTO wa_fatura.
+              if wa_fatura-STATU eq 1.
+                wa_fatura-icon = 1."kýrmýzý ýsýk
+              elseif wa_fatura-STATU eq 2.
+                wa_fatura-icon = 2."sarý  ýsýk
+              elseif wa_fatura-statu = 3.
+                wa_fatura-icon = 3."yesil ýsýk
+              endif.
+              modify it_fatura FROM wa_fatura.
+              clear wa_fatura.
+          ENDLOOP.
+
+      IF sy-SUBRC eq 0.
+        MESSAGE 'kaydedildi...' TYPE 'S'.
+      ENDIF.
+    ENDIF.
+    CLEAR wa_fatcp.
+  ENDLOOP.
+endform.
+
+FORM mail_gonder.
+get PARAMETER ID 'LIF2' FIELD it_mail-lifnr.
+SELECT * FROM ZBARAN_mail INTO TABLE it_mail WHERE lifnr = it_mail-LIFNR.
+
+w_docdata-OBJ_DESCR = 'MAIL GONDERME DENEMESI'.
+shift w_docdata-OBJ_DESCR LEFT DELETING LEADING space.
+
+w_objtxt = '<html> <body>'.
+append w_objtxt to t_objtxt.
+w_objtxt = '<h1>MAIL ILE BILGILENDIRME</h1>'.
+append w_objtxt to t_objtxt.
+
+LOOP AT it_mail INTO wa_mail.
+*CONCATENATE '<p>MERHABA ' ' ' wa_mail-UNVAN' ' wa_mail-NAME1 ' ' wa_mail-NAME2'</p>' INTO w_objtxt.
+**w_objtxt = '<P>merhaba '&& wa_mail-unvan &&' '&& wa_mail-NAME1 && ' '&& wa_mail-name2 && '</p>'.
+*append w_objtxt TO t_objtxt.
+*concatenate '<p>ILGILI  ' WA_MAiL-Lifnr' YA AIT BELGE ' WA_mail-posta' ADRESINE GONDERILMISITIR</P>' INTO w_objtxt.
+*append w_objtxt to  t_objtxt.
+*CONCATENATE '<p>' 'BILGINIZE...' '</p>' into w_objtxt.
+*append w_objtxt to t_objtxt.
+concatenate '<p>' 'Merhaba '  into w_objtxt.
+append w_objtxt to t_objtxt.
+concatenate  ' 'wa_mail-UNVAN ' ' into w_objtxt.
+append w_objtxt to t_objtxt.
+TRANSlate wa_mail-name1 TO upper case.
+concatenate  ' ' wa_mail-NAME1  ''  into w_objtxt.
+translate wa_mail-name2 to UPPER CASE.
+append w_objtxt to t_objtxt.
+concatenate wa_mail-NAME2'</p>'  into w_objtxt.
+append w_objtxt to t_objtxt.
+concatenate '<p>' 'Ilgili '  into w_objtxt.
+append w_objtxt to t_objtxt.
+concatenate ' ' WA_MAil-LIFNR '  '  into w_objtxt.
+append w_objtxt to t_objtxt.
+concatenate ' ' 'numaraya ait belge ' ' '  into w_objtxt.
+append w_objtxt to t_objtxt.
+translate wa_mail-POSTA TO LOWER CASE.
+concatenate '' WA_mail-posta ' ' into w_objtxt.
+append w_objtxt to t_objtxt.
+concatenate  'mail adresine gönderilmiþtir.' '</P>'  into w_objtxt.
+append w_objtxt to t_objtxt.
+concatenate '<p>' 'Bilginize...</P>'  into w_objtxt.
+append w_objtxt to t_objtxt.
+ENDLOOP.
+
+SELECT posta as receiver FROM zbaran_mail INTO TABLE t_mail WHERE LIFNR eq it_mail-LIFNR.
+
+LOOP AT t_mail INTO w_mail.
+  w_reclist-RECEIVER = w_mail-receiver.
+  w_reclist-REC_TYPE = 'U'.
+  append w_reclist to t_reclist.
+  clear W_RECLIST.
+ENDLOOP.
+
+clear w_objtxt.
+check t_reclist[] is not INITIAL.
+w_docdata-OBJ_DESCR = w_docdata-OBJ_DESCR .
+describe TABLE t_objtxt LINES W_LINES.
+READ TABLE t_objtxt INTO w_objtxt INDEX w_lines.
+  w_docdata-doc_size =
+    ( w_lines - 1 ) * 255 + strlen( w_objtxt ).
+* Packing data
+  clear w_objpack-transf_bin.
+  w_objpack-head_start = 1.
+  w_objpack-head_num   = 0.
+  w_objpack-body_start = 1.
+  w_objpack-body_num   = w_lines.
+  w_objpack-doc_type   = 'HTML'.
+  append w_objpack to t_objpack.
+
+CALL FUNCTION 'SO_DOCUMENT_SEND_API1'
+  EXPORTING
+    DOCUMENT_DATA                    = w_docdata
+   PUT_IN_OUTBOX                    = 'X'
+   SENDER_ADDRESS                   = 'baran@hotmail.com'
+   SENDER_ADDRESS_TYPE              = 'SMTP'
+   COMMIT_WORK                      = 'X'
+  TABLES
+   PACKING_LIST                     = t_objpack
+   OBJECT_HEADER                    = t_objhead
+   CONTENTS_TXT                     = t_objtxt
+   RECEIVERS                        = t_reclist
+ EXCEPTIONS
+   TOO_MANY_RECEIVERS               = 1
+   DOCUMENT_NOT_SENT                = 2
+   DOCUMENT_TYPE_NOT_EXIST          = 3
+   OPERATION_NO_AUTHORIZATION       = 4
+   PARAMETER_ERROR                  = 5
+   X_ERROR                          = 6
+   ENQUEUE_ERROR                    = 7
+   OTHERS                           = 8
+          .
+  if sy-subrc eq 0.
+    commit work.
+    submit rsconn01 with mode = 'INT' and return.
+    modify  it_fatura from wa_fatura. " index gv_index .
+    message 'Mail baþarýyla gönderildi.' type 'S'.
+  else.
+    modify  it_fatura from wa_fatura. " index gv_index.
+    message 'Mail gönderilemedi.' type 'S' display like 'E'.
+  endif.
+  clear : t_objpack, t_objhead ,t_objtxt , t_reclist.
+
+endform.
+
+form avl2.
+  get PARAMETER ID 'LIF' FIELD gt_kisi-lifnr.
+  perform avl2_oku.
+  perform avl2_duzen.
+  perform avl2_yaz.
+ENDFORM.
+
+form avl2_oku.
+"tip farklarýnda esitlemek ýcýn basa 0 basmaya yarýyor
+CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+  EXPORTING
+    INPUT         = gt_kisi-LIFNR
+ IMPORTING
+   OUTPUT        = gt_kisi-lifnr.
+
+SELECT * FROM lfa1 INTO CORRESPONDING FIELDS OF table gt_kisi WHERE LIFNR eq gt_kisi-lifnr.
+
+ENDFORM.
+
+form avl2_duzen.
+gs_layout1-zebra = 'X'.
+gs_layout1-colwýdth_optýmýze = 'X'.
+ENDFORM.
+
+form avl2_yaz.
+data:lv_repid2   LIKE sy-repid,
+     lv_tabname2 TYPE SLIS_TABNAME VALUE 'GT_KISI',
+     "ls_fcat    TYPE SLIS_FIELDCAT_ALV,
+     lv_strname2 LIKE dd02l-tabname VALUE 'ZBARAN_KISI'.
+LV_REPID2 = sy-repid.
+FREE gt_fcat.
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid2
+   I_INTERNAL_TABNAME           = lv_tabname2
+   I_STRUCTURE_NAME             = lv_strname2
+  CHANGING
+    ct_fieldcat                 = gt_fcat1[]
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+   i_callback_program                = lv_repid2
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'kisi bilgisi'
+   IS_LAYOUT                         = gs_layout1
+   IT_FIELDCAT                       = gt_fcat1[]
+  TABLES
+    t_outtab                          = gt_kisi
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.
+
+
+*Selection texts
+*----------------------------------------------------------
+* SO_SECIM         FATURA NO
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   0-1-2-3 DEGERLERÝNDEN BÝRÝNÝ GÝRÝN...!

@@ -1,0 +1,625 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=ISO-8859-1" />
+<title>Dictionary object- ZEARC_T001</title>
+<style type="text/css">
+  th{text-align:left}
+  .cell{
+     font-family:"Courier New", Courier, monospace;
+     color:#000;
+     font-size:12px;
+     background-color:#F2F4F7;
+  }
+  .cell td { border: thin solid #ccc; }
+</style>
+<style type="text/css">
+  .normal{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:12px }
+  .footer{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:12px; text-align: center }
+  h2{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:16px; font-weight:800 }
+  h3{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:14px; font-weight:800 }
+  .outerTable{
+   width:100%;
+   border-top-width: thin;
+   border-right-width: thin;
+   border-right-width: thin;
+   border-left-width: thin;
+   border-top-style: solid;
+   border-right-style: solid;
+   border-bottom-style: solid;
+   border-left-style: solid;
+  }
+  .innerTable{
+   width:100%;
+   border-top-width: thin;
+   border-right-width: thin;
+   border-bottom-width: thin;
+   border-left-width: thin;
+   border-top-style: solid;
+   border-right-style: solid;
+   border-bottom-style: solid;
+   border-left-style: solid;
+  }
+</style>
+</head>
+<body>
+  <table class="outerTable">
+    <tr>
+      <td><h2>Table: ZEARC_T001</h2>
+  <h3>Description: E-Arþiv Gönderilen Faturalar</h3></td>
+    </tr>
+    <tr>
+      <td><!--This is where our main table begins  -->
+<table class="innerTable">
+<tr>
+  <th>Row</th>
+  <th>Field name</th>
+  <th>Position</th>
+  <th>Key</th>
+  <th>Data element</th>
+  <th>Domain</th>
+  <th>Datatype</th>
+  <th>Length</th>
+  <th>Lowercase</th>
+  <th>Domain text</th>
+</tr>
+<tr class="cell">
+  <td> 1</td>
+  <td>MANDT</td>
+  <td>1</td>
+  <td>X</td>
+  <td>MANDT</td>
+  <td>MANDT</td>
+  <td>CLNT</td>
+  <td>3</td>
+  <td>&nbsp;</td>
+  <td>Üst birim</td>
+</tr>
+<tr class="cell">
+  <td> 2</td>
+  <td>BUKRS</td>
+  <td>2</td>
+  <td>X</td>
+  <td>ZEARC_DE011</td>
+  <td>BUKRS</td>
+  <td>CHAR</td>
+  <td>4</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Þirket Kodu</td>
+</tr>
+<tr class="cell">
+  <td> 3</td>
+  <td>INVNO</td>
+  <td>3</td>
+  <td>X</td>
+  <td>ZEARC_DE021</td>
+  <td>&nbsp;</td>
+  <td>CHAR</td>
+  <td>36</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Fatura No</td>
+</tr>
+<tr class="cell">
+  <td> 4</td>
+  <td>EFTID</td>
+  <td>4</td>
+  <td>X</td>
+  <td>ZEARC_DE016</td>
+  <td>ZEARC_DM024</td>
+  <td>CHAR</td>
+  <td>36</td>
+  <td>X</td>
+  <td>E-Arþiv ID</td>
+</tr>
+<tr class="cell">
+  <td> 5</td>
+  <td>EUUID</td>
+  <td>5</td>
+  <td>X</td>
+  <td>ZEARC_DE017</td>
+  <td>ZEARC_DM023</td>
+  <td>CHAR</td>
+  <td>36</td>
+  <td>X</td>
+  <td>E-Arþiv UUID</td>
+</tr>
+<tr class="cell">
+  <td> 6</td>
+  <td>ZUUID</td>
+  <td>6</td>
+  <td>X</td>
+  <td>ZEARC_DE018</td>
+  <td>ZEARC_DM022</td>
+  <td>CHAR</td>
+  <td>36</td>
+  <td>X</td>
+  <td>E-Arþiv Zarf ID</td>
+</tr>
+<tr class="cell">
+  <td> 7</td>
+  <td>ERNAM</td>
+  <td>7</td>
+  <td>X</td>
+  <td>ZEARC_DE013</td>
+  <td>USNAM</td>
+  <td>CHAR</td>
+  <td>12</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Yaratan Kiþi</td>
+</tr>
+<tr class="cell">
+  <td> 8</td>
+  <td>ERDAT</td>
+  <td>8</td>
+  <td>X</td>
+  <td>ZEARC_DE014</td>
+  <td>DATUM</td>
+  <td>DATS</td>
+  <td>8</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Gönderim Tarihi</td>
+</tr>
+<tr class="cell">
+  <td> 9</td>
+  <td>ERZET</td>
+  <td>9</td>
+  <td>X</td>
+  <td>ZEARC_DE020</td>
+  <td>UZEIT</td>
+  <td>TIMS</td>
+  <td>6</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Gönderim Saati</td>
+</tr>
+<tr class="cell">
+  <td>10</td>
+  <td>STATU</td>
+  <td>10</td>
+  <td>X</td>
+  <td>ZEARC_DE070</td>
+  <td>ZEARC_DM008</td>
+  <td>CHAR</td>
+  <td>2</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Statü</td>
+</tr>
+<tr class="cell">
+  <td>11</td>
+  <td>MODUL</td>
+  <td>11</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE019</td>
+  <td>ZEARC_DM010</td>
+  <td>CHAR</td>
+  <td>4</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Modul</td>
+</tr>
+<tr class="cell">
+  <td>12</td>
+  <td>STCD2</td>
+  <td>12</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE004</td>
+  <td>STCD2</td>
+  <td>CHAR</td>
+  <td>11</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Vergi Numarasý</td>
+</tr>
+<tr class="cell">
+  <td>13</td>
+  <td>ECODE</td>
+  <td>13</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE046</td>
+  <td>&nbsp;</td>
+  <td>CHAR</td>
+  <td>7</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Durum</td>
+</tr>
+<tr class="cell">
+  <td>14</td>
+  <td>DESCH</td>
+  <td>14</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE084</td>
+  <td>&nbsp;</td>
+  <td>CHAR</td>
+  <td>255</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Proxy'den Dönen Açýklama</td>
+</tr>
+<tr class="cell">
+  <td>15</td>
+  <td>INMSG</td>
+  <td>15</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE047</td>
+  <td>&nbsp;</td>
+  <td>CHAR</td>
+  <td>250</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Mesaj</td>
+</tr>
+<tr class="cell">
+  <td>16</td>
+  <td>SCNRO</td>
+  <td>16</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE007</td>
+  <td>ZEARC_DM007</td>
+  <td>CHAR</td>
+  <td>1</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Senaryo</td>
+</tr>
+<tr class="cell">
+  <td>17</td>
+  <td>FTYPE</td>
+  <td>17</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE022</td>
+  <td>ZEARC_DM020</td>
+  <td>CHAR</td>
+  <td>2</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Tipi</td>
+</tr>
+<tr class="cell">
+  <td>18</td>
+  <td>ERESP</td>
+  <td>18</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE133</td>
+  <td>&nbsp;</td>
+  <td>CHAR</td>
+  <td>10</td>
+  <td>&nbsp;</td>
+  <td>E-ArþivTicari Fatura Yanýtý</td>
+</tr>
+<tr class="cell">
+  <td>19</td>
+  <td>EFOID</td>
+  <td>19</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>CHAR</td>
+  <td>36</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+</tr>
+<tr class="cell">
+  <td>20</td>
+  <td>FKDAT</td>
+  <td>20</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE008</td>
+  <td>&nbsp;</td>
+  <td>DATS</td>
+  <td>8</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Faturalama Tarihi</td>
+</tr>
+<tr class="cell">
+  <td>21</td>
+  <td>VBELN</td>
+  <td>21</td>
+  <td>&nbsp;</td>
+  <td>VBELN</td>
+  <td>VBELN</td>
+  <td>CHAR</td>
+  <td>10</td>
+  <td>&nbsp;</td>
+  <td>SD belgesi numarasý</td>
+</tr>
+<tr class="cell">
+  <td>22</td>
+  <td>BELNR</td>
+  <td>22</td>
+  <td>&nbsp;</td>
+  <td>BELNR_D</td>
+  <td>BELNR</td>
+  <td>CHAR</td>
+  <td>10</td>
+  <td>&nbsp;</td>
+  <td>Muhasebe belgesinin belge numarasý</td>
+</tr>
+<tr class="cell">
+  <td>23</td>
+  <td>TBELN</td>
+  <td>23</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE246</td>
+  <td>BELNR</td>
+  <td>CHAR</td>
+  <td>10</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Ters Kayýt Numarasý</td>
+</tr>
+<tr class="cell">
+  <td>24</td>
+  <td>TNAME</td>
+  <td>24</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE247</td>
+  <td>UNAME</td>
+  <td>CHAR</td>
+  <td>12</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Ýptal Eden Kullanýcý</td>
+</tr>
+<tr class="cell">
+  <td>25</td>
+  <td>ISDRM</td>
+  <td>25</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE249</td>
+  <td>CHAR1</td>
+  <td>CHAR</td>
+  <td>1</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Ýþleme Durumu</td>
+</tr>
+<tr class="cell">
+  <td>26</td>
+  <td>NAME1</td>
+  <td>26</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE039</td>
+  <td>&nbsp;</td>
+  <td>CHAR</td>
+  <td>100</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Unvan</td>
+</tr>
+<tr class="cell">
+  <td>27</td>
+  <td>KUNNR</td>
+  <td>27</td>
+  <td>&nbsp;</td>
+  <td>KUNNR</td>
+  <td>KUNNR</td>
+  <td>CHAR</td>
+  <td>10</td>
+  <td>&nbsp;</td>
+  <td>Müþteri numarasý</td>
+</tr>
+<tr class="cell">
+  <td>28</td>
+  <td>NETWR</td>
+  <td>28</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE010</td>
+  <td>WERTV8</td>
+  <td>CURR</td>
+  <td>15</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Toplam Tutar</td>
+</tr>
+<tr class="cell">
+  <td>29</td>
+  <td>WAERK</td>
+  <td>29</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE009</td>
+  <td>WAERS</td>
+  <td>CUKY</td>
+  <td>5</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Para Birimi</td>
+</tr>
+<tr class="cell">
+  <td>30</td>
+  <td>MWSBK</td>
+  <td>30</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE012</td>
+  <td>WERTV8</td>
+  <td>CURR</td>
+  <td>15</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Vergi Tutarý</td>
+</tr>
+<tr class="cell">
+  <td>31</td>
+  <td>INSUR</td>
+  <td>31</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE177</td>
+  <td>WERTV9</td>
+  <td>CURR</td>
+  <td>17</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Sigorta</td>
+</tr>
+<tr class="cell">
+  <td>32</td>
+  <td>FREIG</td>
+  <td>32</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE178</td>
+  <td>WERTV9</td>
+  <td>CURR</td>
+  <td>17</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Navlun</td>
+</tr>
+<tr class="cell">
+  <td>33</td>
+  <td>DISNT</td>
+  <td>33</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE165</td>
+  <td>&nbsp;</td>
+  <td>CURR</td>
+  <td>15</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Ýskonto Tutarý</td>
+</tr>
+<tr class="cell">
+  <td>34</td>
+  <td>ALIES</td>
+  <td>34</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE005</td>
+  <td>TEXT120</td>
+  <td>CHAR</td>
+  <td>120</td>
+  <td>X</td>
+  <td>E-Arþiv Alias</td>
+</tr>
+<tr class="cell">
+  <td>35</td>
+  <td>XBLNR</td>
+  <td>35</td>
+  <td>&nbsp;</td>
+  <td>XBLNR</td>
+  <td>XBLNR</td>
+  <td>CHAR</td>
+  <td>16</td>
+  <td>&nbsp;</td>
+  <td>Referans belge numarasý</td>
+</tr>
+      </table>
+     </td>
+   </tr>
+<br/>
+  <table class="outerTable">
+    <tr>
+      <td><h2>Fixed Domain Values </h2>
+    </tr>
+    <tr>
+      <td><!--This is where our main table begins  -->
+<table class="innerTable">
+<tr>
+  <th>Domain Name</th>
+  <th>Value Low</th>
+  <th>Value High</th>
+  <th>Text</th>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM008</td>
+  <td>01</td>
+  <td>&nbsp;</td>
+  <td>Sunucu Baðlantý Hatasý</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM008</td>
+  <td>02</td>
+  <td>&nbsp;</td>
+  <td>Fatura Gönderilemedi</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM008</td>
+  <td>03</td>
+  <td>&nbsp;</td>
+  <td>Fatura Gönderildi</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM008</td>
+  <td>04</td>
+  <td>&nbsp;</td>
+  <td>Fatura Ýptal Edildi</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM008</td>
+  <td>05</td>
+  <td>&nbsp;</td>
+  <td>Fatura Ters Kayýtlý</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM010</td>
+  <td>FI</td>
+  <td>&nbsp;</td>
+  <td>FI Faturasý</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM010</td>
+  <td>SD</td>
+  <td>&nbsp;</td>
+  <td>SD Faturasý</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM010</td>
+  <td>MM</td>
+  <td>&nbsp;</td>
+  <td>MM Faturasý</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM010</td>
+  <td>RT</td>
+  <td>&nbsp;</td>
+  <td>Iade Faturasý</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM010</td>
+  <td>BI</td>
+  <td>&nbsp;</td>
+  <td>BI Faturasý</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM010</td>
+  <td>FICA</td>
+  <td>&nbsp;</td>
+  <td>FICA Faturasý</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM007</td>
+  <td>1</td>
+  <td>&nbsp;</td>
+  <td>EARSIVFATURA</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM007</td>
+  <td>2</td>
+  <td>&nbsp;</td>
+  <td>Ticari Fatura</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM007</td>
+  <td>3</td>
+  <td>&nbsp;</td>
+  <td>Matbu</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM007</td>
+  <td>4</td>
+  <td>&nbsp;</td>
+  <td>Dijital</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM020</td>
+  <td>01</td>
+  <td>&nbsp;</td>
+  <td>SATIS</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM020</td>
+  <td>02</td>
+  <td>&nbsp;</td>
+  <td>IADE</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM020</td>
+  <td>03</td>
+  <td>&nbsp;</td>
+  <td>TEVKIFAT</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM020</td>
+  <td>04</td>
+  <td>&nbsp;</td>
+  <td>ISTISNA</td>
+</tr>
+      </table>
+     </td>
+   </tr>
+   <tr>
+<td class="footer">Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2020. Sap Release 740</td>
+   </tr>
+</table>
+</body>
+</html>

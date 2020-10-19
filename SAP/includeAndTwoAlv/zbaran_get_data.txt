@@ -1,0 +1,180 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_GET_DATA
+*&---------------------------------------------------------------------*
+form read_data.
+
+SELECT bukrs belnr gjahr blart bldat usnam xblnr bstat tcode FROM bkpf INTO CORRESPONDING FIELDS OF TABLE gt_bkpf
+                                                              WHERE bukrs eq p_bukrs
+                                                                and belnr eq p_belnr
+                                                                and gjahr eq p_gjahr
+                                                                and blart in so_blart
+                                                                and bldat in so_bldat.
+LOOP AT gt_bkpf.
+  gt_kalem-bukrs = gt_bkpf-bukrs.
+  gt_kalem-belnr = gt_bkpf-belnr.
+  gt_kalem-gjahr = gt_bkpf-gjahr.
+  gt_kalem-blart = gt_bkpf-blart.
+  gt_kalem-bldat = gt_bkpf-bldat.
+  gt_kalem-usnam = gt_bkpf-usnam.
+  gt_kalem-xblnr = gt_bkpf-xblnr.
+  gt_kalem-bstat = gt_bkpf-bstat.
+  gt_kalem-tcode = gt_bkpf-tcode.
+  APPEND gt_kalem.
+ENDLOOP.
+if chb1 ='X' or chb2 = 'X'.
+  if chb1 = 'X' and chb2 =''.
+    CASE 'X'.
+      WHEN rad1.
+        PERFORM read_m1.
+      WHEN rad2.
+        perform read_s1.
+      WHEN rad3.
+        PERFORM read_h1.
+    ENDCASE.
+  ELSEIF chb2 = 'X' and chb1 = ''.
+    CASE 'X'.
+      WHEN rad1.
+        PERFORM read_m1.
+      WHEN rad2.
+        perform read_s1.
+      WHEN rad3.
+        PERFORM read_h1.
+    ENDCASE.
+  else.
+    CASE 'X'.
+      WHEN rad1.
+        PERFORM read_m1.
+      WHEN rad2.
+        perform read_s1.
+      WHEN rad3.
+        PERFORM read_h1.
+    ENDCASE.
+  ENDIF.
+else.
+  MESSAGE 'LUTFEN CHEKBOX ALANINI DOLDURUN' TYPE 'E'.
+ENDIF.
+ENDFORM.
+
+FORM read_m1.
+if chb1 = 'X' and chb2 = ''.
+  SELECT * FROM bsid INTO CORRESPONDING FIELDS OF TABLE it_musteri
+  WHERE bukrs eq p_bukrs and
+        belnr eq p_belnr and
+        gjahr eq p_gjahr.
+ELSEIF chb2 = 'X' and chb1 = ''.
+  SELECT * FROM bsad INTO CORRESPONDING FIELDS OF TABLE it_musteri
+  WHERE bukrs eq p_bukrs and
+        belnr eq p_belnr and
+        gjahr eq p_gjahr.
+ELSE.
+  SELECT * FROM bsid INTO CORRESPONDING FIELDS OF TABLE gt_bsid
+  WHERE bukrs eq p_bukrs AND
+        belnr eq p_belnr AND
+        gjahr eq p_gjahr.
+    LOOP AT gt_bsid.
+      it_musteri-bukrs = gt_bsid-bukrs.
+      it_musteri-belnr = gt_bsid-belnr.
+      it_musteri-kunnr = gt_bsid-kunnr.
+      it_musteri-gjahr = gt_bsid-gjahr.
+      it_musteri-buzei = gt_bsid-buzei.
+      it_musteri-xblnr = gt_bsid-xblnr.
+    APPEND it_musteri.
+    ENDLOOP.
+
+    SELECT * FROM bsad INTO CORRESPONDING FIELDS OF TABLE gt_bsad
+  WHERE bukrs eq p_bukrs AND
+        belnr eq p_belnr AND
+        gjahr eq p_gjahr.
+    LOOP AT gt_bsad.
+      it_musteri-bukrs = gt_bsad-bukrs.
+      it_musteri-belnr = gt_bsad-belnr.
+      it_musteri-kunnr = gt_bsad-kunnr.
+      it_musteri-gjahr = gt_bsad-gjahr.
+      it_musteri-buzei = gt_bsad-buzei.
+      it_musteri-xblnr = gt_bsad-xblnr.
+      it_musteri-augdt = gt_bsad-augdt.
+      it_musteri-augbl = gt_bsad-augbl.
+    APPEND it_musteri.
+    ENDLOOP.
+ENDIF.
+ENDFORM.
+
+FORM read_s1.
+if chb1 = 'X' and chb2 = ''.
+  SELECT * INTO CORRESPONDING FIELDS OF TABLE it_satýcý FROM bsik INNER JOIN bkpf
+    ON ( bsik~bukrs = bkpf~bukrs AND bsik~belnr = bkpf~belnr AND
+ bsik~gjahr = bkpf~gjahr ) WHERE ( bsik~belnr eq p_belnr ).
+ELSEIF chb2 = 'X' and chb1 = ''.
+  SELECT * INTO CORRESPONDING FIELDS OF TABLE it_satýcý FROM bsak INNER JOIN bkpf
+    ON ( bsak~bukrs = bkpf~bukrs AND bsak~belnr = bkpf~belnr AND
+ bsak~gjahr = bkpf~gjahr )  WHERE ( bsak~belnr eq p_belnr ).
+ELSE.
+  SELECT * FROM bsik INTO CORRESPONDING FIELDS OF TABLE gt_bsik
+  WHERE bukrs eq p_bukrs AND
+        belnr eq p_belnr AND
+        gjahr eq p_gjahr.
+    LOOP AT gt_bsik.
+      it_satýcý-bukrs = gt_bsik-bukrs.
+      it_satýcý-belnr = gt_bsik-belnr.
+      it_satýcý-lifnr = gt_bsik-lifnr.
+      it_satýcý-gjahr = gt_bsik-gjahr.
+      it_satýcý-buzei = gt_bsik-buzei.
+      it_satýcý-SAKNR = gt_bsik-SAKNR.
+    APPEND it_satýcý.
+    ENDLOOP.
+    SELECT * FROM bsak INTO CORRESPONDING FIELDS OF TABLE gt_bsak
+  WHERE bukrs eq p_bukrs AND
+        belnr eq p_belnr AND
+        gjahr eq p_gjahr.
+    LOOP AT gt_bsak.
+      it_satýcý-bukrs = gt_bsak-bukrs.
+      it_satýcý-belnr = gt_bsak-belnr.
+      it_satýcý-lifnr = gt_bsak-lifnr.
+      it_satýcý-gjahr = gt_bsak-gjahr.
+      it_satýcý-buzei = gt_bsak-buzei.
+      it_satýcý-augdt = gt_bsak-augdt.
+      it_satýcý-augbl = gt_bsak-augbl.
+    APPEND it_satýcý.
+    ENDLOOP.
+ENDIF.
+ENDFORM.
+
+FORM read_h1.
+if chb1 = 'X' and chb2 = ''.
+  SELECT * FROM bsis INTO CORRESPONDING FIELDS OF TABLE it_hesap FOR ALL ENTRIES IN gt_bkpf
+  WHERE bukrs eq gt_bkpf-bukrs and
+        belnr eq gt_bkpf-belnr and
+        gjahr eq gt_bkpf-gjahr.
+ELSEIF chb2 = 'X' and chb1 = ''.
+  SELECT * FROM bsas INTO CORRESPONDING FIELDS OF TABLE it_hesap FOR ALL ENTRIES IN gt_bkpf
+  WHERE bukrs eq gt_bkpf-bukrs and
+        belnr eq gt_bkpf-belnr and
+        gjahr eq gt_bkpf-gjahr.
+ELSE.
+  SELECT * FROM bsis INTO CORRESPONDING FIELDS OF TABLE gt_bsis
+  WHERE bukrs eq p_bukrs AND
+        belnr eq p_belnr AND
+        gjahr eq p_gjahr.
+    LOOP AT gt_bsis.
+      it_hesap-bukrs = gt_bsis-bukrs.
+      it_hesap-belnr = gt_bsis-belnr.
+      it_hesap-XBLNR = gt_bsis-XBLNR.
+      it_hesap-gjahr = gt_bsis-gjahr.
+      it_hesap-buzei = gt_bsis-buzei.
+    APPEND it_hesap.
+    ENDLOOP.
+    SELECT * FROM bsas INTO CORRESPONDING FIELDS OF TABLE gt_bsas
+  WHERE bukrs eq p_bukrs AND
+        belnr eq p_belnr AND
+        gjahr eq p_gjahr.
+    LOOP AT gt_bsas.
+      it_hesap-bukrs = gt_bsas-bukrs.
+      it_hesap-belnr = gt_bsas-belnr.
+      it_hesap-AUGBL = gt_bsas-AUGBL.
+      it_hesap-gjahr = gt_bsas-gjahr.
+      it_hesap-buzei = gt_bsas-buzei.
+      it_hesap-WRBTR = gt_bsas-WRBTR.
+    APPEND it_hesap.
+    ENDLOOP.
+ENDIF.
+ENDFORM.

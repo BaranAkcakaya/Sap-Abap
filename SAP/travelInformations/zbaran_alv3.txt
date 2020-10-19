@@ -1,0 +1,69 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_ALV3
+*&---------------------------------------------------------------------*
+FORM alv1.
+PERFORM read_alv1.
+PERFORM layout_dzn1.
+PERFORM display_alv1.
+ENDFORM.
+
+FORM layout_dzn1.
+gs_layout-zebra = 'X'.
+gs_layout-colwýdth_optýmýze = 'X'.
+ENDFORM.
+
+FORM display_alv1.
+DATA:lv_repid   LIKE sy-repid,
+     lv_tabname TYPE slis_tabname VALUE 'gt_SPFLI',
+     lv_strname LIKE dd02l-tabname VALUE 'spfli'.
+     lv_repid = sy-repid.
+
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid
+   I_INTERNAL_TABNAME           = lv_tabname
+   I_STRUCTURE_NAME             = lv_strname
+ CHANGING
+    ct_fieldcat                 = gt_fcat[]
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+   I_CALLBACK_PROGRAM                = lv_repid
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'UCUS BÝLGÝLERÝ'
+   I_CALLBACK_USER_COMMAND           = 'USER_COMMAND'
+   IS_LAYOUT                         = gs_layout
+   IT_FIELDCAT                       = gt_fcat[]
+
+  TABLES
+    t_outtab                          = gt_SPFLI[]
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2
+          .
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.
+
+FORM user_command USING r_ucomm LIKE sy-ucomm
+                        rs_selfield TYPE slis_selfield.
+  CASE r_ucomm.
+      WHEN'&IC1'.
+      CASE rs_selfield-fieldname.
+          WHEN'CARRID'.
+          SET PARAMETER ID 'CAR' FIELD rs_selfield-value.
+          PERFORM alv2.
+      ENDCASE.
+   ENDCASE.
+ENDFORM.

@@ -1,0 +1,1292 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK5
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT ZBARAN_ORNEK005.
+
+*&---------------------------------------------------------------------*
+*& ALV
+*&---------------------------------------------------------------------*
+*TYPES : BEGIN OF TY_MARA,
+*        MATNR TYPE MARA-MATNR,
+*        BRGEW TYPE MARA-BRGEW, "Gross Weight
+*        END OF TY_MARA.
+*
+*DATA : IT_MARA       TYPE TABLE OF TY_MARA,
+*       WA_MARA       TYPE TY_MARA,
+*       IT_MARA_COLL  TYPE TABLE OF TY_MARA.
+*
+*DATA : GR_TABLE TYPE REF TO CL_SALV_TABLE.
+*
+*SELECT MATNR
+*       BRGEW
+*FROM MARA
+*INTO TABLE IT_MARA UP TO 500 ROWS.
+*
+**TRY.
+*CALL METHOD CL_SALV_TABLE=>FACTORY
+**  EXPORTING
+**    LIST_DISPLAY   = IF_SALV_C_BOOL_SAP=>FALSE
+**    R_CONTAINER    =
+**    CONTAINER_NAME =
+*  IMPORTING
+*    R_SALV_TABLE   = GR_TABLE
+*  CHANGING
+*    T_TABLE        = IT_MARA
+*    .
+** CATCH CX_SALV_MSG .
+**ENDTRY.
+*
+*DATA : V_LINES TYPE I. "declare variable
+*DESCRIBE TABLE IT_MARA LINES V_LINES.
+*.
+*
+*CALL METHOD GR_TABLE->DISPLAY.
+
+*&---------------------------------------------------------------------*
+*& Screen event
+*&---------------------------------------------------------------------*
+
+**** Selection-Screen Hiding Fields Dynamically
+***
+***tables: mara.
+***
+***parameter: rb1 radiobutton group rb1
+***
+***           default 'X' user-command comm.
+***
+***parameter: rb2 radiobutton group rb1 .
+***
+***select-options:s_matnr for mara-matnr no intervals
+***
+***modif id I1.
+***
+***at selection-screen output.
+***
+***  if rb1 eq 'X'.
+***
+***  loop at screen.
+***
+***    case screen-group1.
+***
+***      when 'I1'.
+***
+***        screen-active = '1'.
+***
+***        modify screen.
+***
+***    endcase.
+***
+***  endloop.
+***
+***  else.
+***
+***  loop at screen.
+***
+***    case screen-group1.
+***
+***      when 'I1'.
+***
+***        screen-active = '0'.
+***
+***        modify screen.
+***
+***    endcase.
+***
+***  endloop.
+***
+***  endif.
+
+*&---------------------------------------------------------------------*
+*& Hotspot
+*&---------------------------------------------------------------------*
+*FORMAT HOTSPOT ON.
+*WRITE /:'üzerine týklanabilir',
+*      'üzerine týklanabilir'.
+*FORMAT HOTSPOT OFF.
+*SKIP 5.
+*WRITE /:'üzerine týklanabilir' HOTSPOT,
+*      'üzerine týklanamaz'.
+*
+*DATA:gv_tik type string VALUE 'üzerine týklanýr'.
+*WRITE /: gv_tik HOTSPOT,
+*      'üzerine týklanabilir'.
+*
+*AT LINE-SELECTION.
+*
+*  WRITE /:'týklama sonucu'.
+
+*&---------------------------------------------------------------------*
+*& Button
+*&---------------------------------------------------------------------*
+
+**SELECTION-SCREEN BEGIN OF BLOCK blok_1 WITH FRAME TITLE text_1.
+**
+**PARAMETERS: p_deger TYPE string.
+**
+**SELECTION-SCREEN END OF BLOCK blok_1.
+**
+**INITIALIZATION.
+**text_1 = 'blok baslýgý'.
+***SELECTION-SCREEN:BEGIN OF LINE.
+***SELECTION-SCREEN PUSHBUTTON 1(13)  buton1 USER-COMMAND kul1.
+***SELECTION-SCREEN PUSHBUTTON 15(13) buton2 USER-COMMAND kul2.
+***SELECTION-SCREEN PUSHBUTTON 29(13) buton3 USER-COMMAND kul3.
+***SELECTION-SCREEN: END OF LINE.
+***
+***SKIP 1.
+***
+***SELECTION-SCREEN PUSHBUTTON /1(41) buton4 USER-COMMAND kul4.
+***
+***INITIALIZATION.
+***buton1 = 'birinci buton'.
+***buton2 = 'ikinci buton'.
+***buton3 = 'üçüncü buton'.
+***buton4 = 'dördüncü buton'.
+***
+***CASE sy-ucomm.
+***  WHEN 'kul1'."burda onemlý olan butn ýsmý kesýnlýkle buyuk olmalý"
+***    write 'ev'.
+***  WHEN 'kul2'.
+***    WRITE 'araba'.
+***  WHEN 'kul3'.
+***    WRITE 'yat'.
+***  WHEN 'kul4'.
+***    WRITE 'bos'.
+***
+***ENDCASE.
+
+*&---------------------------------------------------------------------*
+*& Icons
+*&---------------------------------------------------------------------*
+*TABLES: ICON.
+*INCLUDE <ICON>.
+*FIELD-SYMBOLS: <F>.
+*
+*SELECT * FROM ICON.
+*   ASSIGN (ICON-NAME) TO <F>.
+*   WRITE:   /(5) <F>, 20 '@',21 ICON-ID+1(2),23 '@',ICON-OLENG,
+*            ICON-BUTTON,ICON-STATUS,ICON-MESSAGE,ICON-FUNCTION,
+*            ICON-NAME.
+*ENDSELECT.
+
+*&---------------------------------------------------------------------*
+*& Listbox
+*&---------------------------------------------------------------------*
+*TYPE-POOLS: vrm.
+*DATA: name TYPE vrm_id,
+*      list TYPE vrm_values,
+*      value LIKE LINE OF list.
+*
+*PARAMETERS: options(10) AS LISTBOX VISIBLE LENGTH 15.
+*
+*AT SELECTION-SCREEN OUTPUT.
+*  name = 'options'.
+*  value-key = '1'.
+*  value-text = 'option1'.
+*  APPEND value TO list.
+*  value-key = '2'.
+*  value-text = 'option2'.
+*  APPEND value TO list.
+*  CALL FUNCTION 'VRM_SET_VALUES'
+*    EXPORTING
+*      id     = name
+*      values = list.
+*
+*START-OF-SELECTION.
+*  WRITE: / 'Option selected', options.
+
+*&---------------------------------------------------------------------*
+*& Try-Catch
+*&---------------------------------------------------------------------*
+
+**data: lv_i type i.
+**data OREF type ref to CX_ROOT.
+**
+**TRY.
+**lv_i = 10 / 0.
+**CATCH CX_ROOT into OREF.
+**write 'hata'.
+**
+**ENDTRY.
+**write: / 'program devam ediyor'.
+
+"-------------------------------------------------------------------
+*&---------------------------------------------------------------------*
+*& Line
+*&---------------------------------------------------------------------*
+* DO 5 TIMES.
+*   Write : / SY-uline.
+* ENDDO.
+"-----------------------------------------------------------------
+
+*&---------------------------------------------------------------------*
+*& color
+*&---------------------------------------------------------------------*
+*         format hotspot on.
+*format COLOR COL_NORMAL.
+*write : 'karthik'.
+*format  hotspot off.
+"-----------------------------------------------------------------
+
+*&---------------------------------------------------------------------*
+*& Parameteer no-display
+*&---------------------------------------------------------------------*
+* PARAMETERS : AD(15)     TYPE C NO-DISPLAY,
+*              SOYAD(15)  TYPE C,
+*              TC(11)     TYPE I.
+**type-pools : slis .
+**tables : ztest_ogr.
+**
+**data :  begin of gt_list occurs 0 ,
+**  id like ztest_ogr-id ,
+**  isim like ztest_ogr-isim,
+**  soyad like ztest_ogr-soyad,
+**  note like ztest_ogr-note ,
+**  mark ,
+**
+**end of gt_list.
+**
+**
+**
+**data : gt_fcat  type slis_t_fieldcat_alv,
+**       gs_fcat  type line of slis_t_fieldcat_alv,
+**       gs_layo  type slis_layout_alv    .
+**
+**
+**select-options : p_id for ztest_ogr-id .
+**
+**perform :  get_data ,
+**           layout   ,
+**           set_fcat ,
+**           call_alv .
+**
+***&---------------------------------------------------------------------*
+***&      Form  GET_DATA
+***&---------------------------------------------------------------------*
+**form get_data .
+**  select * from ztest_ogr into table gt_list where id in p_id .
+**endform.
+**
+***&---------------------------------------------------------------------*
+***&      Form  LAYOUT
+***&---------------------------------------------------------------------*
+**form layout .
+**  gs_layo-zebra = 'X' .
+**  gs_layo-colwidth_optimize = 'X' .
+**  gs_layo-box_fieldname = 'MARK' .
+**endform.                    " LAYOUT
+**
+**
+***&---------------------------------------------------------------------*
+***&      Form  SET_FCAT
+***&---------------------------------------------------------------------*
+**form set_fcat .
+***
+**  call function 'REUSE_ALV_FIELDCATALOG_MERGE'
+**    exporting
+**      i_program_name         = sy-repid
+**      i_internal_tabname     = 'GT_LIST'
+**      i_client_never_display = 'X'
+**      i_inclname             = sy-repid
+**      i_bypassing_buffer     = 'X'
+**      i_buffer_active        = 'X'
+**    changing
+**      ct_fieldcat            = gt_fcat[]
+**    exceptions
+**      inconsistent_interface = 1
+**      program_error          = 2
+**      others                 = 3.
+**
+**  loop at gt_fcat into gs_fcat.
+**    if gs_fcat-fieldname = 'MARK'.
+**      gs_fcat-no_out     = 'X'   .
+**    endif.
+**        if gs_fcat-fieldname = 'ISIM'.
+**      gs_fcat-edit     = 'X'   .
+**    endif.
+**    modify gt_fcat from gs_fcat.
+**  endloop.
+**
+**endform.
+**
+**
+***&---------------------------------------------------------------------*
+***&      Form  CALL_ALV
+***&---------------------------------------------------------------------*
+**form call_alv .
+**  call function 'REUSE_ALV_GRID_DISPLAY'
+**    exporting
+**      i_callback_program       = sy-repid
+**      i_callback_pf_status_set = 'GUI'
+**      i_callback_user_command  = 'COMMAND'
+**      it_fieldcat              = gt_fcat[]
+**      is_layout                = gs_layo
+**    tables
+**      t_outtab                 = gt_list
+**    exceptions
+**      program_error            = 1
+**      others                   = 2.
+**
+**endform.
+**
+***&---------------------------------------------------------------------*
+***&      Form  gui
+***&---------------------------------------------------------------------*
+***form gui using g_xpa .
+****
+***  set pf-status 'GUI' .
+***
+***endform  .                                                         " gui
+**
+***&---------------------------------------------------------------------*
+***&      Form  command
+***&---------------------------------------------------------------------*
+**form command using r_ucomm like sy-ucomm
+**                   rs_selfield type slis_selfield .
+**
+**  data lv_text type string.
+**
+**  case r_ucomm .
+**    when '&F03'.
+**      leave to screen 0 .
+**      when '&SEND'.
+**        LOOP AT gt_list where mark eq 'X'.
+**          CONCATENATE gt_list-isim 'Bu idli faturayý  gönderiliyor'
+**           into lv_text separated by space .
+**        message lv_text type 'I'.
+**        endloop.
+**
+**  endcase.
+**
+**endform .
+
+*******************************************
+***TYPE-POOLS: slis.  " SLIS contains all the ALV data types
+***
+***TYPES: BEGIN OF ty_sbook.
+***        INCLUDE STRUCTURE sbook.
+***TYPES: icon TYPE c,  " Add field to hold traffic light value
+***       END OF ty_sbook.
+***
+***DATA: it_sbook     TYPE TABLE OF ty_sbook.
+***DATA: wa_sbook     TYPE ty_sbook.
+***DATA: it_fieldcat  TYPE slis_t_fieldcat_alv,
+***      wa_fieldcat  TYPE slis_fieldcat_alv.
+***DATA: is_layout    TYPE slis_layout_alv.
+***DATA: g_repid      TYPE sy-repid.
+***
+***START-OF-SELECTION.
+***  g_repid = sy-repid.
+****Fetch data from the database
+***  SELECT * UP TO 20 ROWS FROM sbook INTO TABLE it_sbook.
+***
+****Assign different traffic lights to each row based on condition
+***  LOOP AT it_sbook INTO wa_sbook.
+***    IF wa_sbook-luggweight LE 0.
+***      wa_sbook-icon = 1.  " Red Traffic Light
+***    ELSEIF wa_sbook-luggweight LE 10.
+***      wa_sbook-icon = 2.  " Yellow Traffic Light
+***    ELSE.
+***      wa_sbook-icon = 3.  " Green Traffic Light
+***    ENDIF.
+***    MODIFY it_sbook FROM wa_sbook TRANSPORTING icon.
+***    CLEAR: wa_sbook.
+***  ENDLOOP.
+***
+****Fill layout info.
+****Fill traffic lights field name in the ALV layout
+***  is_layout-lights_fieldname = 'ICON'.
+***
+****Pass data and field catalog to ALV function module to display ALV list
+***  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+***    EXPORTING
+***      i_callback_program = g_repid
+***      is_layout          = is_layout
+***      it_fieldcat        = it_fieldcat
+***    TABLES
+***      t_outtab           = it_sbook
+***    EXCEPTIONS
+***      program_error      = 1
+***      OTHERS             = 2.
+
+
+*&---------------------------------------------------------------------*
+*& Dynamic Screen
+*&---------------------------------------------------------------------*
+*TYPE-POOLS: SLIS.
+*TABLES: T134.
+*TYPES: BEGIN OF TY_T134,
+*       CHECK TYPE CHAR1,
+*       MTART TYPE T134-MTART,
+*       END OF TY_T134.
+*DATA : IT_T134 TYPE TABLE OF TY_T134,
+*       WA_T134 TYPE TY_T134.
+*DATA: IT_FCAT TYPE SLIS_T_FIELDCAT_ALV,
+*      WA_FCAT LIKE LINE OF IT_FCAT.
+*
+*DATA: IT_MARA TYPE TABLE OF MARA,
+*      WA_MARA TYPE MARA.
+*
+*SELECT-OPTIONS: S_MTART FOR T134-MTART NO INTERVALS.
+*
+*AT SELECTION-SCREEN ON VALUE-REQUEST FOR S_MTART-LOW.
+*  WA_FCAT-COL_POS = 1.
+*  WA_FCAT-FIELDNAME = 'CHECK'.
+*  WA_FCAT-SELTEXT_M = 'Select'.
+*  WA_FCAT-TABNAME = 'IT_T134'.
+*  APPEND WA_FCAT TO IT_FCAT.
+*  CLEAR WA_FCAT.
+*  WA_FCAT-COL_POS = 2.
+*  WA_FCAT-FIELDNAME = 'MTART'.
+*  WA_FCAT-SELTEXT_M = 'Material Type'.
+*  WA_FCAT-TABNAME = 'IT_T134'.
+*  APPEND WA_FCAT TO IT_FCAT.
+*  CLEAR WA_FCAT.
+*  SELECT MTART  FROM T134 INTO CORRESPONDING FIELDS OF TABLE IT_T134.
+*  CALL FUNCTION 'REUSE_ALV_POPUP_TO_SELECT'
+*    EXPORTING
+*      I_TITLE              = 'Select Material Type'
+*      I_CHECKBOX_FIELDNAME = 'CHECK'
+*      I_TABNAME            = 'IT_T134'
+*      IT_FIELDCAT          = IT_FCAT
+*      I_CALLBACK_PROGRAM   = SY-REPID
+*    TABLES
+*      T_OUTTAB             = IT_T134.
+*
+*  LOOP AT IT_T134 INTO WA_T134 WHERE CHECK = 'X'.
+*    S_MTART-LOW = WA_T134-MTART.
+*    S_MTART-OPTION = 'EQ'.
+*    S_MTART-SIGN = 'I'.
+*    APPEND S_MTART.
+*  ENDLOOP.
+*
+*START-OF-SELECTION.
+*  SELECT * FROM MARA INTO TABLE IT_MARA UP TO 50 ROWS
+*     WHERE MTART IN S_MTART .
+*
+*
+*  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+*    EXPORTING
+*      I_CALLBACK_PROGRAM = SY-REPID
+*      I_STRUCTURE_NAME   = 'MARA'
+*    TABLES
+*      T_OUTTAB           = IT_MARA.
+
+**type-POOLS:slis.
+**
+**TYPES: BEGIN OF TY_MARA,
+**        MATNR TYPE MARA-MATNR,
+**        MTART TYPE MARA-MTART,
+**        MBRSH TYPE MARA-MBRSH,
+**        MATKL TYPE MARA-MATKL,
+**        MEINS TYPE MARA-MEINS,
+**        LABOR TYPE MARA-LABOR,
+**      END OF TY_MARA.
+**DATA : IT_MARA TYPE TABLE OF TY_MARA,
+**       WA_MARA TYPE TY_MARA.
+**DATA :  IT_MARACP     TYPE  STANDARD TABLE OF TY_MARA, "temparary table for MARA
+**        IT_CHANGES    TYPE  STANDARD TABLE OF TY_MARA. "changes on grid
+**
+**DATA :  WA_FIELDCAT   TYPE  SLIS_FIELDCAT_ALV, "Field catalog work area
+**        IT_FIELDCAT   TYPE  SLIS_T_FIELDCAT_ALV, "field catalog internal table
+**        IT_LAYOUT TYPE SLIS_LAYOUT_ALV, "ALV layout settings
+**        FORM_TOP_OF_PAGE  TYPE SLIS_FORMNAME VALUE 'FORM_TOP_OF_PAGE', "for avl header.
+**        FORM_CALLBACK TYPE SLIS_FORMNAME VALUE 'USER_COMMAND'. "For user command
+**SELECT-OPTIONS: S_MATNR FOR WA_MARA-MATNR. "material no input
+**
+**START-OF-SELECTION.
+**  SELECT MATNR
+**         MTART
+**         MBRSH
+**         MATKL
+**         MEINS
+**         LABOR FROM MARA INTO TABLE IT_MARA WHERE MATNR IN S_MATNR.
+**  PERFORM BUILD_FCAT.
+**  PERFORM DISPLAY_ALV.
+**FORM BUILD_FCAT .
+**  WA_FIELDCAT-FIELDNAME   = 'MATNR'.
+**  WA_FIELDCAT-SELTEXT_M   = 'Material Value'.
+**  WA_FIELDCAT-COL_POS     =  1.
+**  WA_FIELDCAT-KEY         = 'X'.
+**  WA_FIELDCAT-HOTSPOT         = 'X'.
+**  APPEND WA_FIELDCAT TO IT_FIELDCAT.
+**  CLEAR WA_FIELDCAT.
+**
+**  WA_FIELDCAT-FIELDNAME   = 'MTART'.
+**  WA_FIELDCAT-SELTEXT_M   = 'Material Type'.
+**  WA_FIELDCAT-EDIT        = 'X'.
+**  WA_FIELDCAT-COL_POS     =  2.
+**  APPEND WA_FIELDCAT TO IT_FIELDCAT.
+**  CLEAR WA_FIELDCAT.
+**
+**  WA_FIELDCAT-FIELDNAME   = 'MBRSH'.
+**  WA_FIELDCAT-SELTEXT_M   = 'Industry Sector'.
+**  WA_FIELDCAT-EDIT        = 'X'.
+**  WA_FIELDCAT-COL_POS     =  3.
+**  APPEND WA_FIELDCAT TO IT_FIELDCAT.
+**  CLEAR WA_FIELDCAT.
+**
+**  WA_FIELDCAT-FIELDNAME   = 'MATKL'.
+**  WA_FIELDCAT-SELTEXT_M   = 'Material Group'.
+**  WA_FIELDCAT-EDIT        = 'X'.
+**  WA_FIELDCAT-COL_POS     =  4.
+**  APPEND WA_FIELDCAT TO IT_FIELDCAT.
+**  CLEAR WA_FIELDCAT.
+**
+**  WA_FIELDCAT-FIELDNAME   = 'MEINS'.
+**  WA_FIELDCAT-SELTEXT_M   = 'Base UOM'.
+**  WA_FIELDCAT-ICON         = 'X'.  " Display the field as ICON
+**  WA_FIELDCAT-COL_POS     =  5.
+**  APPEND WA_FIELDCAT TO IT_FIELDCAT.
+**  CLEAR WA_FIELDCAT.
+**
+**  WA_FIELDCAT-FIELDNAME   = 'LABOR'.
+**  WA_FIELDCAT-SELTEXT_M   = 'Lab Office'.
+**  WA_FIELDCAT-ICON         = 'X'.  " Display the field as ICON
+**  WA_FIELDCAT-COL_POS     =  6.
+**  APPEND WA_FIELDCAT TO IT_FIELDCAT.
+**  CLEAR WA_FIELDCAT.
+**ENDFORM.                    " BUILD_FCAT
+**
+**FORM DISPLAY_ALV .
+**  IT_MARACP[] = IT_MARA[].
+**  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+**    EXPORTING
+**      I_CALLBACK_PROGRAM      = SY-REPID "program name
+**      I_CALLBACK_USER_COMMAND = FORM_CALLBACK "user command subroutine name
+**      IS_LAYOUT               = IT_LAYOUT
+**      IT_FIELDCAT             = IT_FIELDCAT
+**    TABLES
+**      T_OUTTAB                = IT_MARA
+**    EXCEPTIONS
+**      PROGRAM_ERROR           = 1
+**      OTHERS                  = 2.
+**  IF SY-SUBRC <> 0.
+**    MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+**            WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+**  ENDIF.
+**ENDFORM.                    " DISPLAY_ALV
+**
+**FORM F_SAVE_DATA.
+**  DATA : WA_MARACP     TYPE TY_MARA.
+**  DATA : WA_MARA_TMP TYPE MARA.
+**  CLEAR IT_CHANGES[].
+**  LOOP AT IT_MARA INTO WA_MARA.
+**    READ TABLE IT_MARACP INTO WA_MARACP INDEX SY-TABIX.
+**    IF WA_MARACP NE WA_MARA.
+**      APPEND WA_MARA TO IT_CHANGES.
+**      MOVE-CORRESPONDING WA_MARA TO WA_MARA_TMP.
+**      MODIFY MARA FROM WA_MARA_TMP .
+**      IF SY-SUBRC EQ 0.
+**        MESSAGE 'Data Updated' TYPE 'I'.
+**      ENDIF.
+**    ENDIF.
+**    CLEAR WA_MARACP.
+**  ENDLOOP.
+**ENDFORM.                    "f_save_data
+**FORM USER_COMMAND  USING P_UCOMM    LIKE SY-UCOMM
+**                         P_SELFIELD TYPE SLIS_SELFIELD.
+**  "p_ucomm will hold user action like double click, save click
+**  CASE P_UCOMM.
+**    WHEN '&IC1'.        " SAP standard code for double-clicking
+**      READ TABLE IT_MARA INTO WA_MARA INDEX P_SELFIELD-TABINDEX. " Getting Row data
+**      CASE P_SELFIELD-FIELDNAME.
+**        WHEN 'MATNR'. " Column data
+**          SET PARAMETER ID: 'MAT' FIELD P_SELFIELD-VALUE.
+**
+**          CALL TRANSACTION 'MM03' AND SKIP FIRST SCREEN.
+**        WHEN 'MTART'.
+**          MESSAGE P_SELFIELD-VALUE TYPE 'S'.
+**      ENDCASE.
+**    WHEN '&DATA_SAVE'.
+**            MESSAGE 'Trying to save' TYPE 'S'.
+**      PERFORM F_SAVE_DATA.
+**
+**      "It_changes hold all the change made in the ALV
+**  ENDCASE.
+**ENDFORM.
+
+*&---------------------------------------------------------------------*
+*& Random
+*&---------------------------------------------------------------------*
+*DATA : MYAMOUNT LIKE BBSEG-WRBTR.
+*
+*DO 5 TIMES.
+*
+*PERFORM GENERATE_RND.
+*
+*ENDDO.
+*
+*FORM GENERATE_RND.
+*
+*CALL FUNCTION 'RANDOM_AMOUNT'
+*
+*EXPORTING
+*
+*RND_MIN = '1'
+*
+*RND_MAX = '100'
+*
+*VALCURR = 'DEM'
+*
+*IMPORTING
+*
+*RND_AMOUNT = MYAMOUNT
+*
+*EXCEPTIONS
+*
+*OTHERS = 1.
+*
+*WRITE:/ MYAMOUNT.
+*
+*ENDFORM. " GENERATE_RND
+
+*&---------------------------------------------------------------------*
+*& SendMail
+*&---------------------------------------------------------------------*
+* Data Declarations
+*DATA: LT_MAILSUBJECT     TYPE SODOCCHGI1.
+*DATA: LT_MAILRECIPIENTS  TYPE STANDARD TABLE OF SOMLREC90 WITH HEADER LINE.
+*DATA: LT_MAILTXT         TYPE STANDARD TABLE OF SOLI      WITH HEADER LINE.
+** Recipients
+*LT_MAILRECIPIENTS-REC_TYPE  = 'U'.
+*LT_MAILRECIPIENTS-RECEIVER = 'sheetal@gmail.com'.
+*APPEND LT_MAILRECIPIENTS .
+*CLEAR LT_MAILRECIPIENTS .
+** Subject.
+*LT_MAILSUBJECT-OBJ_NAME = 'TEST'.
+*LT_MAILSUBJECT-OBJ_LANGU = SY-LANGU.
+*LT_MAILSUBJECT-OBJ_DESCR = 'Mail Subject'.
+** Mail Contents
+*LT_MAILTXT = 'This is a test mail'.
+*APPEND LT_MAILTXT. CLEAR LT_MAILTXT.
+** Send Mail
+*CALL FUNCTION 'SO_NEW_DOCUMENT_SEND_API1'
+*  EXPORTING
+*    DOCUMENT_DATA              = LT_MAILSUBJECT
+*  TABLES
+*    OBJECT_CONTENT             = LT_MAILTXT
+*    RECEIVERS                  = LT_MAILRECIPIENTS
+*  EXCEPTIONS
+*    TOO_MANY_RECEIVERS         = 1
+*    DOCUMENT_NOT_SENT          = 2
+*    DOCUMENT_TYPE_NOT_EXIST    = 3
+*    OPERATION_NO_AUTHORIZATION = 4
+*    PARAMETER_ERROR            = 5
+*    X_ERROR                    = 6
+*    ENQUEUE_ERROR              = 7
+*    OTHERS                     = 8.
+*IF SY-SUBRC EQ 0.
+*  COMMIT WORK.
+**   Push mail out from SAP outbox
+*  SUBMIT RSCONN01 WITH MODE = 'INT' AND RETURN.
+*ENDIF.
+
+*&---------------------------------------------------------------------*
+*& Calculator
+*&---------------------------------------------------------------------*
+
+*DATA: deger(15) TYPE C.
+*
+*call function 'FITRV_CALCULATOR'
+** EXPORTING
+** INPUT_VALUE =
+** CURRENCY =
+** START_COLUMN = '10'
+** START_ROW = '10'
+*IMPORTING
+*OUTPUT_VALUE = deger
+*EXCEPTIONS
+*INVALID_INPUT = 1
+*CALCULATION_CANCELED = 2
+*OTHERS = 3.
+*
+*IF SY-SUBRC = 0.
+*WRITE:/ 'Sonuc ', deger.
+*ENDIF.
+
+*&---------------------------------------------------------------------*
+*& SmartForm
+*&---------------------------------------------------------------------*
+**DATA :
+**  fm_name TYPE rs38l_fnam,
+**  it_vbak TYPE TABLE OF vbak.
+**
+**SELECT * FROM vbak into TABLE it_vbak
+**  WHERE vbeln GE '0100000004'
+**  AND vbeln LE '0100000010'.
+**
+**
+**CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+**  EXPORTING
+**    formname = 'ZBARAN_SMARTFORMS002'
+**  IMPORTING
+**    FM_NAME = fm_name
+**  EXCEPTIONS
+**    NO_FORM = 1
+**    NO_FUNCTION_MODULE = 2
+**    OTHERS = 3.
+**
+**CALL FUNCTION fm_name
+**  TABLES
+**    it_vbak = it_vbak
+**  EXCEPTIONS
+**    FORMATTING_ERROR = 1
+**    INTERNAL_ERROR = 2
+**    SEND_ERROR = 3
+**    USER_CANCELED = 4
+**    OTHERS = 5.
+*******************
+* Internal Table declarations
+*DATA: i_otf TYPE itcoo OCCURS 0 WITH HEADER LINE,
+*      i_tline TYPE TABLE OF tline WITH HEADER LINE,
+**      i_receivers TYPE TABLE OF somlreci1 WITH HEADER LINE,
+*      i_record LIKE solisti1 OCCURS 0 WITH HEADER LINE,
+** Objects to send mail.
+*      i_objpack LIKE sopcklsti1 OCCURS 0 WITH HEADER LINE,
+*      i_objtxt LIKE solisti1 OCCURS 0 WITH HEADER LINE,
+*      i_objbin LIKE solisti1 OCCURS 0 WITH HEADER LINE,
+*      i_reclist LIKE somlreci1 OCCURS 0 WITH HEADER LINE,
+** Work Area declarations
+*      wa_objhead TYPE soli_tab,
+*      w_ctrlop TYPE ssfctrlop,
+*      w_compop TYPE ssfcompop,
+*      w_return TYPE ssfcrescl,
+*      wa_doc_chng TYPE sodocchgi1,
+**      w_data TYPE sodocchgi1,
+*      wa_buffer TYPE string, "To convert from 132 to 255
+** Variables declarations
+*      v_form_name TYPE rs38l_fnam,
+*      v_len_in LIKE sood-objlen,
+*      it_vbak TYPE TABLE OF vbak,
+**      v_len_out LIKE sood-objlen,
+**      v_len_outn TYPE i,
+*      v_lines_txt TYPE i,
+*      v_lines_bin TYPE i.
+*
+*
+*CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+*  EXPORTING
+*    formname           = 'ZBARAN_SMARTFORMS002'
+*  IMPORTING
+*    fm_name            = v_form_name
+*  EXCEPTIONS
+*    no_form            = 1
+*    no_function_module = 2
+*    OTHERS             = 3.
+*IF sy-subrc <> 0.
+*  MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+*  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+*ENDIF.
+*w_ctrlop-getotf = 'X'.
+*w_ctrlop-no_dialog = 'X'.
+*w_compop-tdnoprev = 'X'.
+*CALL FUNCTION v_form_name
+*  EXPORTING
+*    control_parameters = w_ctrlop
+*    output_options     = w_compop
+*    user_settings      = 'X'
+*  IMPORTING
+*    job_output_info    = w_return
+*  EXCEPTIONS
+*    formatting_error   = 1
+*    internal_error     = 2
+*    send_error         = 3
+*    user_canceled      = 4
+*    OTHERS             = 5.
+*IF sy-subrc <> 0.
+*  MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+*  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+*ENDIF.
+*i_otf[] = w_return-otfdata[].
+*CALL FUNCTION 'CONVERT_OTF'
+*  EXPORTING
+*    format                = 'PDF'
+*    max_linewidth         = 132
+*  IMPORTING
+*    bin_filesize          = v_len_in
+*  TABLES
+*    otf                   = i_otf
+*    lines                 = i_tline
+*  EXCEPTIONS
+*    err_max_linewidth     = 1
+*    err_format            = 2
+*    err_conv_not_possible = 3
+*    OTHERS                = 4.
+*IF sy-subrc <> 0.
+*ENDIF.
+*LOOP AT i_tline.
+*  TRANSLATE i_tline USING '~'.
+*  CONCATENATE wa_buffer i_tline INTO wa_buffer.
+*ENDLOOP.
+*TRANSLATE wa_buffer USING '~'.
+*DO.
+*  i_record = wa_buffer.
+*  APPEND i_record.
+*  SHIFT wa_buffer LEFT BY 255 PLACES.
+*  IF wa_buffer IS INITIAL.
+*    EXIT.
+*  ENDIF.
+*ENDDO.
+** Attachment
+*REFRESH: i_reclist,
+*          i_objtxt,
+*          i_objbin,
+*          i_objpack.
+*CLEAR wa_objhead.
+*i_objbin[] = i_record[].
+** Create Message Body Title and Description
+*i_objtxt = 'test with pdf-Attachment!'.
+*APPEND i_objtxt.
+*DESCRIBE TABLE i_objtxt LINES v_lines_txt.
+*READ TABLE i_objtxt INDEX v_lines_txt.
+*wa_doc_chng-obj_name = 'smartform'.
+*wa_doc_chng-expiry_dat = sy-datum + 10.
+*wa_doc_chng-obj_descr = 'smartform'.
+*wa_doc_chng-sensitivty = 'F'.
+*wa_doc_chng-doc_size = v_lines_txt * 255.
+** Main Text
+*CLEAR i_objpack-transf_bin.
+*i_objpack-head_start = 1.
+*i_objpack-head_num = 0.
+*i_objpack-body_start = 1.
+*i_objpack-body_num = v_lines_txt.
+*i_objpack-doc_type = 'RAW'.
+*APPEND i_objpack.
+** Attachment (pdf-Attachment)
+*i_objpack-transf_bin = 'X'.
+*i_objpack-head_start = 1.
+*i_objpack-head_num = 0.
+*i_objpack-body_start = 1.
+*DESCRIBE TABLE i_objbin LINES v_lines_bin.
+*READ TABLE i_objbin INDEX v_lines_bin.
+*i_objpack-doc_size = v_lines_bin * 255 .
+*i_objpack-body_num = v_lines_bin.
+*i_objpack-doc_type = 'PDF'.
+*i_objpack-obj_name = 'smart'.
+*i_objpack-obj_descr = 'test'.
+*APPEND i_objpack.
+*CLEAR i_reclist.
+*i_reclist-receiver = 'nareshreddy.k@gmail.com'.
+*i_reclist-rec_type = 'U'.
+*APPEND i_reclist.
+*CALL FUNCTION 'SO_NEW_DOCUMENT_ATT_SEND_API1'
+*  EXPORTING
+*    document_data              = wa_doc_chng
+*    put_in_outbox              = 'X'
+*    commit_work                = 'X'
+*  TABLES
+*    packing_list               = i_objpack
+*    object_header              = wa_objhead
+*    contents_bin               = i_objbin
+*    contents_txt               = i_objtxt
+*    receivers                  = i_reclist
+*  EXCEPTIONS
+*    too_many_receivers         = 1
+*    document_not_sent          = 2
+*    document_type_not_exist    = 3
+*    operation_no_authorization = 4
+*    parameter_error            = 5
+*    x_error                    = 6
+*    enqueue_error              = 7
+*    OTHERS                     = 8.
+*IF sy-subrc <> 0.
+*  WRITE:/ 'Error When Sending the File', sy-subrc.
+*ELSE.
+*  WRITE:/ 'Mail sent'.
+*ENDIF.
+
+*&---------------------------------------------------------------------*
+*& Parameter sidebyside
+*&---------------------------------------------------------------------*
+**tables:mara.
+**
+**SELECTION-SCREEN : BEGIN OF BLOCK b4 WITH FRAME TITLE text-t04.
+**  SELECTION-SCREEN: BEGIN OF LINE.
+**    SELECTION-SCREEN:COMMENT 1(20) text-m01 FOR FIELD s_matnr.
+**    PARAMETER: s_matnr TYPE mara-matnr.
+**    SELECTION-SCREEN: COMMENT 50(20) text-m03.
+**    PARAMETER: r_matnr TYPE mara-matnr.
+**  SELECTION-SCREEN : END OF LINE.
+**    SELECTION-SCREEN: BEGIN OF LINE.
+**    SELECTION-SCREEN:COMMENT 1(20) text-m01 FOR FIELD s_DISST.
+**    PARAMETER: s_DISST TYPE mara-DISST.
+**    SELECTION-SCREEN: COMMENT 50(20) text-m03.
+**    PARAMETER: r_MATKL TYPE mara-MATKL.
+**  SELECTION-SCREEN : END OF LINE.
+**SELECTION-SCREEN : END OF BLOCK b4.
+
+*&---------------------------------------------------------------------*
+*& parameter not input
+*&---------------------------------------------------------------------*
+*parameters: p_update type i.
+*at selection-screen output.
+*  loop at screen.
+*    if screen-name eq 'P_UPDATE'.
+*      screen-input = '0'.
+*      modify screen.
+*    endif.
+*  endloop.
+
+*&---------------------------------------------------------------------*
+*& image add
+*&---------------------------------------------------------------------*
+*TYPE-POOLS cndp.
+**&---------------------------------------------------------------------*
+**& Data Declaration.
+**&---------------------------------------------------------------------*
+*DATA: docking    TYPE REF TO cl_gui_docking_container,
+*      htmlviewer TYPE REF TO cl_gui_html_viewer,
+*      picture    TYPE REF TO cl_gui_picture.
+*DATA: MY_CONTAINER TYPE REF TO cl_gui_custom_container.
+*DATA url  TYPE cndp_url.
+*PARAMETERS p_11 TYPE i.
+*at SELECTION-SCREEN OUTPUT.
+*
+*
+*  PERFORM build_htmlviewer.
+*
+*  CALL METHOD picture->set_display_mode
+*    EXPORTING
+*      display_mode = cl_gui_picture=>display_mode_stretch.
+*
+*
+*  CALL FUNCTION 'DP_PUBLISH_WWW_URL'
+*    EXPORTING
+*      objid    = 'ZLOGO'
+*      lifetime = 'T'
+*    IMPORTING
+*      url      = url
+*    EXCEPTIONS
+*      OTHERS   = 1.
+*
+** Load the picture.
+*  IF sy-subrc = 0.
+*    CALL METHOD picture->load_picture_from_url_async
+*      EXPORTING
+*        url = url.
+*  ENDIF.
+*
+**&---------------------------------------------------------------------*
+**&      Form  build_htmlviewer
+**&---------------------------------------------------------------------*
+*FORM build_htmlviewer .
+*  DATA: repid LIKE sy-repid.
+*  repid = sy-repid.
+*
+*  IF my_container IS INITIAL.
+*
+*
+*    CREATE OBJECT MY_CONTAINER
+*    EXPORTING container_name = 'KH'.
+*
+*
+*    CREATE OBJECT docking
+*      EXPORTING
+*        REPID                       = repid
+*        DYNNR                       = sy-dynnr
+*        SIDE                        = cl_gui_docking_container=>DOCK_AT_TOP
+*        EXTENSION                   = 100
+*      EXCEPTIONS
+*        CNTL_ERROR                  = 1
+*        CNTL_SYSTEM_ERROR           = 2
+*        CREATE_ERROR                = 3
+*        LIFETIME_ERROR              = 4
+*        LIFETIME_DYNPRO_DYNPRO_LINK = 5
+*        others                      = 6.
+*
+*    IF htmlviewer IS INITIAL .
+*      CREATE OBJECT picture
+*        EXPORTING
+*          parent             = my_container.
+*    ENDIF .
+*  ENDIF .
+*ENDFORM.
+
+********************************************************************************************************
+*data: docking type ref to cl_gui_docking_container,
+*      picture_control_1 type ref to cl_gui_picture,
+*      url(256) type c .
+*data: query_table like w3query occurs 1 with header line,
+*      html_table like w3html occurs 1,
+*      return_code like  w3param-ret_code,
+*      content_type like  w3param-cont_type,
+*      content_length like  w3param-cont_len,
+*      pic_data like w3mime occurs 0,
+*      pic_size type i.
+** END OF DO NOT CHANGE*************************************
+*data : sum(4) , num1(4) , num2(4).
+*parameters: p_dummy(4) default '4' .
+*parameters: p_dummy1(4) default '5' .
+*at selection-screen output.
+*  perform show_pic.
+*start-of-selection.
+**&-------------------------------------------------------------------
+**& Form show_pic
+**&-------------------------------------------------------------------
+*form show_pic.
+*  data: repid like sy-repid.
+*  repid = sy-repid.
+*  create object picture_control_1 exporting parent = docking.
+*  check sy-subrc = 0.
+*  call method picture_control_1->set_3d_border
+*    exporting
+*      border = 1.
+*  call method picture_control_1->set_display_mode
+*    exporting
+*      display_mode = cl_gui_picture=>display_mode_stretch.
+*  call method picture_control_1->set_position
+*    exporting
+*      height = 300
+*      left   = 400
+*      top    = 10
+*      width  = 600.
+**CHANGE POSITION AND SIZE ABOVE***************************
+*  if url is initial.
+*    refresh query_table.
+*    query_table-name  = '_OBJECT_ID'.
+**CHANGE IMAGE NAME BELOW UPLOADED IN SMW0******************
+*    query_table-value = 'ZSCREEN'.
+*    append query_table.
+*    call function 'WWW_GET_MIME_OBJECT'
+*      tables
+*        query_string        = query_table
+*        html                = html_table
+*        mime                = pic_data
+*      changing
+*        return_code         = return_code
+*        content_type        = content_type
+*        content_length      = content_length
+*      exceptions
+*        object_not_found    = 1
+*        parameter_not_found = 2
+*        others              = 3.
+*    if sy-subrc <> 0.
+**      MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+**              WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+*    endif.
+*    call function 'DP_CREATE_URL'
+*      exporting
+*        type     = 'image'
+*        subtype  = cndp_sap_tab_unknown
+*        size     = pic_size
+*        lifetime = cndp_lifetime_transaction
+*      tables
+*        data     = pic_data
+*      changing
+*        url      = url
+*      exceptions
+*        others   = 1.
+*  endif.
+*  call method picture_control_1->load_picture_from_url
+*    exporting
+*      url = url.
+**Syntax for URL
+**url = 'file://D:\corp-gbanerji\pickut\cartoon_184.gif'.
+**url = 'http://l.yimg.com/a/i/ww/beta/y3.gif'.
+*endform.
+
+*&---------------------------------------------------------------------*
+*& receive central bank currency rate data
+*&---------------------------------------------------------------------*
+*DATA: lv_xml TYPE STRiNG,
+*      lv_url TYPE STRiNG.
+*
+*DATA: lv_client TYPE REF TO if_http_client.
+*
+*lv_url = 'https://www.tcmb.gov.tr/kurlar/today.xml'.
+** Create client
+*CALL METHOD cl_http_client=>create_by_url
+*  EXPORTING
+*    url                = lv_url
+*  IMPORTING
+*    CLiENT             = lv_client
+*  EXCEPTIONS
+*    argument_not_found = 1
+*    plugin_not_active  = 2
+*    internal_error     = 3
+*    OTHERS             = 4.
+*IF sy-subrc NE 0.
+*  MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+*    WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+*ENDIF.
+*
+*lv_client->request->set_header_field( NAME  = '~request_method'
+*                                        VALUE = 'GET' ).
+*
+** Get request:
+*CALL METHOD lv_client->send
+*  EXCEPTIONS
+*    http_communication_failure = 1
+*    http_invalid_state         = 2
+*    http_processing_failed     = 3
+*    OTHERS                     = 4.
+*IF sy-subrc NE 0.
+*  MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+*    WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+*ENDIF.
+*
+** Prepare client-receive:
+*CALL METHOD lv_client->receive
+*  EXCEPTIONS
+*    http_communication_failure = 1
+*    http_invalid_state         = 2
+*    http_processing_failed     = 3
+*    OTHERS                     = 4.
+*
+** Get HTML:
+*lv_xml = lv_client->response->get_cdata( ).
+*
+*break serkanozc.
+*DATA: l_ixml            TYPE REF TO if_ixml,
+*      l_streamfactory   TYPE REF TO if_ixml_stream_factory,
+*      l_istream         TYPE REF TO if_ixml_istream,
+*      l_parser          TYPE REF TO if_ixml_parser,
+*      l_document        TYPE REF TO if_ixml_document,
+*      lv_xml_x          TYPE XSTRiNG.
+*
+*CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
+*  EXPORTING
+*    text           = lv_xml
+**   MIMETYPE       = ' '
+**   ENCODING       =
+* IMPORTING
+*   buffer         = lv_xml_x
+* EXCEPTIONS
+*   failed         = 1
+*   OTHERS         = 2
+*          .
+*IF sy-subrc <> 0.
+*  MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+*          WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+*ENDIF.
+*
+*
+** Creating the main iXML factory
+*l_ixml = cl_ixml=>create( ).
+*
+** Creating a stream factory
+*l_streamfactory = l_ixml->create_stream_factory( ).
+*
+** wrap the xstring containing the manifest file into an input stream
+*l_istream = l_streamfactory->create_istream_xstring( STRiNG = lv_xml_x ).
+*
+** Creating a document
+*l_document = l_ixml->create_document( ).
+*
+*
+** Create a Parser
+*l_parser = l_ixml->create_parser( stream_factory = l_streamfactory
+*                                  istream        = l_istream
+*                                  document       = l_document ).
+*
+** Parse the stream
+*IF l_parser->parse( ) NE 0.
+*  MESSAGE 'today.xml parse problemi' TYPE 'E'.
+*  EXIT.
+*ENDIF.
+*
+*DATA: curr_node_collection  TYPE REF TO if_ixml_node_collection,
+*      curr_node_iterator    TYPE REF TO if_ixml_node_iterator,
+*      curr_node             TYPE REF TO if_ixml_node,
+*      curr_nodemap          TYPE REF TO if_ixml_named_node_map,
+*      curr_attr             TYPE REF TO if_ixml_node,
+*      curr_node_list        TYPE REF TO if_ixml_node_list,
+*      lv_val                TYPE STRiNG,
+*      lv_length             TYPE i,
+*      lv_indx               TYPE i.
+*
+*curr_node_collection = l_document->get_elements_by_tag_name( NAME = 'Currency' ).
+*curr_node_iterator = curr_node_collection->create_iterator( ).
+*curr_node = curr_node_iterator->get_next( ).
+*
+*WHILE curr_node IS NOT INITIAL.
+*
+*  curr_nodemap = curr_node->get_attributes( ).
+*  curr_attr = curr_nodemap->get_named_item( NAME = 'CurrencyCode' ).
+*
+*  CLEAR lv_val.
+*  IF curr_attr IS NOT INITIAL.
+*    lv_val = curr_attr->get_value( ).
+*    WRITE 'CurrencyCode' COLOR COL_GROUP.
+*    WRITE: lv_val.
+*  ENDIF.
+*
+*  curr_node_list = curr_node->get_children( ).
+*  CLEAR lv_length.
+*  lv_length = curr_node_list->get_length( ).
+*  DO lv_length TIMES.
+*    lv_indx = sy-iNDEX - 1.
+*    curr_attr = curr_node_list->get_item( lv_indx ).
+*
+*    CLEAR lv_val.
+*    IF curr_attr IS NOT INITIAL.
+*      lv_val = curr_attr->get_name( ).
+*      WRITE: lv_val COLOR COL_GROUP.
+*      lv_val = curr_attr->get_value( ).
+*      WRITE: lv_val.
+*    ENDIF.
+*
+*  ENDDO.
+*
+*  curr_node = curr_node_iterator->get_next( ).
+*
+*
+*  WRITE: /.
+*ENDWHILE.
+**************************************************
+
+*DATA: IT_SPFLI TYPE STANDARD TABLE OF SPFLI INITIAL SIZE 0,
+*      WA_SPFLI LIKE LINE OF IT_SPFLI.
+*DATA: SPFLI_LINES TYPE I,
+*      GD_PERCENT TYPE I.
+*
+*START-OF-SELECTION.
+*  SELECT *
+*    INTO TABLE IT_SPFLI
+*    FROM SPFLI.
+*  CHECK SY-SUBRC EQ 0.
+*  SPFLI_LINES = SY-DBCNT.
+*  CLEAR: GD_PERCENT.
+*  LOOP AT IT_SPFLI INTO WA_SPFLI.
+*    PERFORM PROGRESS_BAR USING 'Retrieving data...'(001)
+*                               SY-TABIX
+*                               SPFLI_LINES.
+*    DO 1000000 TIMES.
+*      WA_SPFLI-DISTANCE = WA_SPFLI-DISTANCE + 0.
+*    ENDDO.
+*  ENDLOOP.
+*FORM PROGRESS_BAR USING    P_VALUE
+*                           P_TABIX
+*                           P_NLINES.
+*  DATA: W_TEXT(40),
+*        W_PERCENTAGE TYPE P,
+*        W_PERCENT_CHAR(3).
+*  W_PERCENTAGE = ( P_TABIX / P_NLINES ) * 100.
+*  W_PERCENT_CHAR = W_PERCENTAGE.
+*  SHIFT W_PERCENT_CHAR LEFT DELETING LEADING ' '.
+*  CONCATENATE P_VALUE W_PERCENT_CHAR '% Complete'(002) INTO W_TEXT.
+*  IF W_PERCENTAGE GT GD_PERCENT OR P_TABIX EQ 1.
+*    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR'
+*      EXPORTING
+*        PERCENTAGE = W_PERCENTAGE
+*        TEXT       = W_TEXT.
+*    GD_PERCENT = W_PERCENTAGE.
+*  ENDIF.
+*ENDFORM.
+
+*Text elements
+*----------------------------------------------------------
+* M01 sadads
+* M03 fsdgvsd
+
+
+*Selection texts
+*----------------------------------------------------------
+* R_MATNR D       .
+* S_MATNR D       .

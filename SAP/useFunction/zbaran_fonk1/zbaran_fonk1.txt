@@ -1,0 +1,193 @@
+FUNCTION ZBARAN_FONK1.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     REFERENCE(SAYI1) TYPE  INT4
+*"     REFERENCE(SAYI2) TYPE  INT4
+*"     REFERENCE(ISLEM) TYPE  /ASU/ADHOC_STEP
+*"  EXPORTING
+*"     REFERENCE(SONUC) TYPE  INT4
+*"  EXCEPTIONS
+*"      DIVISION_BYZERO
+*"      UNKNOWN_OPERATION
+*"----------------------------------------------------------------------
+data oref TYPE REF TO cx_root.
+
+CASE islem.
+  WHEN '+'.
+     sonuc = sayi1 + sayi2.
+  WHEN '-'.
+     sonuc = sayi1 - sayi2.
+  WHEN '*'.
+     sonuc = sayi1 * sayi2.
+  WHEN '/'.
+*     sonuc = sayi1 / sayi2.
+    if sayi2 = 0.
+     TRY.
+       sonuc = sayi1 / '0'.
+       CATCH cx_root INTO oref.
+       Message 'Hata oluþtu. Tekrar deneyiniz...' type 'E'.
+
+     ENDTRY.
+
+    else.
+     sonuc = sayi1 / sayi2.
+    ENDIF.
+
+
+ENDCASE.
+
+
+
+ENDFUNCTION.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: AM
+*287   Adres bakýmý çaðrýsý olanaksýz; TSADRV tablosunda giriþ eksik
+*290   TSADRV'de giriþ eksik; yeni adres bakýmý çaðrýsý olanaksýz
+*291   TSADRV'de giriþ eksik; yeni adres bakýmý çaðrýsý olanaksýz
+*298   Adres grubu & tanýmlanmadý; adres için silme iþareti olanaksýz
+*
+* Message class: EC
+*089   Internal error: Unable to read screen data
+*
+* Message class: Hard coded
+*   Hata oluþtu. Tekrar deneyiniz...
+*
+* Message class: SCPR
+*026   Table & is too wide. It cannot be processed
+*028   The table/view & has no generated maintenance dialog
+*035   Dictionary interface error: Contact SAP
+*120   Table/view & not found
+*273   Function module call error
+*320   BC Set processing error
+*395   Internal field description read error
+*399   No data record activation information
+*408   Table key not supported by activation links
+*
+* Message class: SV
+*001   Seçilen iþlev henüz desteklenmiyor
+*002   Geri alýnan giriþ sayýsý: &
+*004   Seçime uygun bir giriþ bulunamadý
+*005   Bir giriþ seçildi
+*006   Seçilen giriþ sayýsý: &
+*007   Önceki giriþ mevcut deðil
+*008   Sonraki giriþ mevcut deðil
+*009   Anahtarý ayný olan bir baþka giriþ önceden mevcut
+*010   Bu anahtarla bir giriþ silinmek üzere iþaretlendi
+*011   Silinen giriþ sayýsý: &
+*012   Deðiþtirilen giriþ sayýsý: &
+*013   Giriþ silindi
+*014   Kopyalanan giriþ sayýsý: &
+*015   Hedef anahtar ve kaynak anahtar için farklý giriþ yapýn
+*016   Ýlk duruma getirilen giriþ sayýsý: &
+*017   Giriþ ilk durumuna getirildi
+*018   Veriler saklandý
+*019   Anahtarý geçerli ad alanýndan seçin
+*024   Lütfen hedef giriþleri girin
+*025   Hedef giriþleri girin
+*026   Ýþlevi yürütmeden önce giriþleri seçin
+*028   Tablo & veri sözlüðünde mevcut deðil
+*032   Ýmleci geçerli bir giriþin üzerine konumlayýn
+*033   Çalýþma alanýnýn içindeki anahtarý girin
+*037   & için bakým ekraný eksik yada belirlenmemiþ
+*039   Tablo & iliþkili alan içermiyor
+*040   & giriþ geri alýndý, & orijinal ve & yeni giriþ hala iþaetli
+*041   & giriþ geri alýndý, & asýl giriþ hala iþaretli
+*042   & giriþ geri alýndý, & yeni giriþ hâlâ iþaretli
+*043   Veriler önceden saklandý
+*044   Verilere yalnýz okumak için eriþilebilir
+*045   Bitiþ tarihinden önce olan baþlangýç tarihi girin
+*046   Baþlangýç tarihinden sonra olan bitiþ tarihi girin
+*047   Örtüþen kayýtlar silindi veya sýnýrlandý
+*049   Veriler kullanýcý & tarafýndan bloke edildi (yalnýzca görüntülenebilir)
+*050   Sistem hatasý (Tablo/görüntü & bloke edilemedi)
+*051   Veriler için bakým yetkisi yok (yalnýz görüntüleme olanaklý)
+*053   Talep ettiðiniz verileri görüntülemek için yetkiniz yok
+*054   Yürürlükteki üst birimde ( & ) verilerin bakýmý olanaklý deðil
+*055   Nesne ( & ) adresi bulunamadý
+*056   Ýþlev seçiminden önce en az bir giriþi iþaretleyin
+*057   Seçilen giriþ yeni ve ilk hali yok
+*058   Seçilen giriþler yeni ve ilk halleri yok
+*059   Seçilen giriþ hala ilk halinde bulunuyor
+*060   Seçilen giriþler hala ilk halinde bulunuyorlar
+*061   & giriþi hala ilk halinde, & yeni giriþi ilk hali yok
+*065   Giriþ mevcut deðil, uzun metin için çift týklama
+*066   Blok sonunu seçin
+*084   Görüntülenebilir deðer yok
+*092   Deðiþiklik görevi & þu anda iþleniyor
+*095   & deðiþiklik görevinin deðiþtirilmesi sýrasýnda sistem hatasý
+*096   Görev & deðiþtirildi
+*098   & görevi için giriþ iþaretlendi
+*099   Giriþ, görev içinden silinmek için iþaretlendi
+*105   Görev & için & giriþ iþaretlendi
+*106   & giriþ görev & içinden silinmek için iþaretlendi
+*107   Giriþ önceden görev & içinde mevcuttu
+*108   & giriþ önceden görev & içinde mevcuttu
+*109   & giriþ iþaretlendi, & giriþ mevcuttu: &
+*110   Giriþ, görev & içinde mevcut deðildi
+*111   & giriþ silinmek için iþaretlendi, & giriþ mevcut deðildi: &
+*112   & giriþ görev & içinde mevcut deðildi
+*113   Giriþ geri getirilemedi
+*114   & giriþ geri getirilemedi
+*115   Giriþ silinemedi
+*116   & giriþ silinemedi
+*117   Deðiþikliðe dikkat (giriþ SAP'a ait)
+*120   Diðer giriþler geri getirilir ve gerekirse deðiþtirilir
+*121   Silinen giriþ geri çekilir veya gerekliyse deðiþtirilir
+*122   Giriþ sýnýrlandý
+*123   Sýnýrlý giriþlerin sayýsý: &
+*124   Sýnýrlý giriþleri iþleyin
+*125   Sýnýrlý giriþi iþleyin
+*127   Geçerlilik alanýný sýnýrlayýn
+*128   Standart sistem sýnýfý &, taþýma olanaklý deðil
+*129   Farklý görevlerdeki ilgili nesneler
+*130   Üst birim & yerel, taþýma olanaklý deðil
+*132   Nesne görev &1, kullanýcý &2 için bloke edildi (yalnýz görüntü olanaklý)
+*134   Nesne tanýmýnda tutarsýzlýk (yalnýz görüntü olanaklý)
+*136   Deðiþikliklerde dikkat! (giriþ müþteriye ait)
+*138   &1 bakým nesnesini konrtol edin veya &2 iþlev grubunu güncelleyin
+*139   Adres verileri karþýlaþtýrma sýrasýnda devralýnmadý
+*140   &1 giriþ silindi, &2 giriþ devralýndý
+*141   Giriþler münferit olarak deðiþiklik talebine dahil edilmez
+*142   Girilen veriler için taþýma olanaklý deðil
+*153   Dil seçilmedi
+*160   Kurulan sistem kod sayfasý baþka dillere izin vermiyor
+*161   Ýmleci form adýnýn üzerinde konumlandýrýn
+*162   Nesne &1 &2 &3, göreve dahil edilemez
+*164   Tablo/görünüm &1 ABAP sözlüðünde mevcut deðil
+*173   Ýþlev grubu &1 tutarsýz
+*174   Çalýþma alanýnda anahtar olmayan alanlar için deðerleri gir
+*175   Seçilen BC Set iþlevi desteklenmiyor
+*177   Veri kaydý, BC Set içinden sabit deðer içeriyor ve silinemez
+*183   Merkezi uyarlama daðýtým sistemine uzaktan eriþim sýrasýnda hata
+*184   Veri kaydý, BC Set içinden sabit deðer içeriyor ve deðiþtirilemez
+*202   Sabit BC Set deðerlerine sahip alanlarý deðiþtirmek için yetkiniz yok
+*306   Tablo/görünüm & etkin deðil
+*413   Seçilen & giriþ silinebilir deðil
+*538   Açýlan kutu görünüm kümeleri ile birlikte desteklenmiyor
+*757   Bu tablo anahtarý için bakým yetkisine sahip deðilsiniz.
+*763   Görüntülenen veri kayýtlarý için bakým yetkisine sahip deðilsiniz.
+*764   Deðiþtirilen veri kaydý seçimi.
+*766   Sýnýrlý veri kaydý görüntüsü.
+*808   Tablonun tüm sütunlarý listede gösterilemez.
+*810   &1 görünümünün toplam uzunluðu 1000 karakterden fazla.
+*818   Business-Configuration-Set`in &1`in &2 giriþleri içe aktarýldý.
+*819   Business-Configuration-Set içe aktarýldý.
+*830   En son seçilen giriþe ulaþýldý
+*831   Ýlk seçilen giriþe ulaþýldý
+*
+* Message class: TB
+*109   No maintenance authorization for cross-client tables (see Help)
+*
+* Message class: TK
+*430   Client &1 has status 'not modifiable'
+*729   Changes to repository objects are not permitted in this client
+*730   Changes to repository or cross-client customizing are not permitted
+*731   Cross-client customizing cannot be modified
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2020. Sap Release 740

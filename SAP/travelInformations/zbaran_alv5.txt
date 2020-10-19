@@ -1,0 +1,57 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_ALV5
+*&---------------------------------------------------------------------*
+FORM alv3.
+GET PARAMETER ID 'PLA' FIELD gt_sapln-planetype.
+PERFORM read_alv3.
+PERFORM layout_dzn3.
+PERFORM display_alv3.
+ENDFORM.
+
+FORM layout_dzn3.
+gs_layout2-zebra = 'X'.
+gs_layout2-colwýdth_optýmýze = 'X'.
+ENDFORM.
+
+FORM display_alv3.
+DATA:lv_repid   LIKE sy-repid,
+     lv_tabname TYPE slis_tabname VALUE 'gt_sapln',
+     lv_strname LIKE dd02l-tabname VALUE 'saplane'.
+     lv_repid = sy-repid.
+
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid
+   I_INTERNAL_TABNAME           = lv_tabname
+   I_STRUCTURE_NAME             = lv_strname
+ CHANGING
+    ct_fieldcat                 = gt_fcat2[]
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+   I_CALLBACK_PROGRAM                = lv_repid
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'UCAK BÝLGÝLERÝ'
+   IS_LAYOUT                         = gs_layout2
+   IT_FIELDCAT                       = gt_fcat2[]
+
+  TABLES
+    t_outtab                          = gt_sapln[]
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2
+          .
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.

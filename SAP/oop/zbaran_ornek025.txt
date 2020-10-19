@@ -1,0 +1,73 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK025
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK025.
+class lcl_tasima DEFINITION ABSTRACT.
+  public SECTION.
+    CONSTANTS:c_kara     TYPE string VALUE 'Kara',
+              c_hava     TYPE string VALUE 'Hava',
+              c_deniz    TYPE string VALUE 'Deniz'.
+    types:gty_fiyat      TYPE p LENGTH 10 DECIMALS 2,
+          gty_tarih      TYPE d.
+    data:mv_ulke_alinan  TYPE string READ-ONLY,
+         mv_ulke_gidilen TYPE string READ-ONLY.
+    methods:constructor IMPORTING iv_ulke_alinan  TYPE STRING
+                                  iv_ulke_gidilen TYPE string ,
+            ulasým_yolu IMPORTING VALUE(iv_ulasým) TYPE string,
+            urun_tipi   IMPORTING VALUE(iv_urun)  TYPE string,
+            nesneyi_yazdýr ABSTRACT.
+  PROTECTED SECTION.
+    data:mv_fiyat TYPE i,
+         mv_ulasim TYPE string,
+         mv_urun TYPE string.
+    METHODS:fiyat_hesapla ABSTRACT IMPORTING VALUE(iv_fiyat) TYPE i RETURNING VALUE(rv_fiyat) TYPE i.
+endclass.
+CLASS lcl_tasima IMPLEMENTATION.
+  method constructor.
+    MV_ULKE_ALINAN = IV_ULKE_ALINAN.
+    mv_ulke_gidilen = iv_ulke_gidilen.
+  endmethod.
+  method ULASIM_YOLU.
+    mv_ulasim = IV_ULASIM.
+  endmethod.
+  method URUN_TIPI.
+    mv_urun = IV_URUN.
+  endmethod.
+ENDCLASS.
+class LCL_KARA DEFINITION INHERITING FROM LCL_TASIMA.
+  PUBLIC SECTION.
+    methods:constructor  IMPORTING iv_ulke_alinan TYPE STRING
+                                 iv_ulke_gidilen TYPE STRING,
+           nesneyi_yazdýr REDEFINITION.
+  PROTECTED SECTION.
+    METHODS:fiyat_hesapla REDEFINITION.
+endclass.
+class LCL_KARA IMPLEMENTATION.
+  method NESNEYI_YAZDIR.
+    write /:'alinan ulke:',MV_ULKE_ALINAN.
+    write /:'gidecek ulke:',MV_ULKE_GIDILEN.
+    write /:'ulasým yolu:',C_KARA.
+  endmethod.
+  method FIYAT_HESAPLA.
+
+  endmethod.
+  method constructor.
+    super->constructor( iv_ulke_alinan = iv_ulke_alinan iv_ulke_gidilen = iv_ulke_gidilen ).
+    mv_ulasým = C_KARA.
+  endmethod.
+endclass.
+
+data:go_tasima  TYPE REF TO LCL_TASIMA,
+     gt_tasima  type TABLE OF REF TO lcl_tasima,
+     go_yonetici TYPE REF TO LCL_KARA.
+
+start-OF-SELECTION.
+
+create OBJECT go_tasima TYPE LCL_kara
+EXPORTING IV_ULKE_ALINAN = 'singapur'
+          iv_ulke_gidilen = 'meksika'.
+go_tasýma->nesneyi_yazdir( ).

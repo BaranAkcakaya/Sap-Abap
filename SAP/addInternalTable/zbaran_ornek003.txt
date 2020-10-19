@@ -1,0 +1,89 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK3
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT ZBARAN_ORNEK003.
+
+*&---------------------------------------------------------------------*
+*& Adding data to internal table
+*&---------------------------------------------------------------------*
+
+data:BEGIN OF gt_ogr,
+     no        TYPE i,
+     ad(20)    TYPE c,
+     soyad(20) TYPE c,
+     notu      TYPE p DECIMALS 1,
+end of gt_ogr.
+
+DATA: vize   like gt_ogr-notu,
+      final  like gt_ogr-notu,
+      sonuc  TYPE p DECIMALS 1.
+
+DATA:itab_ogr like STANDARD TABLE OF gt_ogr WITH HEADER LINE.
+
+selection-screen begin of block block_01 with frame title text-001.
+select-options : s_deger1  for gt_ogr-notu,
+                 s_deger2  for gt_ogr-notu.
+selection-screen end of block block_01.
+
+START-OF-SELECTION.
+
+do 5 times.
+read table: s_deger1  index sy-index,
+            s_deger2 INDEX sy-index.
+ vize  = s_deger1-low.
+ final = s_deger2-low.
+ sonuc = vize * 30 / 100 + final * 70 / 100.
+ if vize > 100 or final > 100.
+  MESSAGE '1-100 arasý sayý gýrýnýz' TYPE 'E'.
+ENDIF.
+case sy-index.
+ when 1.
+ itab_ogr-no    = 100.
+ itab_ogr-ad    = 'sabah'.
+ itab_ogr-soyad = 'aksam'.
+ itab_ogr-notu  = sonuc.
+ append itab_ogr.
+
+ when 2.
+ itab_ogr-no    = 101.
+ itab_ogr-ad    = 'gece'.
+ itab_ogr-soyad = 'gunduz'.
+ itab_ogr-notu  = sonuc.
+ append itab_ogr.
+
+  when 3.
+ itab_ogr-no    = 102.
+ itab_ogr-ad    = 'uzun'.
+ itab_ogr-soyad = 'ince'.
+ itab_ogr-notu  = sonuc.
+ append itab_ogr.
+
+  when 4.
+ itab_ogr-no    = 103.
+ itab_ogr-ad    = 'zayýf'.
+ itab_ogr-soyad = 'sýsko'.
+ itab_ogr-notu  = sonuc.
+ append itab_ogr.
+
+  when 5.
+ itab_ogr-no    = 104.
+ itab_ogr-ad    = 'yaz'.
+ itab_ogr-soyad = 'kýs'.
+ itab_ogr-notu  = sonuc.
+ append itab_ogr.
+
+ endcase.
+
+enddo.
+
+ LOOP AT itab_ogr.
+ WRITE:/ itab_ogr-no,
+         itab_ogr-ad,
+         itab_ogr-soyad,
+         itab_ogr-notu.
+ ENDLOOP.

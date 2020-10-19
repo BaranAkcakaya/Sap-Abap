@@ -1,0 +1,90 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK7
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT ZBARAN_ORNEK007.
+
+*&---------------------------------------------------------------------*
+*& ListBox
+*&---------------------------------------------------------------------*
+*data: gas     type c,
+*      fueloil TYPE c,
+*      liquid  type c.
+
+SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-001.
+PARAMETERS:p_deger1 AS LISTBOX VISIBLE LENGTH 10,
+           p_deger2 type i.
+SELECTION-SCREEN END OF BLOCK blok1.
+
+TYPE-POOLS: vrm.
+DATA: name TYPE vrm_id,
+      list TYPE vrm_values,
+      value LIKE LINE OF list.
+
+*PARAMETERS: options(10) AS LISTBOX VISIBLE LENGTH 15.
+
+AT SELECTION-SCREEN OUTPUT.
+  name = 'p_deger1'.
+  value-key = '1'.
+  value-text = 'GAS'.
+  APPEND value TO list.
+  value-key = '2'.
+  value-text = 'FUELOIL'.
+  APPEND value TO list.
+  value-key = '3'.
+  value-text = 'LÝQUÝD'.
+  APPEND value TO list.
+  CALL FUNCTION 'VRM_SET_VALUES'EXPORTING
+      id     = name
+      values = list.
+at SELECTION-SCREEN.
+
+if  p_deger2 > 100.
+  MESSAGE 'lütfen 0-100 arasý bir deger girin' TYPE 'E'.
+ENDIF.
+
+*if p_deger1 IS INITIAL.
+*  MESSAGE 'parametreyi bos býrakmayýn' TYPE 'E'.
+*endif.
+
+end-of-selection.
+
+START-OF-SELECTION.
+
+CASE p_deger1.
+  when '1'.
+    if p_deger2 < 20.
+      WRITE 'GÜVENLÝ'.
+    ELSEIF p_deger2 > 20 and p_deger2 < 40.
+      WRITE 'DÝKKAT'.
+    ELSE.
+      WRITE 'TEHLÝKELÝ'.
+     ENDIF.
+  WHEN '2'.
+    if p_deger2 < 30.
+      WRITE 'GÜVENLÝ'.
+    ELSEIF p_deger2 > 30 and p_deger2 < 60.
+      WRITE 'DÝKKAT'.
+    ELSE.
+      WRITE 'TEHLÝKELÝ'.
+    ENDIF.
+  WHEN '3'.
+    if p_deger2 < 40.
+      WRITE 'GÜVENLÝ'.
+    ELSEIF p_deger2 > 40 and p_deger2 < 60.
+      WRITE 'DÝKKAT'.
+    else.
+      WRITE 'tehlikeli'.
+    ENDIF.
+ENDCASE.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   lütfen 0-100 arasý bir deger girin

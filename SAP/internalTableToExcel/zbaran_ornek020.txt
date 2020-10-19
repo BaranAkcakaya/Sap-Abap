@@ -1,0 +1,96 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK020
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK020.
+TABLES: ZBARAN_001.
+DATA:gt_tablo LIKE HASHED TABLE OF zbaran_001 WITH HEADER LINE WITH UNIQUE KEY PERSNO,
+     gs_tablo TYPE ZBARAN_001.
+DATA:itab LIKE ZBARAN_001 OCCURS 0 WITH HEADER LINE.
+gs_tablo-persno = 1003.
+gs_tablo-AD = 'fatih'.
+gs_tablo-SOYAD = 'terim'.
+gs_tablo-HSATIS = 395000.
+gs_tablo-SATIS = 500000.
+gs_tablo-MAAS = 3000 + ( ( gs_tablo-SATIS ) - ( gs_tablo-HSATIS ) ) * 1 / 100.
+INSERT INTO ZBARAN_001 VALUES GS_TABLO.
+
+gs_tablo-persno = 1004.
+gs_tablo-AD = 'cem'.
+gs_tablo-SOYAD = 'yýlmaz'.
+gs_tablo-HSATIS = 1250000.
+gs_tablo-SATIS = 5000000.
+gs_tablo-MAAS = 3000 + ( ( gs_tablo-SATIS ) - ( gs_tablo-HSATIS ) ) * 1 / 100.
+INSERT INTO ZBARAN_001 VALUES GS_TABLO.
+
+gs_tablo-persno = 1005.
+gs_tablo-AD = 'yýlmaz'.
+gs_tablo-SOYAD = 'erdogan'.
+gs_tablo-HSATIS = 900000.
+gs_tablo-SATIS = 1000000.
+gs_tablo-MAAS = 3000 + ( ( gs_tablo-SATIS ) - ( gs_tablo-HSATIS ) ) * 1 / 100.
+INSERT INTO ZBARAN_001 VALUES GS_TABLO.
+
+gs_tablo-persno = 1006.
+gs_tablo-AD = 'hadi'.
+gs_tablo-SOYAD = 'gel'.
+gs_tablo-HSATIS = 125000.
+gs_tablo-SATIS = 90000.
+gs_tablo-MAAS = 3000 + ( ( gs_tablo-SATIS ) - ( gs_tablo-HSATIS ) ) * 1 / 100.
+INSERT INTO ZBARAN_001 VALUES GS_TABLO.
+
+SELECT * FROM ZBARAN_001 INTO TABLE GT_TABLO.
+
+LOOP AT GT_TABLO.
+WRITE:/ gt_tablo-persno,
+        GT_TABLO-AD,
+        GT_TABLO-SOYAD,
+        GT_TABLO-HSATIS,
+        GT_TABLO-SATIS,
+        GT_TABLO-MAAS.
+ENDLOOP.
+
+select * from zbaran_001 INTO  TABLE itab .
+
+DATA dest type string.
+CALL METHOD cl_gui_frontend_services=>directory_browse
+CHANGING
+selected_folder = dest.
+
+data lv_fnam TYPE RLGRAP-FILENAME.
+CONCATENATE dest '/excelaktarma1.xls' INTO LV_FNAM."burada dest bizim dosya uzantýmýz concatenate(baglama) ile dest'e dosya adýný ekliyoruz
+CALL FUNCTION 'WS_DOWNLOAD'
+ EXPORTING
+   FILENAME                      = lv_fnam
+   FILETYPE                      = 'DAT'
+  TABLES
+    DATA_TAB                      = itab.
+
+
+
+
+"standart internal tablo"
+**DATA:gt_tablo LIKE STANDARD TABLE OF zbaran_001 WITH HEADER LINE.
+**SELECT * FROM ZBARAN_001 INTO TABLE GT_TABLO.
+**data:gs_tablo like gt_tablo,
+**     carpan TYPE p VALUE '0.01'.
+**
+**gs_tablo-persno = 1003.
+**gs_tablo-AD = 'fatih'.
+**gs_tablo-SOYAD = 'terim'.
+**gs_tablo-HSATIS = 395000.
+**gs_tablo-SATIS = 500000.
+**gs_tablo-MAAS = 3000 + ( ( gs_tablo-SATIS ) - ( gs_tablo-HSATIS ) ) * carpan.
+**INSERT GS_TABLO INTO TABLE GT_TABLO.
+**
+**LOOP AT GT_TABLO.
+**WRITE:/ gt_tablo-persno,
+**        GT_TABLO-AD,
+**        GT_TABLO-SOYAD,
+**        GT_TABLO-HSATIS,
+**        GT_TABLO-SATIS,
+**        GT_TABLO-MAAS.
+**ENDLOOP.

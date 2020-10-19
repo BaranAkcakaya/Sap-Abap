@@ -1,0 +1,201 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK017
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK017.
+
+TABLES:zbaran_view,
+       zbaran_view2.
+TYPE-POOLS:slis.
+
+DATA:gt_malzeme TYPE TABLE OF zbaran_view,
+     gt_hareket TYPE TABLE OF zbaran_view2,
+     gt_fcat    TYPE slis_t_fieldcat_alv,
+     gs_layout  TYPE slis_layout_alv.
+
+SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-001.
+SELECT-OPTIONS:so_matnr  FOR zbaran_view-matnr  MATCHCODE OBJECT zbaran_dnm18_sh.
+PARAMETERS:rad1 RADIOBUTTON GROUP grp1,
+           rad2 RADIOBUTTON GROUP grp1.
+SELECTION-SCREEN END OF BLOCK blok1.
+
+START-OF-SELECTION.
+  CASE 'X'.
+    WHEN rad1.
+      PERFORM master_bilgisi.
+    WHEN rad2.
+      PERFORM hareket_bilgisi.
+  ENDCASE.
+
+FORM master_bilgisi.
+*  PERFORM malzeme_no.
+  PERFORM read_data.
+  PERFORM display_data.
+ENDFORM.
+
+form read_data.
+SELECT * FROM zbaran_view INTO TABLE gt_malzeme WHERE matnr in so_matnr.
+ENDFORM.
+
+FORM display_data.
+DATA:lv_repid   LIKE sy-repid,
+     lv_tabname TYPE slis_tabname VALUE 'gt_malzeme',
+*     ls_fcat    TYPE slis_fieldcat_alv,
+     lv_strname LIKE dd02l-tabname VALUE 'zbaran_view'.
+lv_repid = sy-repid.
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid
+   I_INTERNAL_TABNAME           = lv_tabname
+   I_STRUCTURE_NAME             = lv_strname
+  CHANGING
+    ct_fieldcat                 = gt_fcat
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+gs_layout-zebra = 'X'.
+gs_layout-colwýdth_optýmýze = 'X'.
+
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'malzeme tabloso'
+   IS_LAYOUT                         = gs_layout
+   IT_FIELDCAT                       = gt_fcat
+
+  TABLES
+    t_outtab                          = gt_malzeme
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2
+          .
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.
+
+*FORM malzeme_no.
+*  DATA:lt_malzeme_tablo TYPE TABLE OF zbaran_view,
+*       ls_malzeme_str   TYPE zbaran_view.
+*  SELECT * FROM zbaran_view INTO TABLE lt_malzeme_tablo
+*  WHERE matnr IN so_matnr.
+*
+*  IF sy-subrc = 0.
+*   FORMAT HOTSPOT ON.
+*    FORMAT COLOR 4.
+*        WRITE:2'matnr',18'mtart',24'kondm',33'bismt',46'msehi',
+*        60'brgew',77'ntgew',86'gewei',100'maktx',133''.
+*   FORMAT COLOR COL_NORMAL.
+*    LOOP AT lt_malzeme_tablo INTO ls_malzeme_str.
+*      WRITE:/ sy-uline,
+*              ls_malzeme_str-matnr,
+*              ls_malzeme_str-mtart,
+*              ls_malzeme_str-kondm,
+*              ls_malzeme_str-bismt,
+*              ls_malzeme_str-msehi,
+*              ls_malzeme_str-brgew,
+*              ls_malzeme_str-ntgew,
+*              ls_malzeme_str-gewei,
+*              ls_malzeme_str-spras,
+*              ls_malzeme_str-maktx.
+*    ENDLOOP.
+*    WRITE:/ sy-uline.
+*   FORMAT  HOTSPOT OFF.
+*  ELSE.
+*    WRITE:/ 'kayýt yok...'.
+*  ENDIF.
+*ENDFORM.
+
+FORM hareket_bilgisi.
+*  PERFORM hareket_no.
+  PERFORM read_hareket.
+  PERFORM display_hareket.
+ENDFORM.
+
+form read_hareket.
+SELECT * FROM zbaran_view2 INTO TABLE gt_hareket WHERE matnr in so_matnr.
+ENDFORM.
+
+FORM display_hareket.
+DATA:lv_repid   LIKE sy-repid,
+     lv_tabname TYPE slis_tabname VALUE 'gt_hareket',
+*     ls_fcat    TYPE slis_fieldcat_alv,
+     lv_strname LIKE dd02l-tabname VALUE 'zbaran_view2'.
+lv_repid = sy-repid.
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid
+   I_INTERNAL_TABNAME           = lv_tabname
+   I_STRUCTURE_NAME             = lv_strname
+  CHANGING
+    ct_fieldcat                 = gt_fcat
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+gs_layout-zebra = 'X'.
+gs_layout-colwýdth_optýmýze = 'X'.
+
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'hareket tabloso'
+   IS_LAYOUT                         = gs_layout
+   IT_FIELDCAT                       = gt_fcat
+
+  TABLES
+    t_outtab                          = gt_hareket
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2
+          .
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.
+
+*FORM hareket_no.
+*  DATA:lt_hareket_tab  TYPE TABLE OF ZBARAN_VIEW2,
+*       ls_hareket_str  TYPE ZBARAN_VIEW2.
+*  SELECT * FROM ZBARAN_VIEW2 INTO TABLE lt_hareket_tab WHERE matnr IN so_matnr.
+*  SORT lt_hareket_tab ASCENDING by GJAHR.
+*  IF sy-subrc = 0.
+*    FORMAT HOTSPOT on.
+*    FORMAT COLOR 4.
+*        WRITE:2'belnr',12'gjahr',19'bldat',25'blart',31'ebelp',
+*        37'gjahr',47'matnr',64'menge',76'meins',82'werks',88'kzbwa'.
+*    FORMAT COLOR COL_NORMAL.
+*     LOOP AT lt_hareket_tab  INTO ls_hareket_str.
+*        WRITE:/ sy-uline,
+*                ls_hareket_str-belnr,
+*                ls_hareket_str-gjahr,
+*                ls_hareket_str-bldat,
+*                ls_hareket_str-blart,
+*                ls_hareket_str-ebelp,
+*                ls_hareket_str-gjahr,
+*                ls_hareket_str-matnr,
+*                ls_hareket_str-menge,
+*                ls_hareket_str-meins,
+*                ls_hareket_str-werks,
+*                ls_hareket_str-kzbwa.
+*     ENDLOOP.
+*        WRITE:/ sy-uline.
+*    FORMAT HOTSPOT OFF.
+*  ELSE.
+*    WRITE:/ 'kayýt yok...'.
+*  ENDIF.
+*ENDFORM.

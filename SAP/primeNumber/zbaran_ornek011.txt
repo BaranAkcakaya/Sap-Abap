@@ -1,0 +1,99 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK0011
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK011.
+
+*&---------------------------------------------------------------------*
+*&prime number
+*&---------------------------------------------------------------------*
+DATA:sayi1 TYPE i,
+     sayi2 TYPE i,
+     sonuc TYPE p DECIMALS 1,
+     a1    TYPE i,
+     sayac TYPE i,
+     p     TYPE i,
+     topla TYPE i.
+
+
+
+SELECTION-SCREEN BEGIN OF BLOCK blok_b WITH FRAME TITLE text-001.
+PARAMETERS:p_girdi1 TYPE i OBLIGATORY,
+           p_girdi2 TYPE i OBLIGATORY.
+SELECTION-SCREEN END OF BLOCK blok_b.
+
+sayi1 = p_girdi1.
+sayi2 = p_girdi2.
+p     = 1.
+topla = 0.
+
+at SELECTION-SCREEN.
+if p_girdi1 gt 10000 or p_girdi2 gt 10000.
+  MESSAGE '10000 e kadar olan degerler icin...' TYPE 'E'.
+ENDIF.
+if p_girdi1 > p_girdi2.
+  MESSAGE '1. sayý 2. sayýdan kucuk olmalý...' TYPE 'E'.
+ENDIF.
+end-of-SELECTION.
+
+START-OF-SELECTION.
+
+WHILE sayi1 <= sayi2.
+a1    = 2.
+sayac = 0.
+WHILE a1 ** 2  <= sayi1.
+sonuc = sayi1 mod a1.
+if sonuc = 0.
+   sayac = 1.
+  exit.
+ENDIF.
+a1 = a1 + 1.
+ENDWHILE.
+if sayac = 0.
+  WRITE: / p ,
+          sayi1.
+p = p + 1.
+topla = topla + sayi1.
+ENDIF.
+sayi1 = sayi1 + 1.
+ENDWHILE.
+WRITE:/ 'TUM ASAL SAYILARIN TOPLAMI : ',40 topla.
+"gýrýlen sayýnýn asal olup olmadýgýný soyluyo"
+*DATA:sayi1 TYPE i,
+*     sonuc TYPE p DECIMALS 1,
+*     a1    TYPE i,
+*     sayac TYPE i.
+*
+*SELECTION-SCREEN BEGIN OF BLOCK blok_b WITH FRAME TITLE text-001.
+*PARAMETERS:p_girdi1 TYPE i OBLIGATORY.
+*SELECTION-SCREEN END OF BLOCK blok_b.
+*
+*sayi1 = p_girdi1.
+*a1 = 2.
+*sayac = 0.
+*
+*WHILE a1 ** 2  <= sayi1.
+*sonuc = sayi1 mod a1.
+*if sonuc = 0.
+*   WRITE / 'asal sayý degil'.
+*   sayac = 1.
+*  exit.
+*ENDIF.
+*a1 = a1 + 1.
+*ENDWHILE.
+*if sayac = 0.
+*  WRITE / 'asal sayý'.
+*ENDIF.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   10000 e kadar olan degerler icin...
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2020. Sap Release 740

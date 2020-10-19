@@ -1,0 +1,1052 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_CLASS_ULASIM
+*&---------------------------------------------------------------------*
+*data :"gs_table_u001 TYPE ZTABLO_U001,
+*      gt_ulasým_kara TYPE STANDARD TABLE OF ZTABLO_KARA1,
+*      gt_ulasým_hava TYPE STANDARD TABLE OF ZTABLO_hava,
+*      gt_ulasým_deniz TYPE STANDARD TABLE OF ZTABLO_DENIZ.
+class ulasým_class DEFINITION ABSTRACT.
+  public SECTION.
+*    types:BEGIN OF gt_table_kara,
+*          katno  TYPE ZTABLO_KARA1-katno,
+*          carnm  TYPE ZTABLO_KARA1-carnm,
+*          CARSR  TYPE ZTABLO_KARA1-CARSR,
+*          CARSS  TYPE ZTABLO_KARA1-CARSS,
+*          CARCN  TYPE ZTABLO_KARA1-CARCN,
+*          CARMG  TYPE ZTABLO_KARA1-CARMG,
+*          CARTK  TYPE ZTABLO_KARA1-CARTK,
+*          CARYD  TYPE ZTABLO_KARA1-CARYD,
+*          CARYT  TYPE ZTABLO_KARA1-CARYT,
+*          CARHU  TYPE ZTABLO_KARA1-CARHU,
+*          CARAT  TYPE ZTABLO_KARA1-CARAT,
+*          end of gt_table_kara.
+    data :gs_table_u001 TYPE ZTABLO_U001,
+          gt_ulasým_kara TYPE STANDARD TABLE OF ZTABLO_KARA1,
+          gt_ulasým_kara2 TYPE STANDARD TABLE OF ZTABLO_KARA2,
+          gt_ulasým_hava TYPE STANDARD TABLE OF ZTABLO_hava,
+          gt_ulasým_deniz TYPE STANDARD TABLE OF ZTABLO_DENIZ.
+    TYPES:gt_table_kara1  TYPE STANDARD TABLE OF ZTABLO_KARA1 WITH NON-UNIQUE KEY KATNO.
+    methods:aracý_bul  ABSTRACT IMPORTING VALUE(iv_sipno) TYPE ztablo_view1-SIPNO,
+                         "RETURNING VALUE(rv_ulasým_kara) TYPE gt_table_kara1.
+            search_healp ABSTRACT IMPORTING VALUE(iv_sipno) TYPE ZTABLO_U001-SIPNO,
+            maliyet_hesapla ABSTRACT IMPORTING VALUE(iv_sipno) TYPE ZTABLO_U001-SIPNO
+                            RETURNING VALUE(rv_fiyat) type ZTABLO_S001-NENTR.
+
+ENDCLASS.
+class ulasým_class IMPLEMENTATION.
+
+ENDCLASS.
+class kara_ulasým DEFINITION INHERITING FROM ULASIM_CLASS.
+  public SECTION.
+    DATA:it_ulasým_kara TYPE STANDARD TABLE OF ZTABLO_KARA1,
+         it2_ulasým_kara TYPE STANDARD TABLE OF ZTABLO_KARA2,
+         gt_tablo_maps  TYPE STANDARD TABLE OF ZTABLO_MAPS,
+*         gt_ulasým_kara TYPE STANDARD TABLE OF ZTABLO_KARA1,
+         gs_ulasým_kara TYPE ZTABLO_KARA1,
+         gs2_ulasým_kara TYPE ZTABLO_KARA2,
+         mv_NTGEW TYPE ZTABLO_U001-NTGEW.
+    methods:ARACI_BUL REDEFINITION,
+            SEARCH_HEALP REDEFINITION,
+            MALIYET_HESAPLA REDEFINITION,
+            DORSE_BUL IMPORTING VALUE(iv_sipno) TYPE ZTABLO_U001-sipno,
+            YAKIT_MALIYET IMPORTING VALUE(iv_AKARA) TYPE ZTABLO_kara1-KATNO
+                          RETURNING VALUE(rv_maliyet) TYPE ZTABLO_S001-NENTR,
+            MAPS_COOR IMPORTING VALUE(iv_tesno) TYPE ZTABLO_U001-TESNO,
+            MAPS_DISTANCE IMPORTING VALUE(iv_tesno) TYPE ZTABLO_U001-TESNO.
+ENDCLASS.
+class KARA_ULASIM IMPLEMENTATION.
+  method MAPS_DISTANCE.
+    data:lt_tablo_dist    TYPE STANDARD TABLE OF ZTABLO_MAPS,
+         ls_tablo_dist    TYPE ZTABLO_MAPS,
+         lv_http_url      TYPE string,
+         lv_content       TYPE string,
+         lv_len           TYPE syst-tabix,
+         lv_time(10)      TYPE c,
+         lv_PALAT         TYPE ZTABLO_MAPS-MALAT,
+         lv_PALNG         TYPE ZTABLO_MAPS-MALAT,
+         lv_distance      TYPE ZTABLO_MAPS-TOPYL,
+         lv_len2          TYPE syst-tabix,
+         moff             TYPE syst-tabix,
+         moff1            TYPE syst-tabix,
+         moff2            TYPE syst-tabix,
+         lv_http_client   TYPE REF TO if_http_client.
+
+    SELECT SINGLE * FROM ZTABLO_MAPS INTO ls_tablo_dist WHERE TESNO = IV_TESNO.
+    IF PLANE_MAPS1 = 1.
+      lv_PALAT = ls_tablo_dist-PALAT.
+      lv_PALNG = ls_tablo_dist-PALNG.
+       CONCATENATE 'https://api.routing.yandex.net/v1.0.0/distancematrix?origins='
+       ls_tablo_dist-MALAT ',' ls_tablo_dist-MALNG '&destinations=' lv_PALAT
+       ',' lv_PALNG '&mode=driving&apikey=c2898c42-9a80-4b48-84b4-27397b6537b6' INTO lv_http_url.
+    ELSEIF PLANE_MAPS2 = 1.
+      lv_PALAT = ls_tablo_dist-PGLAT.
+      lv_PALNG = ls_tablo_dist-PGLNG.
+       CONCATENATE 'https://api.routing.yandex.net/v1.0.0/distancematrix?origins='
+       ls_tablo_dist-MGLAT ',' ls_tablo_dist-MGLNG '&destinations=' lv_PALAT
+       ',' lv_PALNG '&mode=driving&apikey=c2898c42-9a80-4b48-84b4-27397b6537b6' INTO lv_http_url.
+    ELSE.
+    CONCATENATE 'https://api.routing.yandex.net/v1.0.0/distancematrix?origins='
+    ls_tablo_dist-MALAT ',' ls_tablo_dist-MALNG '&destinations=' ls_tablo_dist-MGLAT
+    ',' ls_tablo_dist-MGLNG '&mode=driving&apikey=c2898c42-9a80-4b48-84b4-27397b6537b6' INTO lv_http_url.
+    ENDIF.
+
+    CALL METHOD cl_http_client=>create_by_url
+    EXPORTING
+      url                = lv_http_url
+    IMPORTING
+      client             = lv_http_client
+    EXCEPTIONS
+      argument_not_found = 1
+      plugin_not_active  = 2
+      internal_error     = 3
+      OTHERS             = 4.
+
+    lv_http_client->request->set_header_field( name = '~request_method' value = 'GET' ).
+    lv_http_client->send( ).
+
+    CALL METHOD lv_http_client->RECEIVE
+    EXCEPTIONS
+      http_communication_failure = 1
+      http_invalid_state         = 2
+      http_processing_failed     = 3
+      OTHERS                     = 4.
+    lv_content = lv_http_client->RESPONSE->GET_CDATA( ).
+
+    DO 1 TIMES.
+    FIND '"duration"' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff .
+    IF sy-subrc = 0 .
+      moff = moff + 10 .
+      FIND '"status"' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff1 .
+      lv_len = moff1 - moff .
+      FIND '"value"' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff .
+
+      IF sy-subrc = 0 .
+        moff = moff + 7 .
+        FIND '"status"' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff1 .
+        lv_len  = moff1 - moff .
+        moff    = moff + 1.
+        lv_len2 = ( lv_len - 3 ).
+        lv_time = lv_content+moff(lv_len2) .
+      ENDIF.
+    ELSE.
+      EXIT.
+    ENDIF.
+  ENDDO .
+
+      DO 1 TIMES.
+    FIND '"distance"' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff .
+    IF sy-subrc = 0 .
+      moff = moff + 10 .
+      FIND '"traffic_type"' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff1 .
+      lv_len = moff1 - moff .
+      FIND '"value"' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff .
+      IF sy-subrc = 0 .
+        moff = moff + 7 .
+        FIND '"traffic_type"' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff1 .
+        lv_len      = moff1 - moff .
+        moff        = moff + 1.
+        lv_len2     = ( lv_len - 7 ).
+        lv_distance = lv_content+moff(lv_len2) .
+      ENDIF.
+    ELSE.
+      EXIT.
+    ENDIF.
+  ENDDO .
+  IF PLANE_MAPS1 = 1.
+    LV_DISTANCE1 = LV_DISTANCE / 1000.
+    clear PLANE_MAPS1.
+  ELSEIF PLANE_MAPS2 = 1.
+    LV_DISTANCE2 = LV_DISTANCE / 1000.
+    clear PLANE_MAPS2.
+  ELSE.
+  LS_TABLO_DIST-TOPYL = LV_DISTANCE / 1000.
+  modify ZTABLO_MAPS FROM LS_TABLO_DIST.
+  CLEAR  LS_TABLO_DIST .
+  ENDIF.
+
+
+  ENDMETHOD.
+  METHOD MAPS_COOR.
+    DATA:ls_tablo_maps  TYPE ZTABLO_MAPS,
+         lv_http_client TYPE REF TO if_http_client,
+         lv_content     TYPE string,
+         lv_http_url    TYPE string,
+         lv_len         TYPE syst-tabix,
+         lv_len2        TYPE syst-tabix,
+         moff           TYPE syst-tabix,
+         moff1          TYPE syst-tabix,
+         moff2          TYPE syst-tabix,
+         moff3          TYPE syst-tabix,
+         lv_lat1        TYPE ZTABLO_MAPS-MALAT,
+         lv_lat2        TYPE ZTABLO_MAPS-MGLAT,
+         lv_lng1        TYPE ZTABLO_MAPS-MALNG,
+         a              TYPE i,
+         lv_lng2        TYPE ZTABLO_MAPS-MGLNG.
+
+    SELECT SINGLE * FROM ZTABLO_U001 INTO gs_table_u001 WHERE TESNO = IV_TESNO.
+    clear LV_CONV_SONUC.
+    Translate gs_table_u001-MAADR TO UPPER CASE.
+    PERFORM CONVERT_ENG_CHARACTER.
+    clear ls_tablo_maps.
+    clear gt_tablo_maps.
+
+    IF plane_maps_coor = 1.
+     CONCATENATE 'https://geocode-maps.yandex.ru/1.x/?apikey=c8941893-17c3-4fb2-81c5-b00c442468a0&geocode='
+     p_input5 INTO lv_http_url.
+    ELSE.
+     CONCATENATE 'https://geocode-maps.yandex.ru/1.x/?apikey=c8941893-17c3-4fb2-81c5-b00c442468a0&geocode='
+     LV_CONV_SONUC INTO lv_http_url.
+    ENDIF.
+
+    CALL METHOD cl_http_client=>create_by_url
+    EXPORTING
+      url                = lv_http_url
+    IMPORTING
+      client             = lv_http_client
+    EXCEPTIONS
+      argument_not_found = 1
+      plugin_not_active  = 2
+      internal_error     = 3
+      OTHERS             = 4.
+
+    lv_http_client->request->set_header_field( name = '~request_method' value = 'GET' ).
+    lv_http_client->send( ).
+
+    CALL METHOD lv_http_client->RECEIVE
+    EXCEPTIONS
+      http_communication_failure = 1
+      http_invalid_state         = 2
+      http_processing_failed     = 3
+      OTHERS                     = 4.
+    lv_content = lv_http_client->RESPONSE->GET_CDATA( ).
+
+    DO 3 TIMES.
+    FIND '<Point' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff .
+    IF sy-subrc = 0 .
+      moff = moff + 6 .
+      FIND '</Point>' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff1 .
+      lv_len = moff1 - moff .
+      FIND '<pos>' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff .
+
+      IF sy-subrc = 0 .
+        moff = moff + 5 .
+        moff2 = moff.
+        FIND '</pos>' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff1 .
+        lv_len  = moff1 - moff.
+        clear a.
+        DO .
+            moff = moff + 1.
+            lv_lng1 = lv_content+moff(1).
+            a = a + 1.
+          IF lv_lng1 = ' '.
+            exit.
+          ENDIF.
+        ENDDO.
+        lv_len2 = ( lv_len - a ) - 1.
+        lv_lNG1 = lv_content+moff2(a) .
+        moff3   = moff2 + ( a + 1 ).
+        lv_lAT1 = lv_content+moff3(lv_len2) .
+      ENDIF.
+    ELSE.
+      EXIT.
+    ENDIF.
+  ENDDO .
+   IF plane_maps_coor = 1.
+   ls_tablo_maps-PAADR = P_INPUT5.
+   ls_tablo_maps-PALAT = lv_lat1.
+   ls_tablo_maps-PALNG = lv_lng1.
+   ELSE.
+   ls_tablo_maps-MAADR = LV_CONV_SONUC.
+   ls_tablo_maps-MALAT = lv_lat1.
+   ls_tablo_maps-MALNG = lv_lng1.
+   ENDIF.
+
+    clear LV_CONV_SONUC.
+
+    translate gs_table_u001-MGADR TO UPPER CASE.
+    PERFORM CONVERT_ENG_CHARACTER2.
+    IF plane_maps_coor = 1.
+    CONCATENATE 'https://geocode-maps.yandex.ru/1.x/?apikey=c8941893-17c3-4fb2-81c5-b00c442468a0&geocode='
+    p_input6 INTO lv_http_url.
+    ELSE.
+    CONCATENATE 'https://geocode-maps.yandex.ru/1.x/?apikey=c8941893-17c3-4fb2-81c5-b00c442468a0&geocode='
+    LV_CONV_SONUC INTO lv_http_url.
+    ENDIF.
+
+    CALL METHOD cl_http_client=>create_by_url
+    EXPORTING
+      url                = lv_http_url
+    IMPORTING
+      client             = lv_http_client
+    EXCEPTIONS
+      argument_not_found = 1
+      plugin_not_active  = 2
+      internal_error     = 3
+      OTHERS             = 4.
+
+    lv_http_client->request->set_header_field( name = '~request_method' value = 'GET' ).
+    lv_http_client->send( ).
+
+    CALL METHOD lv_http_client->RECEIVE
+    EXCEPTIONS
+      http_communication_failure = 1
+      http_invalid_state         = 2
+      http_processing_failed     = 3
+      OTHERS                     = 4.
+    lv_content = lv_http_client->RESPONSE->GET_CDATA( ).
+    clear:moff,moff1,moff2,moff3.
+    DO 1 TIMES.
+    FIND '<Point' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff .
+    IF sy-subrc = 0 .
+      moff = moff + 6 .
+      FIND '</Point>' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff1 .
+      lv_len = moff1 - moff .
+      FIND '<pos>' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff .
+
+      IF sy-subrc = 0 .
+        moff = moff + 5 .
+        moff2 = moff.
+        FIND '</pos>' IN SECTION OFFSET moff OF lv_content IGNORING CASE MATCH OFFSET moff1 .
+        lv_len  = moff1 - moff .
+        clear a.
+        DO .
+            moff = moff + 1.
+            lv_lng1 = lv_content+moff(1).
+            a = a + 1.
+          IF lv_lng1 = ' '.
+            exit.
+          ENDIF.
+        ENDDO.
+        lv_len2 = ( lv_len - a ) - 1.
+        lv_lNG2 = lv_content+moff2(a) .
+        moff3   = moff2 + ( a + 1 ).
+        lv_lAT2 = lv_content+moff3(lv_len2) .
+      ENDIF.
+    ELSE.
+      EXIT.
+    ENDIF.
+  ENDDO .
+        IF plane_maps_coor = 1.
+        ls_tablo_maps-PGADR = P_INPUT6.
+        ls_tablo_maps-PGLAT = lv_lat2.
+        ls_tablo_maps-PGLNG = lv_lng2.
+        ELSE.
+        ls_tablo_maps-MGADR = LV_CONV_SONUC.
+        ls_tablo_maps-MGLAT = lv_lat2.
+        ls_tablo_maps-MGLNG = lv_lng2.
+        ENDIF.
+        ls_tablo_maps-TESNO = GS_TABLE_U001-TESNO.
+*  IF plane_maps_coor = 1.
+*  MODIFY gt_tablo_maps FROM ls_tablo_maps INDEX 1.
+*  ELSE.
+  APPEND ls_tablo_maps TO gt_tablo_maps.
+*  ENDIF.
+  IF plane_maps_coor = 0.
+    INSERT ztablo_maps FROM ls_tablo_maps.
+  ELSE.
+    clear plane_maps_coor.
+  ENDIF.
+  CLEAR  ls_tablo_maps .
+
+  ENDMETHOD.
+  method ARACI_BUL.
+    clear gt_ulasým_kara.
+    select SINGLE * from ZTABLO_u001 INTO gs_table_u001 WHERE sipno = iv_sipno.
+    select * from ZTABLO_KARA1 INTO TABLE it_ulasým_kara.
+    mv_ntgew = gs_table_u001-NTGEW.
+    LOOP AT it_ulasým_kara INTO gs_ulasým_kara WHERE CARAT >= mv_ntgew.
+      APPEND gs_ulasým_kara TO gt_ulasým_kara.
+    ENDLOOP.
+*    rv_ulasým_kara = gt_ulasým_kara.
+  endmethod.
+  METHOD YAKIT_MALIYET.
+    data:gs_kara1 TYPE ztablo_kara1,
+         lv_yakýt TYPE ztablo_kara1-CARYT,
+         lv_benzin TYPE i VALUE 7,
+         lv_yol   TYPE p LENGTH 8 DECIMALS 2,
+         lv_maliyet TYPE ZTABLO_S001-NENTR.
+    select SINGLE * FROM ZTABLO_KARA1 INTO gs_kara1 WHERE KATNO = P_AKARA.
+    lv_yakýt = gs_kara1-CARYT.
+    lv_yol   = P_MKARA.
+    lv_maliyet = ( lv_yol / 100 ) * lv_yakýt.
+    rv_maliyet = lv_maliyet * lv_benzin.
+  ENDMETHOD.
+  method DORSE_BUL.
+    DATA:lv_dortp TYPE ztablo_kara2-DORTP,
+         lv_DORHC TYPE ZTABLO_KARA2-DORHC,
+         lv_DORMA TYPE ZTABLO_KARA2-DORma.
+    select SINGLE * FROM ZTABLO_U001 INTO gs_table_u001 WHERE SIPNO = IV_SIPNO.
+    select * FROM ZTABLO_KARA2 INTO   TABLE it2_ulasým_kara.
+    lv_dortp = gs_table_u001-MALTR.
+    lv_dorhc = GS_TABLE_U001-VOLUM.
+    lv_DORMA = gs_table_u001-NTGEW.
+    clear gt_ulasým_kara2.
+    IF lv_dortp = 2 or ( lv_dortp = 3 ) or  ( lv_dortp = 9 ).
+      IF lv_dorhc le 50.
+            LOOP AT IT2_ULASIM_KARA INTO gs2_ulasým_kara WHERE DORTP =  LV_DORTP and
+                                                               DORHC le LV_DORHC.
+              append gs2_ulasým_kara to gt_ulasým_kara2.
+            ENDLOOP.
+      else.
+            LOOP AT IT2_ULASIM_KARA INTO gs2_ulasým_kara WHERE DORTP = LV_DORTP and
+                                                               DORHC gt LV_DORHC.
+            append gs2_ulasým_kara to gt_ulasým_kara2.
+            ENDLOOP.
+      ENDIF.
+    else.
+      IF lv_dorma le 60.
+            LOOP AT IT2_ULASIM_KARA INTO gs2_ulasým_kara WHERE DORTP =  LV_DORTP and
+                                                               DORMA le 60.
+              append gs2_ulasým_kara to gt_ulasým_kara2.
+            ENDLOOP.
+      ELSEIF lv_dorma gt 60 AND lv_dorma le 80.
+            LOOP AT IT2_ULASIM_KARA INTO gs2_ulasým_kara WHERE DORTP =  LV_DORTP and
+                                                               DORMA = 80.
+              append gs2_ulasým_kara to gt_ulasým_kara2.
+            ENDLOOP.
+      else.
+            LOOP AT IT2_ULASIM_KARA INTO gs2_ulasým_kara WHERE DORTP =  LV_DORTP and
+                                                               DORMA gt LV_DORMA.
+              append gs2_ulasým_kara to gt_ulasým_kara2.
+            ENDLOOP.
+      ENDIF.
+    ENDIF.
+*    LOOP AT IT2_ULASIM_KARA INTO gs2_ulasým_kara WHERE DORTP = LV_DORTP.
+*      append gs2_ulasým_kara to gt_ulasým_kara2.
+*    ENDLOOP.
+  ENDMETHOD.
+  METHOD MALIYET_HESAPLA.
+    data:lv_arac_kira TYPE p LENGTH 5 DECIMALS 2,
+         lv_maliyet TYPE ZTABLO_S001-NENTR,
+         lv_top_mal TYPE ZTABLO_S001-NENTR,
+         lv_fiyat TYPE ZTABLO_S001-NENTR,
+         Lv_ladm  TYPE p LENGTH 5 DECIMALS 2,
+         Lv_arac_say  TYPE p LENGTH 5 DECIMALS 2,
+         Lv_arac_say2  TYPE i,
+         lv_en_adet TYPE i,
+         LV_YKSEK_adet   TYPE i,
+         LV_uzun_adet   TYPE i,
+         lv_sofor   TYPE i VALUE 150,
+         lv_gunyol  TYPE i VALUE 700,
+         lv_gun     TYPE p LENGTH 6 DECIMALS 2,
+         lv_vw     TYPE p LENGTH 6 DECIMALS 2,
+         lv_vw2     TYPE p LENGTH 6 DECIMALS 2,
+         lv_gw     TYPE p LENGTH 6 DECIMALS 2,
+         lv_kilo_carpaný     TYPE p LENGTH 6 DECIMALS 5,
+*         lv_yol     TYPE i,
+         lt_ulasým_kara2 TYPE STANDARD TABLE OF ZTABLO_KARA2,
+         ls_ulasým_kara2 TYPE ZTABLO_KARA2,
+*         ls2_ulasým_kara2 TYPE ZTABLO_KARA2,
+         lt_ulasým_kara1 TYPE STANDARD TABLE OF ZTABLO_KARA1,
+         ls_ulasým_kara1 TYPE ZTABLO_KARA1,
+         go_ulasým TYPE REF TO kara_ulasým.
+    create OBJECT go_ulasým.
+*    SELECT SINGLE * FROM ZTABLO_KARA1 INTO GS_ULASIM_KARA WHERE KATNO = P_AKARA.
+    go_ulasým->aracý_bul( p2_sipno ).
+    lT_ULASIM_KARA1[] = GO_ULASIM->GT_ULASIM_KARA[]."aracý bulduk
+    go_ulasým->dorse_bul( P2_SIPNO ).
+    lt_ulasým_kara2[] = go_ulasým->gt_ulasým_kara2[]."dorseyi bulduk
+    lv_maliyet = go_ulasým->yakýt_maliyet( p_akara )."yakýt maliyeti hesaplýyo
+*    lv_arac_kira = gs_ulasým_kara-CARHU.
+    lv_gun = p_mkara / lv_gunyol."gunu buluyoruz
+    LOOP AT LT_ULASIM_KARA1 INTO ls_ulasým_kara1 WHERE KATNO = P_AKARA.
+      LV_TOP_MAL = LV_TOP_MAL + ( ( ls_ulasým_kara1-CARHU / 7 ) * lv_gun ).
+    ENDLOOP.
+*    LOOP AT lt_ulasým_kara2 INTO ls_ulasým_kara2.
+*      ls2_ulasým_kara2 = ls_ulasým_kara2.
+*      LV_TOP_MAL = LV_TOP_MAL + ( ( ls_ulasým_kara2-DORHU / 7 ) * lv_gun ).
+*    ENDLOOP.
+    read TABLE lt_ulasým_kara2 INTO ls_ulasým_kara2 INDEX 1.
+    lv_top_mal = LV_TOP_MAL + lv_maliyet + ( lv_sofor * lv_gun ).
+
+    "navlun hesabý yapýlacak.yukarýdaký toplam maliyet.
+    SELECT SINGLE * FROM ZTABLO_u001 INTO GS_TABLE_U001 WHERE sipno = P2_sipno.
+    lv_gw = GS_TABLE_U001-NTGEW * 1000 * ( GS_TABLE_U001-URUAT )."kg cinsine cevir
+    lv_kilo_carpaný = lv_top_mal / 23800.
+    IF GS_TABLE_U001-MALTR = 2 or GS_TABLE_U001-MALTR = 3 or GS_TABLE_U001-MALTR = 9.
+      "hacimde boyut onemlý olmadýgýndan hesap boyle yapýlýr.
+      lv_vw = ( GS_TABLE_U001-VOLUM * 333 ) * GS_TABLE_U001-URUAT."kg cinsinden
+      IF lv_vw > lv_gw.
+        lv_fiyat = lv_vw * LV_KILO_CARPANI.
+      else.
+        lv_fiyat = lv_gw * LV_KILO_CARPANI.
+      ENDIF.
+    elseif GS_TABLE_U001-MALTR = 1 or GS_TABLE_U001-MALTR = 4
+                                   or GS_TABLE_U001-MALTR = 7
+                                   or GS_TABLE_U001-MALTR = 10.
+      "burada urunler ust uste istiflene bilir.bu yuzden trelerde daha az yer kaplar hesapta ona göre degisir.
+      LV_EN_ADET =  ls_ulasým_kara2-DORGN / GS_TABLE_U001-breit.
+      LV_YKSEK_adet = ls_ulasým_kara2-DORYK / GS_TABLE_U001-HOEHE.
+      LV_UZUN_ADET = ls_ulasým_kara2-DORUN / GS_TABLE_U001-LAENG."dorseye kac tane sýgdýgýný
+      lv_ladm = GS_TABLE_U001-URUAT / ( LV_EN_ADET * LV_YKSEK_ADET )."kac adet arka arkaya gelcegini
+      lv_arac_say = lv_ladm / LV_UZUN_ADET."kac araclýk tasýnacagýný
+*      lv_arac_say2 = lv_arac_say.
+
+        lv_vw = ( lv_ladm * GS_TABLE_U001-LAENG ) * 1750.
+        IF lv_vw > lv_gw.
+          lv_fiyat = lv_vw * LV_KILO_CARPANI.
+        else.
+          lv_fiyat = lv_gw * LV_KILO_CARPANI.
+        ENDIF.
+    elseif GS_TABLE_U001-MALTR = 5.
+      LV_EN_ADET =  ls_ulasým_kara2-DORGN / GS_TABLE_U001-breit.
+*      LV_UZUN_ADET = ls_ulasým_kara2-DORUN / GS_TABLE_U001-LAENG.
+      lv_ladm = GS_TABLE_U001-URUAT / ( LV_EN_ADET ).
+        lv_vw = ( lv_ladm * GS_TABLE_U001-LAENG ) * 1750.
+        IF lv_vw > lv_gw.
+          lv_fiyat = lv_vw * LV_KILO_CARPANI.
+        else.
+          lv_fiyat = lv_gw * LV_KILO_CARPANI.
+        ENDIF.
+    elseif GS_TABLE_U001-MALTR = 8.
+      lv_ladm = GS_TABLE_U001-URUAT.
+        lv_vw = ( lv_ladm * GS_TABLE_U001-LAENG ) * 1750.
+        lv_vw2 = ( GS_TABLE_U001-VOLUM * 333 ) * GS_TABLE_U001-URUAT.
+        IF lv_vw < lv_vw2.
+          lv_vw = lv_vw2.
+        ENDIF.
+        IF lv_vw > lv_gw.
+          lv_fiyat = lv_vw * LV_KILO_CARPANI.
+        else.
+          lv_fiyat = lv_gw * LV_KILO_CARPANI.
+        ENDIF.
+    elseif GS_TABLE_U001-MALTR = 6.
+      lv_vw = ( ls_ulasým_kara2-DORUN * 1750 ).
+        IF lv_vw > lv_gw.
+          lv_fiyat = lv_vw * LV_KILO_CARPANI.
+        else.
+          lv_fiyat = lv_gw * LV_KILO_CARPANI.
+        ENDIF.
+    ENDIF.
+    IF lv_fiyat < lv_top_mal.
+      rv_fiyat = lv_top_mal.
+    ELSE.
+      rv_fiyat = lv_fiyat.
+    ENDIF.
+  ENDMETHOD.
+  METHOD SEARCH_HEALP.
+   DATA:go_ulasým TYPE REF TO KARA_ULASIM.
+   data : lT_ULASIM_KARA type STANDARD TABLE OF ZTABLO_KARA1 .
+   CREATE OBJECT go_ulasým.
+    go_ulasým->aracý_bul( p2_sipno ).
+   lT_ULASIM_KARA[] = GO_ULASIM->GT_ULASIM_KARA[].
+
+  CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+    EXPORTING
+     RETFIELD               = 'KATNO'
+     WINDOW_TITLE           = 'ARABA SECME'
+     dynpprog               = sy-repid
+     dynpnr                 = sy-dynnr
+     dynprofield            = 'P_AKARA'
+     VALUE_ORG              = 'S'
+    TABLES
+     VALUE_TAB              = lt_ulasým_kara[]
+   EXCEPTIONS
+     PARAMETER_ERROR        = 1
+     NO_VALUES_FOUND        = 2
+     OTHERS                 = 3
+            .
+  IF SY-SUBRC <> 0.
+    message id sy-msgid type sy-msgty number sy-msgno
+            with sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+  ENDMETHOD.
+endclass.
+class HAVA_ULASIM DEFINITION INHERITING FROM ULASIM_CLASS.
+  PUBLIC SECTION.
+    DATA:it_ulasým_hava TYPE STANDARD TABLE OF ZTABLO_hava,
+*         gt_ulasým_hava TYPE STANDARD TABLE OF ZTABLO_hava,
+         gs_ulasým_hava TYPE ZTABLO_hava,
+         mv_NTGEW TYPE ZTABLO_U001-NTGEW,
+         mv_VOLUM TYPE ZTABLO_U001-VOLUM.
+    methods:ARACI_BUL REDEFINITION,
+            SEARCH_HEALP REDEFINITION,
+            MALIYET_HESAPLA REDEFINITION,
+            yakýt_maliyet IMPORTING VALUE(iv_ahava) TYPE ZTABLO_HAVA-UATNO
+                          RETURNING VALUE(rv_maliyet) TYPE ZTABLO_S001-NENTR,
+            MAPS_DISTANCE_MEASURA IMPORTING VALUE(iv_tesno) TYPE ZTABLO_MAPS-TESNO.
+ENDCLASS.
+class HAVA_ULASIM IMPLEMENTATION.
+  method ARACI_BUL.
+    clear gt_ulasým_hava.
+    select * FROM ZTABLO_hava INTO TABLE it_ulasým_hava.
+    select SINGLE * FROM ZTABLO_u001 INTO gs_table_u001 WHERE sipno = IV_SIPNO.
+    mv_NTGEW = gs_table_u001-NTGEW.
+    mv_VOLUM = gs_table_u001-VOLUM.
+    LOOP AT IT_ULASIM_HAVA INTO GS_ULASIM_HAVA WHERE PLAMA >= mv_NTGEW and
+                                                     PLAHC >= mv_VOLUM.
+      APPEND GS_ULASIM_HAVA TO gt_ulasým_hava.
+    ENDLOOP.
+*    rv_ulasým_kara = gt_ulasým_hava.
+  endmethod.
+  METHOD MAPS_DISTANCE_MEASURA.
+    DATA:lt_tablo_maps  TYPE STANDARD TABLE OF ztablo_maps,
+         ls_tablo_maps  TYPE ZTABLO_MAPS,
+         lv_lat1        TYPE p LENGTH 6 DECIMALS 6,
+         lv_lat2        TYPE p LENGTH 6 DECIMALS 6,
+         lv_lng1        TYPE p LENGTH 6 DECIMALS 6,
+         lv_lng2        TYPE p LENGTH 6 DECIMALS 6,
+         lv_lat         TYPE p LENGTH 6 DECIMALS 10,
+         lv_lng         TYPE p LENGTH 6 DECIMALS 10,
+         lv_dlat1       TYPE p LENGTH 6 DECIMALS 10,
+         lv_dlat2       TYPE p LENGTH 6 DECIMALS 10,
+         lv_sinlat      TYPE p LENGTH 6 DECIMALS 10,
+         lv_sinlng      TYPE p LENGTH 6 DECIMALS 10,
+         lv_geopain     TYPE p LENGTH 6 DECIMALS 10,
+         lv_distpain    TYPE F,
+         lv_kareslt     TYPE p LENGTH 6 DECIMALS 10,
+         lv_sgrgeo      TYPE F,
+         lv_kareslg     TYPE p LENGTH 6 DECIMALS 10,
+         lv_cosdlat     TYPE p LENGTH 6 DECIMALS 10,
+         lv_cosdlng     TYPE p LENGTH 6 DECIMALS 10,
+         lv_distpain2   TYPE p LENGTH 6 DECIMALS 10.
+    "haversine yontemi ile iki nokta arasýndaký uzaklýgý buldum.
+    clear lv_meas_dist.
+    SELECT SINGLE * FROM ZTABLO_MAPS INTO LS_TABLO_MAPS WHERE TESNO = IV_TESNO.
+    lv_lat1   = ( LS_TABLO_MAPS-PALAT ).
+    lv_lat2   = ( LS_TABLO_MAPS-PGLAT ).
+    lv_lng1   = ( LS_TABLO_MAPS-PALNG ).
+    lv_lng2   = ( LS_TABLO_MAPS-PGLNG ).
+    lv_lat    = ( ( ( lv_lat2 - lv_lat1 ) * 314 ) / 100 ) / 180.
+    lv_lng    = ( ( ( lv_lng2 - lv_lng1 ) * 314 ) / 100 ) / 180.
+    lv_dlat1  = ( ( ( lv_lat1 ) * 314 ) / 100 ) / 180.
+    lv_dlat2  = ( ( ( lv_lat2 ) * 314 ) / 100 ) / 180.
+    lv_sinlat = sin( lv_lat / 2 ).
+    lv_sinlng = sin( lv_lng / 2 ).
+    lv_cosdlat = cos( lv_dlat1 ).
+    lv_cosdlng = cos( lv_dlat2 ).
+    lv_kareslt = ( lv_sinlat ** 2 ).
+    lv_kareslg = ( lv_sinlng ** 2 ).
+    lv_geopain = lv_kareslt + ( lv_kareslg  * lv_cosdlat * lv_cosdlng ).
+    lv_sgrgeo  = lv_geopain ** ( 1 / 2 ).
+    CALL METHOD CL_GIS_GEOCOD_CAL=>ATAN2(
+    EXPORTING
+      IV_X = ( 1 - lv_sgrgeo )
+      IV_Y = lv_sgrgeo
+    IMPORTING
+      EV_ATAN2 = lv_distpain ).
+    lv_distpain2 = lv_distpain * 2.
+    lv_meas_dist = 6371 * lv_distpain2.
+
+  ENDMETHOD.
+  method YAKIT_MALIYET.
+    data:gs_hava    TYPE ztablo_hava,
+         lv_yakýt   TYPE ztablo_hava-playt,
+         lv_benzin  TYPE i VALUE 8,
+         lv_yol     TYPE p LENGTH 8 DECIMALS 2,
+         lv_maliyet TYPE ZTABLO_S001-NENTR.
+
+    select SINGLE * FROM ZTABLO_hava INTO gs_hava WHERE UATNO = P_AHAVA.
+
+    lv_yakýt   = gs_hava-playt.
+    lv_yol     = P_MHAVA.
+    lv_maliyet = ( lv_yol / 100 ) * lv_yakýt.
+    rv_maliyet = lv_maliyet * lv_benzin.
+
+  ENDMETHOD.
+  METHOD MALIYET_HESAPLA.
+    DATA:go_ulasým      TYPE REF TO HAVA_ULASIM,
+         lt_ulasým_hava TYPE STANDARD TABLE OF ZTABLO_HAVA,
+         ls_ulasým_hava TYPE ZTABLO_HAVA,
+         lv_pilot       TYPE i VALUE 100,
+         lv_havalimaný  TYPE i VALUE 1500,
+         lv_yak_mal     TYPE ZTABLO_S001-NENTR,
+         lv_saat        TYPE p LENGTH 4 DECIMALS 2,
+         lv_kilo_carp   TYPE p LENGTH 4 DECIMALS 4,
+         lv_vw          TYPE p LENGTH 6 DECIMALS 2,
+         lv_gw          TYPE p LENGTH 6 DECIMALS 2,
+         lv_fiyat       TYPE ZTABLO_S001-NENTR,
+         lv_top_mal     TYPE ZTABLO_S001-NENTR.
+
+    CREATE OBJECT go_ulasým.
+    go_ulasým->aracý_bul( p2_sipno ).
+    lt_ulasým_hava[] = go_ulasým->gt_ulasým_hava[].
+    lv_yak_mal = go_ulasým->YAKIT_MALIYET( p_ahava ).
+
+    read TABLE LT_ULASIM_HAVA INTO LS_ULASIM_HAVA WITH KEY UATNO = P_AHAVA.
+    SELECT SINGLE * FROM ZTABLO_U001 INTO GS_TABLE_U001 WHERE SIPNO = P2_SIPNO.
+
+    lv_saat      = p_mhava / LS_ULASIM_HAVA-PLAHZ.
+    lv_top_mal   = lv_yak_mal + ( lv_pilot * lv_saat * 4 ) + ( lv_havalimaný * lv_saat ) + ( lv_saat * LS_ULASIM_HAVA-PLASU ).
+    IF ( LS_ULASIM_HAVA-PLAHC * 167 ) < ( LS_ULASIM_HAVA-PLAMA * 1000 ).
+      lv_kilo_carp = lv_top_mal / ( LS_ULASIM_HAVA-PLAHC * 167 ).
+    ELSE.
+      lv_kilo_carp = lv_top_mal / ( LS_ULASIM_HAVA-PLAMA * 1000 ).
+    ENDIF.
+    lv_gw        = ( GS_TABLE_U001-NTGEW * 1000 ) * GS_TABLE_U001-URUAT.
+    lv_vw        = ( GS_TABLE_U001-VOLUM * GS_TABLE_U001-URUAT ) * 167.
+
+    IF lv_gw > lv_vw.
+      lv_fiyat = lv_gw * LV_KILO_CARP.
+    ELSE.
+      lv_fiyat = lv_vw * LV_KILO_CARP.
+    ENDIF.
+    IF lv_top_mal > lv_fiyat.
+      lv_fiyat = lv_top_mal.
+    ENDIF.
+
+    rv_fiyat = lv_fiyat.
+
+  ENDMETHOD.
+  method SEARCH_HEALP.
+   DATA:go_ulasým TYPE REF TO HAVA_ULASIM.
+   data : lT_ULASIM_HAVA type STANDARD TABLE OF ZTABLO_HAVA .
+   CREATE OBJECT go_ulasým.
+    go_ulasým->aracý_bul( p2_sipno ).
+   lT_ULASIM_HAVA[] = GO_ULASIM->GT_ULASIM_HAVA[].
+
+  CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+    EXPORTING
+     RETFIELD               = 'UATNO'
+     WINDOW_TITLE           = 'UCAK SECME'
+     dynpprog               = sy-repid
+     dynpnr                 = sy-dynnr
+     dynprofield            = 'P_AHAVA'
+     VALUE_ORG              = 'S'
+    TABLES
+     VALUE_TAB              = lt_ulasým_HAVA[]
+   EXCEPTIONS
+     PARAMETER_ERROR        = 1
+     NO_VALUES_FOUND        = 2
+     OTHERS                 = 3
+            .
+  IF SY-SUBRC <> 0.
+    message id sy-msgid type sy-msgty number sy-msgno
+            with sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+class deniz_ulasim DEFINITION INHERITING FROM ULASIM_CLASS.
+  PUBLIC SECTION.
+    DATA:it_ulasým_deniz TYPE STANDARD TABLE OF ZTABLO_DENIZ,
+         gs_ulasým_deniz TYPE ZTABLO_DENIZ,
+         mv_MALTR        TYPE ZTABLO_U001-MALTR,
+         mv2_MALTR        TYPE ZTABLO_U001-MALTR.
+    methods:ARACI_BUL REDEFINITION,
+            SEARCH_HEALP REDEFINITION,
+            MALIYET_HESAPLA REDEFINITION,
+            yakýt_maliyet IMPORTING VALUE(iv_adeniz) TYPE ZTABLO_DENIZ-BATNO
+                          RETURNING VALUE(rv_maliyet) TYPE ZTABLO_S001-NENTR.
+endclass.
+class DENIZ_ULASIM IMPLEMENTATION.
+  METHOD ARACI_BUL.
+    clear gt_ulasým_deniz.
+    SELECT * FROM ZTABLO_DENIZ INTO TABLE IT_ULASIM_DENIZ .
+    select SINGLE * FROM ZTABLO_U001 INTO gs_table_u001 WHERE sipno = IV_SIPNO.
+    MV_MALTR = GS_TABLE_U001-MALTR.
+    clear MV2_MALTR.
+    IF  MV_MALTR = 8.
+      MV2_MALTR = 1.
+    elseif MV_MALTR = 1 or MV_MALTR = 4 or MV_MALTR = 5 or MV_MALTR = 7 or MV_MALTR = 10.
+      MV2_MALTR = 2.
+    elseif MV_MALTR = 6.
+      MV2_MALTR = 3.
+    elseif MV_MALTR = 2 or MV_MALTR = 9.
+      MV2_MALTR = 4.
+    ENDIF.
+    LOOP AT IT_ULASIM_DENIZ INTO GS_ULASIM_DENIZ WHERE BOATR = MV2_MALTR.
+      append GS_ULASIM_DENIZ to GT_ULASIM_DENIZ.
+    ENDLOOP.
+  endmethod.
+  method YAKIT_MALIYET.
+    data:gs_deniz   TYPE ztablo_deniz,
+         lv_yakýt   TYPE ztablo_deniz-BOAGY,
+         lv_benzin  TYPE i VALUE 3125,
+         lv_yol     TYPE p LENGTH 8 DECIMALS 2,
+         lv_maliyet TYPE ZTABLO_S001-NENTR,
+         lv_gun_ykt TYPE p LENGTH 8 DECIMALS 2,
+         lv_gun     TYPE p LENGTH 4 DECIMALS 2.
+
+    select SINGLE * FROM ZTABLO_deniz INTO gs_deniz WHERE BATNO = P_Adeniz.
+
+    lv_yakýt   = gs_deniz-BOAGY.
+    lv_gun_ykt = lv_yakýt * 24.
+    lv_yol     = P_MDENIZ.
+    lv_gun     = lv_yol / ( ( ( gs_deniz-BOASP * 185 )  / 100 ) * 24 ).
+    lv_maliyet = lv_gun * lv_gun_ykt.
+    rv_maliyet = lv_maliyet * lv_benzin.
+
+  endmethod.
+  METHOD MALIYET_HESAPLA.
+    DATA:go_ulasým       TYPE REF TO DENIZ_ULASIM,
+         lt_ulasým_deniz TYPE STANDARD TABLE OF ZTABLO_DENIZ,
+         ls_ulasým_DENiz TYPE ZTABLO_DENIZ,
+         lv_yak_mal      TYPE ZTABLO_S001-NENTR,
+         lv_gemi_kira    TYPE ZTABLO_S001-NENTR,
+         lv_top_mal      TYPE ZTABLO_S001-NENTR,
+         lv_fiyat        TYPE ZTABLO_S001-NENTR,
+         lv_yol          TYPE p LENGTH 8 DECIMALS 2,
+         lv_gw           TYPE p LENGTH 6 DECIMALS 2,
+         lv_vw           TYPE p LENGTH 6 DECIMALS 2,
+         lv_kilo_carp    TYPE p LENGTH 4 DECIMALS 4,
+         lv_gun          TYPE p LENGTH 4 DECIMALS 2,
+         lv_calsn_maas   TYPE i.
+
+    CREATE OBJECT go_ulasým.
+    go_ulasým->aracý_bul( p2_sipno ).
+    LT_ULASIM_DENIZ[] = go_ulasým->gt_ulasým_deniz[].
+    lv_yak_mal = go_ulasým->yakýt_MALIYET( p_adeniz ).
+
+    read TABLE lt_ulasým_deniz INTO ls_ulasým_DENiz WITH KEY BATNO = P_Adeniz.
+    SELECT SINGLE * FROM ZTABLO_U001 INTO GS_TABLE_U001 WHERE SIPNO = P2_SIPNO.
+
+    lv_yol       = P_MDENIZ.
+    lv_gun       = lv_yol / ( ( ( ls_ulasým_DENiz-BOASP * 185 )  / 100 ) * 24 ).
+    lv_gemi_kira = ( lv_gun * ls_ulasým_DENiz-BOAGK ).
+    IF ls_ulasým_DENiz-BOATN < 50000.
+      lv_calsn_maas = 3400.
+    elseif ls_ulasým_DENiz-BOATN < 150000 and ls_ulasým_DENiz-BOATN > 49999.
+      lv_calsn_maas = 6000.
+    else.
+      lv_calsn_maas = 8000.
+    ENDIF.
+
+    lv_top_mal = lv_yak_mal + lv_gemi_kira + ( lv_calsn_maas * lv_gun ) + 140000."140000 bir haftalýk liman ucreti
+
+    IF ls_ulasým_DENiz-BOATR = 2.
+      lv_kilo_carp = lv_top_mal / ( ls_ulasým_DENiz-BOACP * 12000 ).
+    elseif ls_ulasým_DENiz-BOATR = 4 or ls_ulasým_DENiz-BOATR = 3 or ls_ulasým_DENiz-BOATR = 1.
+      lv_kilo_carp  = lv_top_mal / ( ls_ulasým_DENiz-BOATN * 1016 ) .
+    ENDIF.
+
+    IF ls_ulasým_DENiz-BOATR = 4 or ls_ulasým_DENiz-BOATR = 1.
+      lv_gw = ( GS_TABLE_U001-NTGEW * 1000 ) * GS_TABLE_U001-URUAT.
+      lv_vw = ( GS_TABLE_U001-VOLUM * 1000 ) * GS_TABLE_U001-URUAT.
+      IF lv_vw < lv_gw.
+        lv_fiyat = lv_kilo_carp * lv_gw.
+      ELSE.
+        lv_fiyat = lv_kilo_carp * lv_vw.
+      ENDIF.
+    ELSEIF ls_ulasým_DENiz-BOATR = 2.
+      lv_gw = ( GS_TABLE_U001-NTGEW * 1000 ) * GS_TABLE_U001-URUAT.
+      lv_vw = ( GS_TABLE_U001-VOLUM * 1000 ) * GS_TABLE_U001-URUAT.
+      IF lv_vw < lv_gw.
+        lv_fiyat = lv_kilo_carp * lv_gw.
+      ELSE.
+        lv_fiyat = lv_kilo_carp * lv_vw.
+      ENDIF.
+    ELSEIF ls_ulasým_DENiz-BOATR = 3.
+      lv_gw = ( GS_TABLE_U001-NTGEW * 1000 ) * GS_TABLE_U001-URUAT.
+      lv_fiyat = lv_kilo_carp * lv_gw.
+    ENDIF.
+
+  rv_fiyat = lv_fiyat.
+
+  ENDMETHOD.
+  METHOD SEARCH_HEALP.
+   DATA:go_ulasým TYPE REF TO DENIZ_ULASIM.
+   data : lT_ULASIM_DENIZ type STANDARD TABLE OF ZTABLO_DENIZ .
+   CREATE OBJECT go_ulasým.
+    go_ulasým->aracý_bul( p2_sipno ).
+   lT_ULASIM_DENIZ[] = GO_ULASIM->GT_ULASIM_DENIZ[].
+
+  CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+    EXPORTING
+     RETFIELD               = 'BATNO'
+     WINDOW_TITLE           = 'GEMÝ SECME'
+     dynpprog               = sy-repid
+     dynpnr                 = sy-dynnr
+     dynprofield            = 'P_ADENIZ'
+     VALUE_ORG              = 'S'
+    TABLES
+     VALUE_TAB              = lT_ULASIM_DENIZ[]
+   EXCEPTIONS
+     PARAMETER_ERROR        = 1
+     NO_VALUES_FOUND        = 2
+     OTHERS                 = 3
+            .
+  IF SY-SUBRC <> 0.
+    message id sy-msgid type sy-msgty number sy-msgno
+            with sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+form maliyet_hesap.
+  DATA:sonuc1 TYPE ZTABLO_S001-NENTR,
+       sonuc2 TYPE ZTABLO_S001-NENTR,
+       sonuc3 TYPE ZTABLO_S001-NENTR.
+  IF P_CHBX1 = 'X'.
+    IF P_AKARA IS INITIAL.
+      MESSAGE 'ARAÇ BÝLGÝSÝ BOÞ BIRAKILAMAZ!' TYPE 'E'.
+    ELSE.
+      clear sonuc1.
+      DATA:go_ulasým1 TYPE REF TO KARA_ULASIM.
+      CREATE OBJECT go_ulasým1.
+      sonuc1 = go_ulasým1->maliyet_hesapla( P2_SIPNO ).
+    ENDIF.
+  ENDIF.
+  IF P_CHBX2 = 'X'.
+    IF P_AHAVA IS INITIAL.
+      MESSAGE 'ARAÇ BÝLGÝSÝ BOÞ BIRAKILAMAZ!' TYPE 'E'.
+    ELSE.
+      clear sonuc2.
+      DATA:go_ulasým2 TYPE REF TO HAVA_ULASIM.
+      CREATE OBJECT go_ulasým2.
+      sonuc2 = go_ulasým2->maliyet_hesapla( P2_SIPNO ).
+    ENDIF.
+  ENDIF.
+  IF P_CHBX3 = 'X'.
+    IF P_ADENIZ IS INITIAL.
+      MESSAGE 'ARAÇ BÝLGÝSÝ BOÞ BIRAKILAMAZ!' TYPE 'E'.
+    ELSE.
+      clear sonuc3.
+      DATA:go_ulasým3 TYPE REF TO DENIZ_ULASIM.
+      CREATE OBJECT go_ulasým3.
+      sonuc3 = go_ulasým3->maliyet_hesapla( P2_SIPNO ).
+    ENDIF.
+  ENDIF.
+  p_malyt = sonuc3 + sonuc2 + sonuc1.
+ENDFORM.
+
+FORM SEARCH_HELP1.
+  DATA:go_ulasým TYPE REF TO KARA_ULASIM.
+*  data : lT_ULASIM_KARA type STANDARD TABLE OF ZTABLO_KARA1 .
+
+  CREATE OBJECT go_ulasým.
+  go_ulasým->search_healp( P2_SIPNO ).
+*   go_ulasým->aracý_bul( p2_sipno ).
+*  lT_ULASIM_KARA[] = GO_ULASIM->GT_ULASIM_KARA[].
+*
+*  CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+*    EXPORTING
+*     RETFIELD               = 'KATNO'
+*     WINDOW_TITLE           = 'ARABA SECME'
+*     dynpprog               = sy-repid
+*     dynpnr                 = sy-dynnr
+*     dynprofield            = 'P_AKARA'
+*     VALUE_ORG              = 'S'
+*    TABLES
+*     VALUE_TAB              = lt_ulasým_kara[]
+*   EXCEPTIONS
+*     PARAMETER_ERROR        = 1
+*     NO_VALUES_FOUND        = 2
+*     OTHERS                 = 3
+*            .
+*  IF SY-SUBRC <> 0.
+*    message id sy-msgid type sy-msgty number sy-msgno
+*            with sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+*  ENDIF.
+
+ENDFORM.
+FORM SEARCH_HELP2.
+  DATA:go_ulasým TYPE REF TO HAVA_ULASIM.
+  CREATE OBJECT go_ulasým.
+  go_ulasým->search_healp( P2_SIPNO ).
+ENDFORM.
+FORM SEARCH_HELP3.
+  DATA:go_ulasým TYPE REF TO DENIZ_ULASIM.
+  CREATE OBJECT go_ulasým.
+  go_ulasým->search_healp( P2_SIPNO ).
+ENDFORM.
+form maps.
+  DATA:go_ulasým TYPE REF TO KARA_ULASIM,
+       ls_table_u001 TYPE ztablo_u001,
+       lv_tesno TYPE ztablo_u001-TESNO.
+  SELECT SINGLE * FROM ZTABLO_U001 INTO  ls_table_u001 WHERE SIPNO = P1_SIPNO.
+  lv_tesno = LS_TABLE_U001-TESNO.
+  create object go_ulasým.
+  go_ulasým->MAPS_COOR( lv_tesno ).
+  go_ulasým->MAPS_DISTANCE( lv_tesno ).
+
+endform.
+form measure_distance.
+  data:go_ulasým TYPE REF TO hava_ulasým.
+  CREATE OBJECT go_ulasým.
+  go_ulasým->MAPS_DISTANCE_MEASURA( P2_TESNO ).
+ENDFORM.
+form plane_maps1.
+  data:go_ulasým TYPE REF TO KARA_ULASIM.
+  CREATE OBJECT go_ulasým.
+  clear LV_TOP_DIST1.
+  PLANE_MAPS1 = 1.
+  go_ulasým->MAPS_DISTANCE( P2_TESNO ).
+  PLANE_MAPS2 = 1.
+  go_ulasým->MAPS_DISTANCE( P2_TESNO ).
+  LV_TOP_DIST1 = LV_DISTANCE1 + LV_DISTANCE2.
+endform.
+  FORM CONVERT_ENG_CHARACTER.
+
+  DATA: BEGIN OF LV_CONVERT,
+    convert1   VALUE 'Ü',
+    convert1_t VALUE 'U',
+    convert2   VALUE 'Ö',
+    convert2_t VALUE 'O',
+  END OF LV_CONVERT.
+
+FIELD-SYMBOLS: <LV_CONVRT1>, <LV_CONVRT2>.
+DATA:LV_STRING TYPE string,
+     LV_SAYAC  TYPE i VALUE 1.
+
+LV_STRING = gs_table_u001-MAADR.
+TRANSLATE LV_STRING TO UPPER CASE.
+DO.
+  ASSIGN COMPONENT LV_SAYAC OF STRUCTURE LV_CONVERT TO <LV_CONVRT1>.
+  IF sy-subrc <> 0.
+    EXIT.
+  ENDIF.
+  LV_SAYAC = LV_SAYAC + 1.
+  ASSIGN COMPONENT LV_SAYAC OF STRUCTURE LV_CONVERT TO <LV_CONVRT2>.
+  IF sy-subrc <> 0.
+    MESSAGE e000(yp).
+  ENDIF.
+  IF LV_STRING CA <LV_CONVRT1>.
+    sy-subrc = 0.
+    WHILE sy-subrc = 0.
+      REPLACE <LV_CONVRT1> WITH <LV_CONVRT2> INTO LV_STRING.
+    ENDWHILE.
+  ENDIF.
+  LV_SAYAC = LV_SAYAC + 1.
+ENDDO.
+
+  CALL FUNCTION 'SCP_REPLACE_STRANGE_CHARS'
+  EXPORTING
+    INTEXT                  = LV_STRING
+  IMPORTING
+    OUTTEXT                 = gs_table_u001-MAADR.
+
+  LV_CONV_SONUC = gs_table_u001-MAADR.
+
+ENDFORM.
+  FORM CONVERT_ENG_CHARACTER2.
+  DATA: BEGIN OF LV_CONVERT,
+    convert1   VALUE 'Ü',
+    convert1_t VALUE 'U',
+    convert2   VALUE 'Ö',
+    convert2_t VALUE 'O',
+  END OF LV_CONVERT.
+
+FIELD-SYMBOLS: <LV_CONVRT1>, <LV_CONVRT2>.
+DATA:LV_STRING TYPE string,
+     LV_SAYAC  TYPE i VALUE 1.
+
+LV_STRING = gs_table_u001-MGADR.
+TRANSLATE LV_STRING TO UPPER CASE.
+DO.
+  ASSIGN COMPONENT LV_SAYAC OF STRUCTURE LV_CONVERT TO <LV_CONVRT1>.
+  IF sy-subrc <> 0.
+    EXIT.
+  ENDIF.
+  LV_SAYAC = LV_SAYAC + 1.
+  ASSIGN COMPONENT LV_SAYAC OF STRUCTURE LV_CONVERT TO <LV_CONVRT2>.
+  IF sy-subrc <> 0.
+    MESSAGE e000(yp).
+  ENDIF.
+  IF LV_STRING CA <LV_CONVRT1>.
+    sy-subrc = 0.
+    WHILE sy-subrc = 0.
+      REPLACE <LV_CONVRT1> WITH <LV_CONVRT2> INTO LV_STRING.
+    ENDWHILE.
+  ENDIF.
+  LV_SAYAC = LV_SAYAC + 1.
+ENDDO.
+
+  CALL FUNCTION 'SCP_REPLACE_STRANGE_CHARS'
+  EXPORTING
+    INTEXT                  = LV_STRING
+  IMPORTING
+    OUTTEXT                 = gs_table_u001-MGADR.
+
+  LV_CONV_SONUC = gs_table_u001-MGADR.
+
+ENDFORM.

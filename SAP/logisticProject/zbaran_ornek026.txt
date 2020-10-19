@@ -1,0 +1,146 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK026
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK026.
+include zbaran_udata.
+include zbaran_screen.
+include zbaran_class_table.
+include zbaran_class_ulasým.
+include zbaran_container.
+"NOTE:EGER MESAFE HESAPLARKEN KULLANICI ADI VE SIFRESI ISTERSE APIKEY IN SURESI BITMISTIR
+"YENI APIKEY ANAHTARI ALMAMIZ LAZIM
+
+*Text elements
+*----------------------------------------------------------
+* C01 KARA ULAÞIM
+* C02 HAVA ULAÞIM
+* C03 DENÝZ ULAÞIM
+* C04 KM
+* C05 KM
+* C06 KM
+* C07 TOPLAM ULAÞIM MALÝYETÝ
+* C08 KARA ARACI
+* C09 HAVA ARACI
+* C10 DENÝZ ARACI
+* D01 Sipariþ No.
+* D02 Þirket Kodu.
+* D03 Satýcý Adý.
+* D04 Satýcý Soyadý.
+* D05 Satýcý No.
+* D06 Mali Yýl.
+* D07 Satýcý Vergi D.
+* D08 Satýcý Vergi N.
+* D09 Malzeme No.
+* D10 Ülke Anahtarý.
+* D11 Malzeme Bel.
+* D12 Ödeme Tutarý.
+* D13 Konþimento No.
+* D14 Ýþ Alaný.
+* D15 Malý Alan.
+* D16 Depo Yeri.
+* D17 MG/MÇ Fiþi.
+* D18 Ürün Risk Drm.
+* D19 Üretici No.
+* D20 Satýcý Mail.
+* D21 Alýnacak Adres.
+* D22 Gidilecek Adres.
+* I01 @6P@
+* I02 @0Y@
+* I03 @LP@
+* I04 @5Y@
+* I05 @0M@
+* L01 Sipariþ No.
+* L02 Teslimat No.
+* L03 Malzeme No.
+* L04 Malzeme Bel.
+* L05 Malý Alan.
+* L06 Depo Yeri.
+* L07 Konþimento No.
+* L08 MG/MÇ Fiþi.
+* L09 Aðýrlýk Net.
+* L10 Aðýrlýk Birimi.
+* L11 Risk Durumu.
+* L12 Hacim.
+* L13 Hacim Birimi.
+* L14 Doluluk Oraný.
+* L15 Uzunluk.
+* L16 Geniþlik.
+* L17 Yükseklik.
+* L18 Üretici No.
+* L19 Bozunma Süresi.
+* L20 SKT/G.T
+* L21 Alýnacak Adres.
+* L22 Gidilecek Adres
+* L23 Not/Bilgi.
+* T01 Ulaþým Ana Ekraný
+* T02 Sipariþ Oluþtuma Ekraný
+* T03 Teslimat Oluþturma Ekraný
+* T04 Sipariþ Onaylama Ekraný
+* T05 Maliyet Hesaplama Bölümü
+
+
+*Selection texts
+*----------------------------------------------------------
+* P_ASIMA         Alýcýný Mail Adresi
+* P_ATCD1         Alýcýnýn Vergi Dairesi
+* P_ATCD2         Alýcýnýn Vergi numarasý
+* P_BILGI         Not
+* P_BREIT D       .
+* P_BUKRS D       .
+* P_CHBX1         KARA YOLU
+* P_CHBX2         HAVA YOLU
+* P_CHBX3         DENÝZ YOLU
+* P_FRBNR         Konþimento Numarasý
+* P_FRMAD         FÝRMA ÝSMÝ
+* P_FUELG D       .
+* P_GEWEI D       .
+* P_GJAHR D       .
+* P_GSBER D       .
+* P_HOEHE D       .
+* P_KUNNR         Müþteri Numarasý
+* P_LAENG D       .
+* P_LAND1 D       .
+* P_LGORT D       .
+* P_LIFNR         Satýcý  Numarasý
+* P_MAADR         Malýn Alýnacaðý Adres
+* P_MALTR         Ürün Risk Durumu
+* P_MALYT         TOPLAM ULAÞIM MALÝYETÝ
+* P_MATNR         Malzeme Numarasý
+* P_MBLNR D       .
+* P_MEABM D       .
+* P_MFRNR         Üretici  Numarasý
+* P_MGADR         Malýn Gideceði Adres
+* P_MHDHB D       .
+* P_NAME1         Satýcý Adý
+* P_NAME2         Satýcý Soyadý
+* P_NENTR D       .
+* P_NTGEW         Paket Baþý Net aðýrlýk
+* P_PARGB D       .
+* P_RAUBE D       .
+* P_SIPNO         Sipariþ Numarasý
+* P_SLEDB D       .
+* P_SSIMA         Satýcýnýn Mail Adresi
+* P_SSUBN         Üretim Belge Numarasý
+* P_STCD1         Satýcýnnýn Vergi Dairesi
+* P_STCD2         Satýcýnýn Vergi Numarasý
+* P_STOFF D       .
+* P_TELNO         TELEFON NO
+* P_URNAD         ÜRÜNÜN ADI
+* P_URUAT         URUN ADETÝ
+* P_VOLEH D       .
+* P_VOLUM D       .
+* P_WEMPF D       .
+* P_XABLN D       .
+* S_SIPNO         Sipariþ Numarasý
+* S_TESNO         Teslimat Numarasý
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   LÜTFEN HAVALÝMANI BÝLGÝLERÝN GÝRÝN

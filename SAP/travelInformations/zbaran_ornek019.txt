@@ -1,0 +1,20 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK019
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK019.
+INCLUDE zbaran_data2.
+INCLUDE zbaran_sscreen2.
+INCLUDE zbaran_gdata.
+INCLUDE zbaran_alv3.
+INCLUDE zbaran_alv4.
+INCLUDE zbaran_alv5.
+
+
+*Selection texts
+*----------------------------------------------------------
+* SO_CITYT D       .
+* SO_CTYFR D       .

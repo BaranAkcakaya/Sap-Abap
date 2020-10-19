@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_DATA
+*&---------------------------------------------------------------------*
+TABLES:bsik,bsak,
+       bsid,bsad,
+       bsis,bsas,
+       bkpf.
+TYPE-POOLS:slis.
+
+DATA:gt_fcat    TYPE slis_t_fieldcat_alv,
+     gs_layout  TYPE slis_layout_alv.
+DATA:gt_fcat1   TYPE slis_t_fieldcat_alv,
+     gs_layout1 TYPE slis_layout_alv.
+DATA:gt_fcat2   TYPE slis_t_fieldcat_alv,
+     gs_layout2 TYPE slis_layout_alv.
+DATA:gt_fcat3   TYPE slis_t_fieldcat_alv,
+     gs_layout3 TYPE slis_layout_alv.
+
+DATA:gt_bkpf TYPE STANDARD TABLE OF bkpf WITH HEADER LINE,
+     gt_bsid TYPE STANDARD TABLE OF bsid WITH HEADER LINE,
+     gt_bsad TYPE STANDARD TABLE OF bsad WITH HEADER LINE,
+     gt_bsik TYPE STANDARD TABLE OF bsik WITH HEADER LINE,
+     gt_bsak TYPE STANDARD TABLE OF bsak WITH HEADER LINE,
+     gt_bsis TYPE STANDARD TABLE OF bsis WITH HEADER LINE,
+     gt_bsas TYPE STANDARD TABLE OF bsas WITH HEADER LINE.
+
+DATA :gt_kalem  TYPE STANDARD TABLE OF zbaran_s001  WITH HEADER LINE,
+      lt_kalem  TYPE  zbaran_s001 OCCURS 0          WITH HEADER LINE.
+DATA:gt_musteri TYPE STANDARD TABLE OF zbaran_s003  WITH HEADER LINE,
+     lt_musteri TYPE zbaran_s003 OCCURS 0           WITH HEADER LINE.
+
+DATA:gt_satici  TYPE STANDARD TABLE OF zbaran_s002  WITH HEADER LINE,
+     lt_satici  TYPE zbaran_s002  OCCURS 0          WITH HEADER LINE.
+
+DATA:gt_hesap   TYPE STANDARD TABLE OF zbaran_s004  WITH HEADER LINE,
+     lt_hesap   TYPE zbaran_s004   OCCURS 0         WITH HEADER LINE.
+
+DATA:it_satici  LIKE STANDARD TABLE OF gt_satici    WITH HEADER LINE,
+     it_musteri LIKE STANDARD TABLE OF gt_musteri   WITH HEADER LINE,
+     it_hesap   LIKE STANDARD TABLE OF gt_hesap     WITH HEADER LINE.

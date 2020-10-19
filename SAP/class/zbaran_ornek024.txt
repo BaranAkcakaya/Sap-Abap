@@ -1,0 +1,332 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK024
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK024.
+* class lcl_isim_yazdir definition.                 "Sýnýfýn Tanýmlanmasý
+*   public section.                                 "Kullanacaðýmýz methodlarý tanýmlýyoruz.
+*     methods : constructor                         "Nesne Method Tanýmlamalarý
+*     "Sýnýf çaðrýldýðýnda ilk çalýþan Constructor Methodu
+*                 importing iv_isim    type string
+*                           iv_soyisim type string,
+*                           yaz.                    "yazma methodu
+*
+* class-methods tarih_zaman_yaz.                    "Class Method tanýmlamasý
+*
+*      private section.                             "methodlarý yazarken kullanacaðýmýz deðiþkenler.
+*      data my_isim type string.
+*      data my_soyisim type string.
+* endclass.
+*
+* class lcl_isim_yazdir implementation.             "Methodlarýn yazýlmasý
+*   method constructor.                             "Ýlk çalýþan method
+*     my_isim = iv_isim.
+*     my_soyisim = iv_soyisim.
+*   endmethod.
+*   method yaz.
+*     write:/ 'Ýsim : ' , my_isim.
+*     write:/ 'Soyisim : ', my_soyisim.
+*   endmethod.
+*   method tarih_zaman_yaz.
+*     write:/ 'Tarih : ', sy-datum. "Günün tarihini veren deðiþken
+*     write:/ 'Saat : ', sy-uzeit.  "O an ki saati veren deðiþken
+*   endmethod.
+*
+* endclass. "Class Sonlandýrdýk
+* "Programý yazmaya baþlayalým.
+* data : go_nesne_1 type ref to lcl_isim_yazdir,
+*        go_nesne_2 type ref to lcl_isim_yazdir.
+* start-of-selection.
+* create object go_nesne_1
+*           exporting iv_isim       = 'baran'
+*                     iv_soyisim    = 'akcakaya'.
+* go_nesne_1->yaz( ).               "Yaz methodunu çaðýrdýk
+* lcl_isim_yazdir=>tarih_zaman_yaz( ).
+*uline.
+*
+* create object go_nesne_2
+*           exporting iv_isim       = 'Mert'
+*                     iv_soyisim    = 'gunok'.
+* go_nesne_2->yaz( ).
+* lcl_isim_yazdir=>tarih_zaman_yaz( ).
+* uline.
+*************************************************************************
+INTERFACE lif_maliyet.
+  types gty_maliyet TYPE p LENGTH 8 DECIMALS 2.
+  methods:maliyeti_al RETURNING VALUE(rv_maliyet) TYPE gty_maliyet.
+endinterface.
+CLASS lcl_calisan DEFINITION ABSTRACT.
+  public SECTION.
+    interfaces lif_maliyet.
+    constants:c_yonetici    TYPE string value 'yonetici',
+              c_muhendis    TYPE string value 'muhendis',
+              c_isci        TYPE string value 'isci',
+              c_idari_per   TYPE string value 'idari personel'.
+    TYPES:gty_maas      TYPE p LENGTH 8 DECIMALS 2,
+          gty_soyisim   TYPE p LENGTH 8 DECIMALS 2.
+    DATA:mv_isim    TYPE string read-only,
+         mv_soyisim TYPE string read-only.
+    METHODS:constructor IMPORTING iv_isim    TYPE string
+                                  iv_soyisim TYPE string,
+            departman_ata final IMPORTING VALUE(iv_departman) TYPE string,
+            maasi_donder IMPORTING VALUE(iv_tecrube_yili) TYPE i RETURNING VALUE(rv_maas) TYPE gty_maas,
+            ozellikleri_yaz ABSTRACT.
+    CLASS-METHODS: class_constructor,
+                   toplam_calisan_sayisi_donder RETURNING VALUE(rv_toplam_calisan_sayisi) TYPE i.
+    protected SECTION.
+
+    DATA:mv_maas    TYPE gty_maas,
+         mv_departman TYPE string,
+         mv_sifat   TYPE string.
+    METHODS maas_hesapla ABSTRACT IMPORTING VALUE(iv_tecrube_yili) TYPE i
+                                  RETURNING VALUE(rv_hesap_maas) TYPE gty_maas.
+    class-data sv_toplam_calisan_sayisi TYPE i.
+endclass.
+CLASS lcl_calisan IMPLEMENTATION.
+  method class_constructor.
+    clear sv_toplam_calisan_sayisi.
+  endmethod.
+  method constructor.
+    mv_isim = iv_isim.
+    mv_soyisim = iv_soyisim.
+  endmethod.
+  method departman_ata.
+    mv_departman = iv_departman.
+  endmethod.
+  method maasi_donder.
+    rv_maas = maas_hesapla( iv_tecrube_yili ).
+  endmethod.
+  method toplam_calisan_sayisi_donder.
+    rv_toplam_calisan_sayisi = sv_toplam_calisan_sayisi.
+  endmethod.
+  method LIF_MALIYEt~maliyeti_al.
+    rv_maliyet = RV_MALIYET.
+  ENDMETHOD.
+endclass.
+class lcl_yonetici DEFINITION inheriting FROM LCL_CALISAN.
+  public SECTION.
+    METHODs:constructor IMPORTING iv_isim TYPE string
+                                  iv_soyisim TYPE string,
+            ozellikleri_yaz REDEFINITION.
+  PROTECTED SECTION.
+    METHODS maas_hesapla REDEFINITION.
+endclass.
+class lcl_yonetici IMPLEMENTATION.
+  method constructor.
+    super->constructor( iv_isim = iv_isim iv_soyisim = iv_soyisim ).
+    mv_sifat = c_yonetici.
+    add 1 to sv_toplam_calisan_sayisi.
+  endmethod.
+  method maas_hesapla.
+    if iv_tecrube_yýlý <= 10.
+      rv_hesap_maas = 7000.
+    else.
+      rv_hesap_maas = 10000.
+    endif.
+  endmethod.
+  method ozellikleri_yaz.
+    WRITE:/ 'yönetici özellikleri'.
+    WRITE:/ mv_sifat,':',mv_isim,mv_soyisim.
+    WRITE:/ 'departman :',mv_departman.
+  ENDMETHOD.
+endclass.
+class lcl_muhendis DEFINITION INHERITING FROM lcl_calisan.
+  PUBLIC SECTION.
+    methods:constructor IMPORTING iv_isim TYPE string
+                                  iv_soyisim TYPE string,
+            ozellikleri_yaz REDEFINITION.
+  protected SECTION.
+    METHODs maas_hesapla REDEFINITION.
+endclass.
+class lcl_muhendis IMPLEMENTATION.
+    method constructor.
+    super->constructor( iv_isim = iv_isim iv_soyisim = iv_soyisim ).
+    mv_sifat = c_muhendis.
+    add 1 to sv_toplam_calisan_sayisi.
+    endmethod.
+    METHOD maas_hesapla.
+      if IV_TECRUBE_YILI <= 10.
+        rv_hesap_maas = 3000.
+      else.
+        rv_hesap_maas = 5000.
+      endif.
+    ENDMETHOD.
+    method OZELLIKLERI_YAZ.
+    WRITE:/ 'mühendis özellikleri'.
+    write:/ mv_sifat,':',mv_isim,mv_soyisim.
+    WRITE:/ 'departman :',mv_departman.
+    ENDMETHOD.
+ENDCLASS.
+class lcl_isci DEFINITION INHERITING FROM lcl_calisan.
+  public SECTION.
+    methods:constructor IMPORTING iv_isim TYPE string
+                                  iv_soyisim TYPE string,
+            OZELLIKLERI_YAZ REDEFINITION.
+  PROTECTED SECTION.
+    METHODs maas_hesapla redefinition.
+endclass.
+class lcl_isci IMPLEMENTATION.
+  method constructor.
+    super->CONSTRUCTOR( IV_ISIM = IV_ISIM IV_SOYISIM = IV_SOYISIM ).
+    mv_sifat = c_isci.
+    add 1 to sv_toplam_calisan_sayisi.
+  ENDMETHOD.
+  METHOD MAAS_HESAPLA.
+    IF IV_TECRUBE_YILI <= 010.
+      rv_hesap_maas = 1000.
+    else.
+      rv_hesap_maas = 1500.
+    ENDIF.
+  ENDMETHOD.
+  method OZELLIKLERI_YAZ.
+    WRITE:/ 'isci özellikleri'.
+    write:/ mv_sifat,':',mv_isim,mv_soyisim.
+    WRITE:/ 'departman :',mv_departman.
+  ENDMETHOD.
+ENDCLASS.
+class lcl_idari_per DEFINITION INHERITING FROM lcl_calisan.
+  public SECTION.
+    methods:constructor IMPORTING iv_isim TYPE string
+                                  iv_soyisim TYPE string,
+            OZELLIKLERI_YAZ REDEFINITION.
+  PROTECTED SECTION.
+    METHODs maas_hesapla redefinition.
+endclass.
+class LCL_IDARI_PER IMPLEMENTATION.
+  method constructor.
+    super->CONSTRUCTOR( IV_ISIM = IV_ISIM IV_SOYISIM = IV_SOYISIM ).
+    mv_sifat = c_idari_per.
+    add 1 to sv_toplam_calisan_sayisi.
+  ENDMETHOD.
+  METHOD MAAS_HESAPLA.
+    IF IV_TECRUBE_YILI <= 010.
+      rv_hesap_maas = 1200.
+    else.
+      rv_hesap_maas = 1800.
+    ENDIF.
+  ENDMETHOD.
+  method OZELLIKLERI_YAZ.
+    WRITE:/ 'idari personel özellikleri'.
+    write:/ mv_sifat,':',mv_isim,mv_soyisim.
+    WRITE:/ 'departman :',mv_departman.
+  ENDMETHOD.
+ENDCLASS.
+CLASS lcl_demirbas DEFINITION ABSTRACT.
+  public SECTION.
+  interfaces lif_maliyet.
+    constants:c_araba   TYPE string VALUE 'Araba',
+              c_bina    TYPE string VALUE 'Bina'.
+    data:mv_isim TYPE STRING read-ONLY.
+    METHODs:constructor IMPORTING iv_isim TYPE string,
+            ozellikleri_yaz.
+  PROTECTED SECTION.
+    DATA:mv_maliyet    TYPE LIF_MALIYET=>GTY_MALIYET,
+         mv_sifat      TYPE STRING.
+ENDCLASS.
+CLASS lcl_demirbas IMPLEMENTATION.
+  method constructor.
+    mv_isim = iv_isim.
+  endmethod.
+  method LIF_MALIYEt~maliyeti_al.
+    rv_maliyet = MV_MALIYET.
+  ENDMETHOD.
+  method OZELLIKLERI_YAZ.
+    write /:'demirbas tipi:',MV_SIFAT.
+    write /:'maliyet:',MV_MALIYET.
+  ENDMETHOD.
+ENDCLASS.
+class lcl_bina DEFINITION INHERITING FROM LCL_DEMIRBAS.
+  PUBLIC SECTION.
+    methods constructor IMPORTING iv_isim TYPE string.
+endclass.
+CLASS lcl_bina IMPLEMENTATION.
+  method CONSTRUCTOR.
+    super->CONSTRUCTOR( IV_ISIM = IV_ISIM ).
+    mv_sifat = C_BINA.
+    mv_maliyet = 70000.
+  endmethod.
+ENDCLASS.
+class lcl_araba DEFINITION INHERITING FROM LCL_DEMIRBAS.
+  PUBLIC SECTION.
+    methods constructor IMPORTING iv_isim TYPE string.
+endclass.
+CLASS lcl_araba IMPLEMENTATION.
+  method CONSTRUCTOR.
+    super->CONSTRUCTOR( IV_ISIM = IV_ISIM ).
+    mv_sifat = C_ARABA.
+    mv_maliyet = 3000.
+  endmethod.
+ENDCLASS.
+"interface tanýmlýyoruz
+DATA:go_calisan       TYPE REF TO lcl_calisan,
+     gt_calisan       TYPE TABLE OF REF TO lcl_calisan,
+     go_yonetici      TYPE REF TO lcl_yonetici,
+     gv_maas          TYPE lcl_calisan=>gty_maas.
+
+start-OF-SELECTION.
+
+CREATE OBJECT go_calisan TYPE lcl_yonetici EXPORTING iv_isim    ='nurcan'
+                                                     iv_soyisim ='sonses'.
+go_calisan->departman_ata('Muhasebe').
+append go_calisan to gt_calisan.
+CREATE OBJECT go_calisan TYPE lcl_yonetici EXPORTING iv_isim    ='burhan'
+                                                     iv_soyisim ='kaya'.
+go_calisan->departman_ata('uretim').
+append go_calisan to gt_calisan.
+CREATE OBJECT go_calisan TYPE lcl_isci     EXPORTING iv_isim    ='can'
+                                                     iv_soyisim ='sesiz'.
+go_calisan->departman_ata('Muhasebe').
+append go_calisan to gt_calisan.
+CREATE OBJECT go_calisan TYPE lcl_muhendis EXPORTING iv_isim    ='hakan'
+                                                     iv_soyisim ='yavuz'.
+go_calisan->departman_ata('Muhendis').
+append go_calisan to gt_calisan.
+CREATE OBJECT go_calisan TYPE LCL_IDARI_PER EXPORTING iv_isim    ='cemre'
+                                                     iv_soyisim ='betül'.
+go_calisan->departman_ata('idari personel').
+append go_calisan to gt_calisan.
+
+LOOP AT GT_CALISAN INTO GO_CALISAN.
+  gv_maas = go_calisan->maasi_donder( 6 ).
+  go_calisan->ozellikleri_yaz( ).
+  write:/'MAAS:',gv_maas.
+  uline.
+ENDLOOP.
+LOOP AT GT_CALISAN INTO GO_CALISAN.
+  TRY.
+    go_yonetici ?= go_calisan.
+    gv_maas = go_yonetici->maasi_donder( 6 ).
+    go_yonetici->ozellikleri_yaz( ).
+    write:/'MAAS:',gv_maas.
+  catch cx_sy_move_cast_error.
+  ENDTRY.
+ENDLOOP.
+WRITE :/ 'Toplam calýsan sayýsý:',lcl_calisan=>TOPLAM_CALISAN_SAYISI_donder( ).
+"ýnterface icin
+DATA:gif_maliyet    TYPE REF TO lif_maliyet,
+     gt_maliyet     TYPE TABLE OF REF TO lif_maliyet,
+     gv_toplam_maliyet TYPE lif_maliyet=>gty_maliyet.
+
+START-OF-SELECTION.
+
+CREATE OBJECT gif_maliyet TYPE lcl_yonetici EXPORTING iv_isim    ='neyse'
+                                                      iv_soyisim ='dahasonra'.
+append gif_maliyet tO GT_MALIYET.
+CREATE OBJECT gif_maliyet TYPE lcl_isci     EXPORTING iv_isim    ='neyse'
+                                                      iv_soyisim ='dahasonra'.
+append gif_maliyet tO GT_MALIYET.
+CREATE OBJECT gif_maliyet TYPE lcl_yonetici EXPORTING iv_isim    ='bugun'
+                                                      iv_soyisim ='dgua'.
+append gif_maliyet tO GT_MALIYET.
+CREATE OBJECT gif_maliyet TYPE lcl_bina     EXPORTING iv_isim    ='yonetim binasý'.
+append gif_maliyet tO GT_MALIYET.
+CREATE OBJECT gif_maliyet TYPE lcl_araba    EXPORTING iv_isim    ='ford mustang'.
+append gif_maliyet tO GT_MALIYET.
+
+LOOP AT gt_maliyet INTO GIF_MALIYET.
+  gv_toplam_maliyet = gif_maliyet->maliyeti_al( ) + gv_toplam_maliyet.
+ENDLOOP.
+write:/ 'Toplam Maliyet:',gv_toplam_maliyet.

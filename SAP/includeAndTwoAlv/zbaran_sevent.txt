@@ -1,0 +1,60 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_SEVENT
+*&---------------------------------------------------------------------*
+INITIALIZATION.
+AT SELECTION-SCREEN OUTPUT.
+IF rad1 = 'X'.
+  LOOP AT SCREEN.
+    if screen-name = 'P_KUNNR'.
+    screen-active = 1 .
+    P_LIFNR = ''.
+    P_saknr = ''.
+    ELSE.
+      CASE screen-name.
+        WHEN 'P_LIFNR'.
+          screen-active = 0.
+        WHEN 'P_SAKNR'.
+          screen-active = 0.
+      ENDCASE.
+   MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+ENDIF.
+IF rad2 = 'X'.
+  LOOP AT SCREEN.
+    if screen-name = 'P_LIFNR'.
+    screen-active = 1.
+    P_KUNNR = ''.
+    P_saknr = ''.
+    ELSE.
+      CASE screen-name.
+        WHEN 'P_KUNNR'.
+          screen-active = 0.
+        WHEN 'P_SAKNR'.
+          screen-active = 0.
+      ENDCASE.
+   MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+ENDIF.
+IF rad3 = 'X'.
+  LOOP AT SCREEN.
+    if screen-name = 'P_SAKNR'.
+    screen-active = 1.
+    P_LIFNR = ''.
+    P_KUNNR = ''.
+    ELSE.
+      CASE screen-name.
+        WHEN 'P_LIFNR'.
+          screen-active = 0.
+        WHEN 'P_KUNNR'.
+          screen-active = 0.
+      ENDCASE.
+   MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+ENDIF.
+
+START-OF-SELECTION.
+PERFORM read_data.
+PERFORM master_bilgisi.

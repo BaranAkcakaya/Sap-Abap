@@ -1,0 +1,140 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_ALV2
+*&---------------------------------------------------------------------*
+FORM read_alv.
+  PERFORM layout_duzenle2.
+  PERFORM display_musteri2.
+ENDFORM.
+
+FORM layout_duzenle2.
+gs_layout1-zebra = 'X'.
+gs_layout1-colwýdth_optýmýze = 'X'.
+ENDFORM.
+
+FORM display_musteri2.
+CASE 'X'.
+ WHEN rad1.
+  DATA:lv_repid1   LIKE sy-repid,
+       lv_tabname1 TYPE slis_tabname VALUE 'it_musteri',
+       lv_strname1 LIKE dd02l-tabname VALUE 'ZBARAN_S003'.
+       lv_repid1 = sy-repid.
+
+  CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+   EXPORTING
+     I_PROGRAM_NAME               = lv_repid1
+     I_INTERNAL_TABNAME           = lv_tabname1
+     I_STRUCTURE_NAME            = lv_strname1
+    CHANGING
+      ct_fieldcat                 = gt_fcat1[]
+   EXCEPTIONS
+     INCONSISTENT_INTERFACE       = 1
+     PROGRAM_ERROR                = 2
+     OTHERS                       = 3.
+
+  IF sy-subrc <> 0.
+  MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+   EXPORTING
+     I_CALLBACK_PROGRAM                = lv_repid1
+     I_BYPASSING_BUFFER                = ' '
+     I_GRID_TITLE                      = 'musteri tablosu'
+     IS_LAYOUT                         = gs_layout1
+     IT_FIELDCAT                       = gt_fcat1[]
+
+    TABLES
+      t_outtab                          = it_musteri[]
+   EXCEPTIONS
+     PROGRAM_ERROR                     = 1
+     OTHERS                            = 2
+            .
+  IF sy-subrc <> 0.
+  MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+ WHEN rad2.
+    DATA:lv_repid2   LIKE sy-repid,
+       lv_tabname2 TYPE slis_tabname VALUE 'it_satýcý',
+       lv_strname2 LIKE dd02l-tabname VALUE 'ZBARAN_S002'.
+       lv_repid2 = sy-repid.
+
+  CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+   EXPORTING
+     I_PROGRAM_NAME               = lv_repid2
+     I_INTERNAL_TABNAME           = lv_tabname2
+     I_STRUCTURE_NAME             = lv_strname2
+    CHANGING
+      ct_fieldcat                 = gt_fcat2[]
+   EXCEPTIONS
+     INCONSISTENT_INTERFACE       = 1
+     PROGRAM_ERROR                = 2
+     OTHERS                       = 3.
+
+  IF sy-subrc <> 0.
+  MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+   EXPORTING
+     I_CALLBACK_PROGRAM                = lv_repid2
+     I_BYPASSING_BUFFER                = ' '
+     I_GRID_TITLE                      = 'satýcý tablosu'
+     IS_LAYOUT                         = gs_layout2
+     IT_FIELDCAT                       = gt_fcat2[]
+
+    TABLES
+      t_outtab                          = it_satýcý[]
+   EXCEPTIONS
+     PROGRAM_ERROR                     = 1
+     OTHERS                            = 2
+            .
+  IF sy-subrc <> 0.
+  MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+ WHEN rad3.
+    DATA:lv_repid3   LIKE sy-repid,
+       lv_tabname3 TYPE slis_tabname VALUE 'it_hesap',
+       lv_strname3 LIKE dd02l-tabname VALUE 'ZBARAN_S004'.
+       lv_repid3 = sy-repid.
+
+  CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+   EXPORTING
+     I_PROGRAM_NAME               = lv_repid3
+     I_INTERNAL_TABNAME           = lv_tabname3
+     I_STRUCTURE_NAME             = lv_strname3
+    CHANGING
+      ct_fieldcat                 = gt_fcat3[]
+   EXCEPTIONS
+     INCONSISTENT_INTERFACE       = 1
+     PROGRAM_ERROR                = 2
+     OTHERS                       = 3.
+  IF sy-subrc <> 0.
+  MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+   EXPORTING
+     I_CALLBACK_PROGRAM                = lv_repid3
+     I_BYPASSING_BUFFER                = ' '
+     I_GRID_TITLE                      = 'hesap tablosu'
+     IS_LAYOUT                         = gs_layout3
+     IT_FIELDCAT                       = gt_fcat3[]
+
+    TABLES
+      t_outtab                          = it_hesap[]
+   EXCEPTIONS
+     PROGRAM_ERROR                     = 1
+     OTHERS                            = 2
+            .
+  IF sy-subrc <> 0.
+  MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+ENDCASE.
+ENDFORM.

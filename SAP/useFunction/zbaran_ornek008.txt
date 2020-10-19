@@ -1,0 +1,55 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK8
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK008.
+
+*&---------------------------------------------------------------------*
+*& use Function
+*&---------------------------------------------------------------------*
+data: lv_d1    type i,
+      lv_d3    type i,
+      lv_islem type char1,
+      lv_sonuc type i.
+
+SELECTION-SCREEN BEGIN OF BLOCK blok_1 WITH FRAME TITLE test_1.
+PARAMETERS:p_deger1 TYPE i,
+           p_deger2 TYPE c,
+           p_deger3 TYPE i,
+           p_deger4 TYPE p DECIMALS 1.
+SELECTION-SCREEN END OF BLOCK blok_1.
+
+
+
+at SELECTION-SCREEN.
+
+  lv_d1    = p_deger1.
+  lv_d3    = p_deger3.
+  lv_islem = p_deger2.
+
+**CASE p_deger2.
+**  WHEN '+'.
+**    p_deger4 = p_deger1 + p_deger3.
+**  WHEN '-'.
+**    p_deger4 = p_deger1 - p_deger3.
+**  WHEN '*'.
+**    p_deger4 = p_deger1 * p_deger3.
+**  WHEN '/'.
+**    p_deger4 = p_deger1 / p_deger3.
+**ENDCASE.
+ CALL FUNCTION 'ZBARAN_FONK1'
+  EXPORTING
+    sayi1     = lv_d1
+    sayi2     = lv_d3
+    islem     = lv_islem
+  IMPORTING
+    SONUC     = lv_sonuc
+  EXCEPTIONS
+    DIVISION_BYZERO   = 1
+    UNKNOWN_OPERATION = 2
+    OTHERS            = 3.
+
+p_deger4  = lv_sonuc.

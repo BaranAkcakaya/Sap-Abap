@@ -1,0 +1,15 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_GDATA
+*&---------------------------------------------------------------------*
+FORM read_alv1.
+SELECT * FROM spfli INTO TABLE gt_SPFLI WHERE CITYFROM in so_CTYFR and
+                                              CITYTO   in so_CITYT.
+ENDFORM.
+
+FORM read_alv2.
+SELECT * FROM sflight INTO TABLE gt_sflgh WHERE carrid eq gt_sflgh-carrid.
+ENDFORM.
+
+FORM read_alv3.
+SELECT * FROM saplane INTO TABLE gt_sapln WHERE planetype eq gt_sapln-planetype.
+ENDFORM.

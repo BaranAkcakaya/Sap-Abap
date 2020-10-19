@@ -1,0 +1,67 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK6
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT ZBARAN_ORNEK006.
+
+*&---------------------------------------------------------------------*
+*& PushButton
+*&---------------------------------------------------------------------*
+DATA:hacim   TYPE i,
+     fiyat   TYPE i,
+     sonuc   TYPE p DECIMALS 2.
+
+SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-006 NO INTERVALS.
+PARAMETERS:p_deger1  TYPE p,
+           p_deger2  TYPE p,
+           p_deger3  type p DECIMALS 2.
+SELECTION-SCREEN end OF BLOCK blok1.
+
+SELECTION-SCREEN BEGIN OF BLOCK blok WITH FRAME TITLE text-005 NO INTERVALS.
+SELECTION-SCREEN : PUSHBUTTON  10(10) text_001 USER-COMMAND tab1,
+                   PUSHBUTTON  22(10) text_002 USER-COMMAND tab2,
+                   PUSHBUTTON  34(10) text_003 USER-COMMAND tab3.
+SELECTION-SCREEN end OF BLOCK blok.
+
+INITIALIZATION.
+text_001 = 'motor'.
+text_002 = 'araba'.
+text_003 = 'otobüs'.
+
+AT SELECTION-SCREEN.
+
+CASE sy-ucomm.
+hacim  = p_deger1.
+fiyat  = p_deger2.
+  WHEN 'TAB1'.
+    if hacim LT '250'.
+      p_deger3 = fiyat + fiyat * '0.08' + ( fiyat + fiyat * '0.08' ) * '0.18'.
+    else.
+      p_deger3 = fiyat + fiyat * '0.37' + ( fiyat + fiyat * '0.37' ) * '0.18'.
+    ENDIF.
+  WHEN 'TAB2'.
+    if hacim LT '1600'.
+      if fiyat LT '45000'.
+         p_deger3 = fiyat + fiyat * '0.45' + ( fiyat + fiyat * '0.45' ) * '0.18'.
+      ELSEIF fiyat GT '45000' and fiyat LT'80000'.
+         p_deger3 = fiyat + fiyat * '0.50' + ( fiyat + fiyat * '0.50' ) * '0.18'.
+      else.
+         p_deger3 = fiyat + fiyat * '0.60' + ( fiyat + fiyat * '0.60' ) * '0.18'.
+      endif.
+    ELSEIF hacim GT '1600' and hacim LT '2000'.
+       if fiyat GT'115000'.
+          p_deger3 = fiyat + fiyat * '1.1' + ( fiyat + fiyat * '1.1' ) * '0.18'.
+       else.
+          p_deger3 = fiyat + fiyat * '1.0' + ( fiyat + fiyat * '1.0' ) * '0.18'.
+       endif.
+    else.
+       p_deger3 = fiyat + fiyat * '1.60' + ( fiyat + fiyat * '1.60' ) * '0.18'.
+    ENDIF.
+  WHEN 'TAB3'.
+     p_deger3 = fiyat + fiyat * '0.01' + ( fiyat + fiyat * '0.01' ) * '0.18'.
+  WHEN OTHERS.
+ENDCASE.

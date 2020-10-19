@@ -1,0 +1,61 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK021
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK021.
+TYPE-POOLS:truxs,
+           slis.
+PARAMETERS p_dosya TYPE rlgrap-filename.
+
+TYPES:begin of t_type,
+      satýr1(10) TYPE p DECIMALS 2 ,
+      satýr2(50) TYPE c,
+      satýr3(10) TYPE c,
+      satýr4(10) TYPE c,
+      satýr5(10) TYPE c,
+      end of t_type.
+
+data:t_yukle TYPE STANDARD TABLE OF t_type,
+     ts_yukle TYPE t_type,
+     it_yukle TYPE truxs_t_text_data.
+
+AT SELECTION-SCREEN  on VALUE-REQUEST FOR p_dosya.
+
+CALL FUNCTION 'F4_FILENAME'
+ EXPORTING
+   FIELD_NAME          = 'p_dosya'
+ IMPORTING
+   FILE_NAME           = p_dosya.
+
+ START-OF-SELECTION.
+
+CALL FUNCTION 'TEXT_CONVERT_XLS_TO_SAP'
+  EXPORTING
+    i_tab_raw_data             = it_yukle
+    i_filename                 = p_dosya
+  TABLES
+    i_tab_converted_data       = t_yukle
+ EXCEPTIONS
+   CONVERSION_FAILED          = 1
+   OTHERS                     = 2.
+
+IF sy-subrc NE 0.
+MESSAGE ID sy-msgid
+TYPE sy-msgty
+NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+
+END-OF-SELECTION.
+
+LOOP AT t_yukle INTO ts_yukle.
+
+  WRITE:/ ts_yukle-satýr1,
+          ts_yukle-satýr2,
+          ts_yukle-satýr3,
+          ts_yukle-satýr4,
+          ts_yukle-satýr5.
+ENDLOOP.

@@ -1,0 +1,236 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK014
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK014.
+
+*&---------------------------------------------------------------------*
+*&Hash Table
+*&---------------------------------------------------------------------*
+*PARAMETERS:tUr(20)  TYPE  c,
+*           adet     TYPE  i,
+*           fiyat    TYPE p DECIMALS 2.
+*data:net_fiyat  TYPE p DECIMALS 2,
+*     kdv_tutarý TYPE p DECIMALS 2,
+*     toplam     TYPE p DECIMALS 2,
+*     kdv_oraný  TYPE i.
+*
+*CONSTANTS kdv  TYPE p DECIMALS 1 VALUE '0.20'.
+*
+*net_fiyat = adet * fiyat.
+*kdv_oraný = kdv * 100.
+*kdv_tutarý = net_fiyat * '0.20'.
+*toplam = net_fiyat + kdv_tutarý.
+*
+*WRITE:/ 'ÜRÜN ADI     : ',28 TUR,
+*      / 'ADET MÝKTARI : ',20 ADET,
+*      / 'NET FÝYATI   : ',20 FIYAT,
+*      / 'KDV ORANI    : ',32'%', '20',
+*      / 'KDV TUTARI   : ',22 KDV_TUTARI,
+*      / 'TOPLAM FIYAT : ',20 NET_fiyat.
+*SKIP 2.
+*WRITE:/ 'TOPOLAM BRUT FÝYAT : ',20 TOPLAM.
+
+
+*&---------------------------------------------------------------------*
+*&Add
+*&---------------------------------------------------------------------*
+**DATA:it_table LIKE HASHED TABLE OF zbaran_futbol WITH HEADER LINE WITH UNIQUE KEY sýra.
+**
+**SELECT * FROM zbaran_futbol INTO TABLE it_table.
+**LOOP AT it_table.
+**  WRITE :/ it_table-sira,
+**           it_table-ftbltkm,
+**           it_table-atgl,
+**           it_table-ydgl,
+**           it_table-avrj,
+**           it_table-puan.
+**  ENDLOOP.
+
+*DATA : gs_table TYPE  zbaran_tablo_1.
+*gs_table-numara = '2'.
+*gs_table-ad = 'Osman'.
+*gs_table-soyad = 'SONANT'.
+*gs_table-notu = 46.
+*INSERT INTO zbaran_tablo_1 VALUES gs_table.
+*gs_table-numara = '3'.
+*gs_table-ad = 'Serkan'.
+*gs_table-soyad = 'KESKÝN'.
+*gs_table-notu = 77.
+*INSERT INTO zbaran_tablo_1 VALUES gs_table.
+*gs_table-numara = '4'.
+*gs_table-ad = 'Ali'.
+*gs_table-soyad =  'ATAY'.
+*gs_table-notu = 91.
+*INSERT INTO zbaran_tablo_1 VALUES gs_table.
+*SELECT * FROM zbaran_tablo_1 INTO gs_table WHERE numara > 0.
+*  WRITE : / gs_table-numara , gs_table-ad,gs_table-soyad,gs_table-notu.
+
+*&---------------------------------------------------------------------*
+*&Modify
+*&---------------------------------------------------------------------*
+**data:gt_table LIKE STANDARD TABLE OF zbaran_tablo_1 WITH HEADER LINE.
+**SELECT * FROM zbaran_tablo_1 INTO TABLE gt_table WHERE numara > 0.
+**LOOP AT gt_table.
+**WRITE : / gt_table-numara , gt_table-ad,gt_table-soyad,gt_table-notu.
+**ENDLOOP.
+**gt_table-numara = '4'.
+***gt_table-ad = 'Ali'.
+***gt_table-soyad =  'ATAY'.
+**gt_table-notu = 67.
+**MODIFY TABLE gt_table TRANSPORTING notu.
+**LOOP AT gt_table.
+**WRITE : / gt_table-numara , gt_table-ad,gt_table-soyad,gt_table-notu.
+**ENDLOOP.
+
+*&---------------------------------------------------------------------*
+*&Update
+*&---------------------------------------------------------------------*
+*data gt_futbol LIKE STANDARD TABLE OF zbaran_futbol WITH HEADER LINE.
+*SELECT * FROM zbaran_futbol INTO TABLE gt_futbol WHERE sýra > 0.
+*gt_futbol-sýra = 14.
+*gt_futbol-ftbltkm = 'MEDIPOL BASAKSEHIR'.
+*UPDATE  zbaran_futbol FROM gt_futbol.
+*gt_futbol-sýra = 16.
+*gt_futbol-ftbltkm = 'SIVASSPOR'.
+*UPDATE zbaran_futbol FROM gt_futbol.
+*LOOP AT gt_futbol.
+*  WRITE :/ gt_futbol-sira,
+*           gt_futbol-ftbltkm,
+*           gt_futbol-atgl,
+*           gt_futbol-ydgl,
+*           gt_futbol-avrj,
+*           gt_futbol-puan.
+*ENDLOOP.
+
+*&---------------------------------------------------------------------*
+*&Delete
+*&---------------------------------------------------------------------*
+***DELETE FROM zbaran_tablo_1 WHERE numara = 2.
+***LOOP AT gt_table.
+***WRITE : / gt_table-numara , gt_table-ad,gt_table-soyad,gt_table-notu.
+***ENDLOOP.
+
+*&---------------------------------------------------------------------*
+*&Form-Perform
+*&---------------------------------------------------------------------*
+
+*WRITE:/ 'programý baslat'.
+*SKIP 1.
+*PERFORM tarih_zaman.
+*PERFORM cizgi_satýr.
+*WAIT UP TO 5 SECONDS.
+*PERFORM tarih_zaman.
+*PERFORM cizgi_satýr.
+*
+*FORM tarih_zaman.
+*  WRITE :/ 'tarih : ',sy-datum,
+*           'zaman : ',sy-uzeit.
+*ENDFORM.
+*
+*form cizgi_satýr.
+*  ULINE.
+*ENDFORM.
+
+**data: gv_sayý_1 TYPE i,
+**      gv_sayý_2 TYPE i,
+**      gv_sayý_3 TYPE i.
+**
+**gv_sayý_1 = 3.
+**gv_sayý_2 = 4.
+**gv_sayý_3 = 5.
+**
+**WRITE:/ 'sayý 1 : ',gv_sayý_1,
+**        'sayý 2 . ',gv_sayý_2,
+**        'sayý 3 : ',gv_sayý_3.
+**
+**PERFORM sayý_degýstýr
+**USING
+**      gv_sayý_1
+**CHANGING
+**      gv_sayý_2
+**      gv_sayý_3.
+**
+**WRITE:/ 'sayý 1 : ',gv_sayý_1,
+**        'sayý 2 . ',gv_sayý_2,
+**        'sayý 3 : ',gv_sayý_3.
+**
+**FORM sayý_degýstýr
+**USING    VALUE(cv_par_1) TYPE i
+**CHANGING VALUE(cv_par_2) TYPE i
+**               cv_par_3  TYPE i.
+**
+**DATA lv_par TYPE i.
+**
+**lv_par = cv_par_1.
+**cv_par_2 = 1.
+**cv_par_3 = 2.
+**ENDFORM.
+
+TYPES sonuc  TYPE p LENGTH 16 DECIMALS 2.
+PARAMETERS:sayi1   TYPE i,
+           sayi2   TYPE i,
+           islem   TYPE c LENGTH 1.
+DATA gv_sonuc  TYPE sonuc.
+DATA hata TYPE REF TO cx_root.
+IF ( islem = '+' or
+     islem = '-' or
+     islem = '*' or
+     islem = '%' or
+     islem = '/' and sayi2 <> 0 ) .
+CASE islem.
+  WHEN '+'.
+    gv_sonuc = sayi1 + sayi2.
+  WHEN '-'.
+    gv_sonuc = sayi1 - sayi2.
+  WHEN '*'.
+    gv_sonuc = sayi1 * sayi2.
+  WHEN '/'.
+    gv_sonuc = sayi1 / sayi2.
+  WHEN '%'.
+    PERFORM yuzde_hesapla
+    USING sayi1
+          sayi2
+    CHANGING gv_sonuc.
+ENDCASE.
+WRITE :'SONUC : ',gv_sonuc.
+ENDIF.
+AT SELECTION-SCREEN.
+ IF sayi2 = 0.
+  TRY.
+  gv_sonuc = sayi1 / '0'.
+  CATCH cx_root INTO hata.
+  MESSAGE 'hata 0 a bolunemez' TYPE 'E'.
+  ENDTRY.
+ ENDIF.
+
+*&---------------------------------------------------------------------*
+*&      Form  YUZDE_HESAPLA
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_SAYI1  text
+*      -->P_SAYI2  text
+*      <--P_GV_SONUC  text
+*----------------------------------------------------------------------*
+FORM yuzde_hesapla  USING    p_sayi1
+                             p_sayi2
+                    CHANGING p_gv_sonuc TYPE sonuc.
+  IF  p_sayi2 = 0.
+    p_gv_sonuc = 0.
+    WRITE 'yuzde hesaplanamadý'.
+  ELSE.
+    p_gv_sonuc = p_sayi1 * 100 / p_sayi2.
+  ENDIF.
+
+ENDFORM.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   hata 0 a bolunemez

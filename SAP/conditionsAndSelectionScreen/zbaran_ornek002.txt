@@ -1,0 +1,76 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK2
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT ZBARAN_ORNEK002.
+
+*DATA: vize  type f,
+*      final TYPE f,
+*      sonuc TYPE p DECIMALS 1,
+*      v1    type f,
+*      v2    type f,
+*      x     type i,
+*      hnotu(2) type c.
+*
+*
+*selection-screen begin of block block_01 with frame title text-001.
+*parameters : p_deger1 type i LENGTH 3 OBLIGATORY,
+*             p_deger2 type i LENGTH 3 OBLIGATORY.
+*selection-screen end of block block_01.
+*
+*
+*at selection-screen.
+*
+*if p_deger1 > 100  or p_deger2 > 100.
+*  message 'LÜTFEN 1-100 ARASI BÝR DEGER GÝRÝNÝZ' TYPE 'E'.
+*endif.
+*
+*end-of-selection.
+*
+*START-OF-SELECTION.
+*
+*
+*vize  = p_deger1.
+*final = p_deger2.
+*
+*sonuc = vize * '0.30' + final * '0.70'.
+*
+*
+*
+*IF sonuc < 100 and sonuc > 95.
+*    hnotu = 'AA'.
+*  ELSEIF sonuc < 95 and sonuc > 90.
+*    hnotu = 'BA'.
+*  ELSEIF sonuc < 90 and sonuc > 85.
+*    hnotu = 'BB'.
+*  ELSEIF sonuc < 85 and sonuc > 80.
+*    hnotu = 'CB'.
+*  ELSEIF sonuc < 80 and sonuc > 70.
+*    hnotu = 'CC'.
+*  ELSEIF sonuc < 70 and sonuc > 60.
+*    hnotu = 'DC'.
+*  ELSEIF sonuc < 60 and sonuc > 50.
+*    hnotu = 'DD'.
+*  ELSE.
+*    hnotu = 'FF'.
+*
+*
+*ENDIF.
+*
+*do sonuc TIMES.
+*  x        = p_deger2 + 5.
+*  p_deger2 = x.
+*enddo.
+*
+*
+*write :/ sonuc,
+*         p_deger2,
+*         hnotu.
+*
+**write : /'1.Deðer : ' , p_deger1,
+**        /'2.Deðer : ' , p_deger2,
+**        /'sonuc   : ' , sonuc.

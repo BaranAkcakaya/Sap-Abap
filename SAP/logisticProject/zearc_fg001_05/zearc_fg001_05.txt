@@ -1,0 +1,92 @@
+function zearc_fg001_05.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     REFERENCE(CONTAINER)
+*"     REFERENCE(IMAGENAME)
+*"     REFERENCE(FIT_IMAGE) DEFAULT 'X'
+*"----------------------------------------------------------------------
+  data: gn_dyn102_cont  type ref to cl_gui_custom_container,
+        gn_dyn102_image type ref to cl_gui_picture.
+
+  data lv_size type int4 .
+
+  data: l_graphic_xstr type xstring,
+        l_graphic_conv type i,
+        l_graphic_offs type i.
+
+  data: graphic_url(255),
+        graphic_refresh(1).
+
+  data: begin of graphic_table occurs 0,
+          line(255) type x,
+        end of graphic_table.
+  data: graphic_size type i.
+
+
+  create object gn_dyn102_cont
+    exporting
+      container_name = container.
+
+  create object gn_dyn102_image
+    exporting
+      parent = gn_dyn102_cont.
+
+  gn_dyn102_image->set_display_mode( exporting display_mode = cl_gui_picture=>display_mode_fit_center ) .
+
+  call method cl_ssf_xsf_utilities=>get_bds_graphic_as_bmp
+    exporting
+      p_object  = 'GRAPHICS'
+      p_name    = imagename
+      p_id      = 'BMAP'
+      p_btype   = 'BCOL'
+    receiving
+      p_bmp     = l_graphic_xstr
+    exceptions
+      not_found = 1
+      others    = 2.
+
+  lv_size = xstrlen( l_graphic_xstr ) .
+
+  check lv_size > 0.
+
+  l_graphic_conv = lv_size.
+  l_graphic_offs = 0.
+
+  while l_graphic_conv > 255.
+    graphic_table-line = l_graphic_xstr+l_graphic_offs(255).
+    append graphic_table.
+    l_graphic_offs = l_graphic_offs + 255.
+    l_graphic_conv = l_graphic_conv - 255.
+  endwhile.
+
+  graphic_table-line = l_graphic_xstr+l_graphic_offs(l_graphic_conv).
+  append graphic_table.
+
+  call function 'DP_CREATE_URL'
+    exporting
+      type     = 'image'
+      subtype  = cndp_sap_tab_unknown
+      size     = lv_size
+      lifetime = cndp_lifetime_transaction
+    tables
+      data     = graphic_table
+    changing
+      url      = graphic_url.
+
+  if sy-subrc = 0. gn_dyn102_image->load_picture_from_url( exporting url = graphic_url ) . endif.
+
+  g_last_graph_container = container.
+  g_last_graph_name      = imagename.
+
+endfunction.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   Gönderim Ýptal Edilmiþtir!
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2020. Sap Release 740

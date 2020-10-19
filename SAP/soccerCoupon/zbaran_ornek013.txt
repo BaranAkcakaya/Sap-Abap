@@ -1,0 +1,162 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK013
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK013.
+
+*&---------------------------------------------------------------------*
+*&soccer coupon
+*&---------------------------------------------------------------------*
+DATA:sonuc TYPE p DECIMALS 2,
+     a     TYPE p DECIMALS 2,
+     girdi TYPE p DECIMALS 2.
+
+SELECTION-SCREEN BEGIN OF BLOCK rad_1 WITH FRAME TITLE text-001.
+PARAMETERS:r1 RADIOBUTTON GROUP grp1,
+           r2 RADIOBUTTON GROUP grp1,
+           r3 RADIOBUTTON GROUP grp1.
+SELECTION-SCREEN END OF BLOCK rad_1.
+SELECTION-SCREEN BEGIN OF BLOCK rad_2 WITH FRAME TITLE text-002.
+PARAMETERS:rb1 RADIOBUTTON GROUP grp2,
+           rb2 RADIOBUTTON GROUP grp2,
+           rb3 RADIOBUTTON GROUP grp2.
+SELECTION-SCREEN END OF BLOCK rad_2.
+SELECTION-SCREEN BEGIN OF BLOCK rad_3 WITH FRAME TITLE text-003.
+PARAMETERS:r4 RADIOBUTTON GROUP grp3,
+           r5 RADIOBUTTON GROUP grp3,
+           r6 RADIOBUTTON GROUP grp3.
+SELECTION-SCREEN END OF BLOCK rad_3.
+SELECTION-SCREEN BEGIN OF BLOCK rad_4 WITH FRAME TITLE text-004.
+PARAMETERS:r7 RADIOBUTTON GROUP grp4,
+           r8 RADIOBUTTON GROUP grp4,
+           r9 RADIOBUTTON GROUP grp4.
+SELECTION-SCREEN END OF BLOCK rad_4.
+SELECTION-SCREEN BEGIN OF BLOCK rad_5 WITH FRAME TITLE text-005.
+PARAMETERS:rb4 RADIOBUTTON GROUP grp5,
+           rb5 RADIOBUTTON GROUP grp5,
+           rb6 RADIOBUTTON GROUP grp5.
+SELECTION-SCREEN END OF BLOCK rad_5.
+
+SELECTION-SCREEN BEGIN OF BLOCK blok_1 WITH FRAME TITLE text-006.
+PARAMETERS:p_girdi TYPE i OBLIGATORY,
+           p_cýktý TYPE p DECIMALS 2.
+SELECTION-SCREEN:PUSHBUTTON /1(15) but1 USER-COMMAND btn1.
+SELECTION-SCREEN END OF BLOCK blok_1.
+INITIALIZATION.
+but1 = 'HEMEN OYNA'.
+AT SELECTION-SCREEN.
+CASE sy-ucomm.
+  WHEN 'BTN1'.
+    WRITE: 'KUPONUNUZ BASARIYLA OYNANMISTIR...'.
+ENDCASE.
+
+IF p_girdi < 3.
+  MESSAGE 'MINIMUM TUTAR 3 TL' TYPE 'E'.
+ENDIF.
+p_cýktý = 1.
+CASE 'X'.
+  WHEN r1.
+    r1 = a.
+    a  = '2.05'.
+  WHEN r2.
+    r2 = a.
+    a  = '3.20'.
+  WHEN r3.
+    r3 = a.
+    a  = '2.40'.
+ENDCASE.
+p_cýktý = p_cýktý * a.
+CASE 'X'.
+  WHEN r4.
+    r1 = a.
+    a  = '2.65'.
+  WHEN r5.
+    r2 = a.
+    a  = '3.05'.
+  WHEN r6.
+    r3 = a.
+    a  = '1.95'.
+ENDCASE.
+p_cýktý = p_cýktý * a.
+CASE 'X'.
+  WHEN r7.
+    r1 = a.
+    a  = '1.65'.
+  WHEN r8.
+    r2 = a.
+    a  = '2.90'.
+  WHEN r9.
+    r3 = a.
+    a  = '3.20'.
+ENDCASE.
+p_cýktý = p_cýktý * a.
+CASE 'X'.
+  WHEN rb1.
+    r1 = a.
+    a  = '1.55'.
+  WHEN rb2.
+    r2 = a.
+    a  = '3.15'.
+  WHEN rb3.
+    r3 = a.
+    a  = '3.25'.
+ENDCASE.
+p_cýktý = p_cýktý * a.
+CASE 'X'.
+  WHEN rb4.
+    r1 = a.
+    a  = '1.45'.
+  WHEN rb5.
+    r2 = a.
+    a  = '3.60'.
+  WHEN rb6.
+    r3 = a.
+    a  = '3.85'.
+ENDCASE.
+p_cýktý   = p_cýktý * a.
+girdi     = p_girdi.
+p_cýktý   = p_cýktý * girdi.
+IF P_cýktý > 500000.
+  p_cýktý = 500000.
+  MESSAGE 'MAXIMUM DEGER' TYPE'E'.
+ENDIF.
+
+*Text elements
+*----------------------------------------------------------
+* 001 REAL MADRID-BARCELONA
+* 002 GALATASARAY-FENERBAHCE
+* 003 M.UNITED-M.CITY
+* 004 JUVENTUS-NAPOLI
+* 005 BAYERN MUNCHEN-BORISIA DORTMUND
+* 006 HEMEN OYNA
+
+
+*Selection texts
+*----------------------------------------------------------
+* P_CIKTI         KUPON TUTARI
+* P_GIRDI         MISLI
+* R1         1                     2.05
+* R2         0                     3.20
+* R3         2                     2.40
+* R4         1                     2.65
+* R5         0                     3.05
+* R6         2                     1.95
+* R7         1                     1.65
+* R8         0                     2.90
+* R9         2                     3.20
+* RB1         1                     1.55
+* RB2         0                     3.15
+* RB3         2                     3.25
+* RB4         1                     1.45
+* RB5         0                     3.60
+* RB6         2                     3.85
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   MINIMUM TUTAR 3 TL

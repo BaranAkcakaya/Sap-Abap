@@ -1,0 +1,349 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=ISO-8859-1" />
+<title>Dictionary object- ZEARC_T010</title>
+<style type="text/css">
+  th{text-align:left}
+  .cell{
+     font-family:"Courier New", Courier, monospace;
+     color:#000;
+     font-size:12px;
+     background-color:#F2F4F7;
+  }
+  .cell td { border: thin solid #ccc; }
+</style>
+<style type="text/css">
+  .normal{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:12px }
+  .footer{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:12px; text-align: center }
+  h2{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:16px; font-weight:800 }
+  h3{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:14px; font-weight:800 }
+  .outerTable{
+   width:100%;
+   border-top-width: thin;
+   border-right-width: thin;
+   border-right-width: thin;
+   border-left-width: thin;
+   border-top-style: solid;
+   border-right-style: solid;
+   border-bottom-style: solid;
+   border-left-style: solid;
+  }
+  .innerTable{
+   width:100%;
+   border-top-width: thin;
+   border-right-width: thin;
+   border-bottom-width: thin;
+   border-left-width: thin;
+   border-top-style: solid;
+   border-right-style: solid;
+   border-bottom-style: solid;
+   border-left-style: solid;
+  }
+</style>
+</head>
+<body>
+  <table class="outerTable">
+    <tr>
+      <td><h2>Table: ZEARC_T010</h2>
+  <h3>Description: E-Arþiv Gönderilen Fatura KDV Bilgileri</h3></td>
+    </tr>
+    <tr>
+      <td><!--This is where our main table begins  -->
+<table class="innerTable">
+<tr>
+  <th>Row</th>
+  <th>Field name</th>
+  <th>Position</th>
+  <th>Key</th>
+  <th>Data element</th>
+  <th>Domain</th>
+  <th>Datatype</th>
+  <th>Length</th>
+  <th>Lowercase</th>
+  <th>Domain text</th>
+</tr>
+<tr class="cell">
+  <td> 1</td>
+  <td>MANDT</td>
+  <td>1</td>
+  <td>X</td>
+  <td>MANDT</td>
+  <td>MANDT</td>
+  <td>CLNT</td>
+  <td>3</td>
+  <td>&nbsp;</td>
+  <td>Üst birim</td>
+</tr>
+<tr class="cell">
+  <td> 2</td>
+  <td>BUKRS</td>
+  <td>2</td>
+  <td>X</td>
+  <td>ZEARC_DE011</td>
+  <td>BUKRS</td>
+  <td>CHAR</td>
+  <td>4</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Þirket Kodu</td>
+</tr>
+<tr class="cell">
+  <td> 3</td>
+  <td>INVNO</td>
+  <td>3</td>
+  <td>X</td>
+  <td>ZEARC_DE021</td>
+  <td>&nbsp;</td>
+  <td>CHAR</td>
+  <td>36</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Fatura No</td>
+</tr>
+<tr class="cell">
+  <td> 4</td>
+  <td>RATIO</td>
+  <td>4</td>
+  <td>X</td>
+  <td>ZEARC_DE083</td>
+  <td>&nbsp;</td>
+  <td>DEC</td>
+  <td>10</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Fatura Kalem Vergi Oraný</td>
+</tr>
+<tr class="cell">
+  <td> 5</td>
+  <td>EFTID</td>
+  <td>5</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE016</td>
+  <td>ZEARC_DM024</td>
+  <td>CHAR</td>
+  <td>36</td>
+  <td>X</td>
+  <td>E-Arþiv ID</td>
+</tr>
+<tr class="cell">
+  <td> 6</td>
+  <td>MWSBK</td>
+  <td>6</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE012</td>
+  <td>WERTV8</td>
+  <td>CURR</td>
+  <td>15</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Vergi Tutarý</td>
+</tr>
+<tr class="cell">
+  <td> 7</td>
+  <td>NETWR</td>
+  <td>7</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE079</td>
+  <td>WERTV8</td>
+  <td>CURR</td>
+  <td>15</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv Vergi Hariç Tutar</td>
+</tr>
+<tr class="cell">
+  <td> 8</td>
+  <td>MWSKZ</td>
+  <td>8</td>
+  <td>&nbsp;</td>
+  <td>MWSKZ</td>
+  <td>MWSKZ</td>
+  <td>CHAR</td>
+  <td>2</td>
+  <td>&nbsp;</td>
+  <td>KDV göstergesi</td>
+</tr>
+<tr class="cell">
+  <td> 9</td>
+  <td>GIBCO</td>
+  <td>9</td>
+  <td>&nbsp;</td>
+  <td>ZEARC_DE141</td>
+  <td>ZEARC_DM017</td>
+  <td>CHAR</td>
+  <td>3</td>
+  <td>&nbsp;</td>
+  <td>E-Arþiv GIB Tevkifat Göstergesi</td>
+</tr>
+      </table>
+     </td>
+   </tr>
+<br/>
+  <table class="outerTable">
+    <tr>
+      <td><h2>Fixed Domain Values </h2>
+    </tr>
+    <tr>
+      <td><!--This is where our main table begins  -->
+<table class="innerTable">
+<tr>
+  <th>Domain Name</th>
+  <th>Value Low</th>
+  <th>Value High</th>
+  <th>Text</th>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>Normal KDV</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>601</td>
+  <td>&nbsp;</td>
+  <td>(2/10) YAPIM ÝÞLERÝ ÝLE BU ÝÞLERLE BÝRLÝKTE ÝFA EDÝLEN</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>602</td>
+  <td>&nbsp;</td>
+  <td>(9/10) ETÜT, PLAN-PROJE, DANIÞMANLIK, DENETÝM</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>603</td>
+  <td>&nbsp;</td>
+  <td>(5/10) MAKÝNE, TEÇHÝZAT, DEMÝRBAÞ VE TAÞITLARA AÝT TADÝL</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>604</td>
+  <td>&nbsp;</td>
+  <td>(5/10) YEMEK SERVÝS HÝZMETÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>605</td>
+  <td>&nbsp;</td>
+  <td>(5/10) ORGANÝZASYON HÝZMETÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>606</td>
+  <td>&nbsp;</td>
+  <td>(9/10) ÝÞGÜCÜ TEMÝN HÝZMETLERÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>607</td>
+  <td>&nbsp;</td>
+  <td>(9/10) ÖZEL GÜVENLÝK HÝZMETÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>608</td>
+  <td>&nbsp;</td>
+  <td>(9/10) YAPI DENETÝM HÝZMETLERÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>609</td>
+  <td>&nbsp;</td>
+  <td>(5/10) FASON OLARAK YAPTIRILAN TEKSTÝL VE KONFEKSÝYON</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>610</td>
+  <td>&nbsp;</td>
+  <td>(9/10) TURÝSTÝK MAÐAZALARA VERÝLEN MÜÞTERÝ BULMA</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>611</td>
+  <td>&nbsp;</td>
+  <td>(9/10) SPOR KULÜPLERÝNÝN YAYIN, REKLÂM VE ÝSÝM HAKKI</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>612</td>
+  <td>&nbsp;</td>
+  <td>(7/10) TEMÝZLÝK HÝZMETÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>613</td>
+  <td>&nbsp;</td>
+  <td>(7/10) ÇEVRE VE BAHÇE BAKIM HÝZMETLERÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>614</td>
+  <td>&nbsp;</td>
+  <td>(5/10) SERVÝS TAÞIMACILIÐI HÝZMETÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>615</td>
+  <td>&nbsp;</td>
+  <td>(5/10) HER TÜRLÜ BASKI VE BASIM HÝZMETLERÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>616</td>
+  <td>&nbsp;</td>
+  <td>(5/10) 5018 SAYILI KANUNA EKLÝ CETVELLERDEKÝ ÝDARE,</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>617</td>
+  <td>&nbsp;</td>
+  <td>(5/10) HURDA METALDEN ELDE EDÝLEN KÜLÇE TESLÝMLERÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>618</td>
+  <td>&nbsp;</td>
+  <td>(5/10) HURDA METALDEN ELDE EDÝLENLER DIÞINDAKÝ BAKIR</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>619</td>
+  <td>&nbsp;</td>
+  <td>(5/10) BAKIR, ÇÝNKO VE ALÜMÝNYUM ÜRÜNLERÝNÝN TESLÝMÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>620</td>
+  <td>&nbsp;</td>
+  <td>(5/10) ÝSTÝSNADAN VAZGEÇENLERÝN HURDA VE ATIK TESLÝMÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>621</td>
+  <td>&nbsp;</td>
+  <td>(9/10) METAL, PLASTÝK, LASTÝK, KAUÇUK, KÂÐIT VE CAM HURDA</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>622</td>
+  <td>&nbsp;</td>
+  <td>(9/10) PAMUK, TÝFTÝK, YÜN VE YAPAÐI ÝLE HAM POST VE DERÝ TES</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>623</td>
+  <td>&nbsp;</td>
+  <td>(9/10) AÐAÇ VE ORMAN ÜRÜNLERÝ TESLÝMÝ</td>
+</tr>
+<tr class="cell">
+  <td>ZEARC_DM017</td>
+  <td>650</td>
+  <td>&nbsp;</td>
+  <td>(2/10,5/10,7/10,9/10) Diðer</td>
+</tr>
+      </table>
+     </td>
+   </tr>
+   <tr>
+<td class="footer">Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2020. Sap Release 740</td>
+   </tr>
+</table>
+</body>
+</html>

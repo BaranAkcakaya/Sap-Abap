@@ -1,0 +1,788 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_CLASS_TABLE
+*&---------------------------------------------------------------------*
+class tablo_class DEFINITION.
+  public SECTION.
+    data:gt_table_s001 TYPE STANDARD TABLE OF ZTABLO_S001,
+         gs_table_s001 TYPE ZTABLO_S001,
+         gt_table_u001 TYPE STANDARD TABLE OF ZTABLO_U001,
+         gs_table_u001 TYPE ZTABLO_U001,
+         gv_change(2) TYPE c,
+         gv_tesno TYPE i,
+         gs_table_view1 TYPE ZTABLO_VIEW1.
+    data: mv_SIPNO  TYPE ztablo_s001-SIPNO,
+          mv_iptal  TYPE ztablo_s001-IPTAL.
+*         mv_BUKRS  TYPE ztablo_s001-BUKRS,
+*         mv_NAME1  TYPE ztablo_s001-NAME1,
+*         mv_NAME2  TYPE ztablo_s001-NAME2,
+*         mv_GJAHR  TYPE ztablo_s001-GJAHR,
+*         mv_LIFNR  TYPE ztablo_s001-LIFNR,
+*         mv_KUNNR  TYPE ztablo_s001-KUNNR,
+*         mv_LAND1  TYPE ztablo_s001-LAND1,
+*         mv_STCD1  TYPE ztablo_s001-STCD1,
+*         mv_STCD2  TYPE ztablo_s001-STCD2,
+*         mv_PARGB  TYPE ztablo_s001-PARGB,
+*         mv_NENTR  TYPE ztablo_s001-NENTR,
+*         mv_GSBER  TYPE ztablo_s001-GSBER,
+*         mv_SSIMA  TYPE ztablo_s001-SSIMA,
+*         mv_ASIMA  TYPE ztablo_s001-ASIMA,
+*         mv_ATCD1  TYPE ztablo_s001-ATCD1,
+*         mv_ATCD2  TYPE ztablo_s001-ATCD2,
+*         mv_SSUBN  TYPE ztablo_s001-SSUBN,
+*         mv_MATNR  TYPE ztablo_u001-MATNR,
+*         mv_MBLNR  TYPE ztablo_u001-MBLNR,
+*         mv_WEMPF  TYPE ztablo_u001-WEMPF,
+*         mv_LGORT  TYPE ztablo_u001-LGORT,
+*         mv_MALTR  TYPE ztablo_u001-MALTR,
+*         mv_MAADR  TYPE ztablo_u001-MAADR,
+*         mv_MGADR  TYPE ztablo_u001-MGADR,
+*         mv_FRBNR  TYPE ztablo_u001-FRBNR,
+*         mv_XABLN  TYPE ztablo_u001-XABLN,
+*         mv_NTGEW  TYPE ztablo_u001-NTGEW,
+*         mv_GEWEI  TYPE ztablo_u001-GEWEI,
+*         mv_VOLUM  TYPE ztablo_u001-VOLUM,
+*         mv_VOLEH  TYPE ztablo_u001-VOLEH,
+*         mv_RAUBE  TYPE ztablo_u001-RAUBE,
+*         mv_STOFF  TYPE ztablo_u001-STOFF,
+*         mv_LAENG  TYPE ztablo_u001-LAENG,
+*         mv_BREIT  TYPE ztablo_u001-BREIT,
+*         mv_MEABM  TYPE ztablo_u001-MEABM,
+*         mv_FUELG  TYPE ztablo_u001-FUELG,
+*         mv_SLEDB  TYPE ztablo_u001-SLED_BBD,
+*         mv_MFRNR  TYPE ztablo_u001-MFRNR,
+*         mv_MHDHB  TYPE ztablo_u001-MHDHB,
+*         mv_BILGI  TYPE ztablo_u001-BILGI.
+*    METHODS:constructor  IMPORTING  iv_SIPNO  TYPE ztablo_s001-SIPNO
+*                                    iv_BUKRS  TYPE ztablo_s001-BUKRS
+*                                    iv_NAME1  TYPE ztablo_s001-NAME1
+*                                    iv_NAME2  TYPE ztablo_s001-NAME2
+*                                    iv_GJAHR  TYPE ztablo_s001-GJAHR
+*                                    iv_LIFNR  TYPE ztablo_s001-LIFNR
+*                                    iv_KUNNR  TYPE ztablo_s001-KUNNR
+*                                    iv_LAND1  TYPE ztablo_s001-LAND1
+*                                    iv_STCD1  TYPE ztablo_s001-STCD1
+*                                    iv_STCD2  TYPE ztablo_s001-STCD2
+*                                    iv_PARGB  TYPE ztablo_s001-PARGB
+*                                    iv_NENTR  TYPE ztablo_s001-NENTR
+*                                    iv_GSBER  TYPE ztablo_s001-GSBER
+*                                    iv_SSIMA  TYPE ztablo_s001-SSIMA
+*                                    iv_ASIMA  TYPE ztablo_s001-ASIMA
+*                                    iv_ATCD1  TYPE ztablo_s001-ATCD1
+*                                    iv_ATCD2  TYPE ztablo_s001-ATCD2
+*                                    iv_SSUBN  TYPE ztablo_s001-SSUBN
+*                                    iv_MATNR  TYPE ztablo_u001-MATNR
+*                                    iv_MBLNR  TYPE ztablo_u001-MBLNR
+*                                    iv_WEMPF  TYPE ztablo_u001-WEMPF
+*                                    iv_LGORT  TYPE ztablo_u001-LGORT
+*                                    iv_MALTR  TYPE ztablo_u001-MALTR
+*                                    iv_MAADR  TYPE ztablo_u001-MAADR
+*                                    iv_MGADR  TYPE ztablo_u001-MGADR
+*                                    iv_FRBNR  TYPE ztablo_u001-FRBNR
+*                                    iv_XABLN  TYPE ztablo_u001-XABLN
+*                                    iv_NTGEW  TYPE ztablo_u001-NTGEW
+*                                    iv_GEWEI  TYPE ztablo_u001-GEWEI
+*                                    iv_VOLUM  TYPE ztablo_u001-VOLUM
+*                                    iv_VOLEH  TYPE ztablo_u001-VOLEH
+*                                    iv_RAUBE  TYPE ztablo_u001-RAUBE
+*                                    iv_STOFF  TYPE ztablo_u001-STOFF
+*                                    iv_LAENG  TYPE ztablo_u001-LAENG
+*                                    iv_BREIT  TYPE ztablo_u001-BREIT
+*                                    iv_MEABM  TYPE ztablo_u001-MEABM
+*                                    iv_FUELG  TYPE ztablo_u001-FUELG
+*                                    iv_SLEDB  TYPE ztablo_u001-SLED_BBD
+*                                    iv_MFRNR  TYPE ztablo_u001-MFRNR
+*                                    iv_MHDHB  TYPE ztablo_u001-MHDHB
+*                                    iv_BILGI  TYPE ztablo_u001-BILGI,
+      methods:
+            table_cancel IMPORTING VALUE(iv_sipno) TYPE ZTABLO_S001-SIPNO ,
+            table_confir IMPORTING VALUE(iv_sipno) TYPE ZTABLO_u001-SIPNO ,
+            table_read   IMPORTING VALUE(gsi_table_s001) TYPE ZTABLO_S001,
+            table_read2  IMPORTING VALUE(gsi_table_u001) TYPE ZTABLO_u001,
+            table_write  IMPORTING VALUE(iv2_sipno) TYPE ZTABLO_VIEW1-SIPNO
+                         RETURNING VALUE(gr_table_view1) TYPE ZTABLO_VIEW1,
+            table_write2 IMPORTING VALUE(iv_tesno) TYPE ZTABLO_u001-TESNO
+                         RETURNING VALUE(gr_table_u001) TYPE ZTABLO_U001,
+            table_modify IMPORTING VALUE(iv_sipno) TYPE ZTABLO_U001-SIPNO.
+*            table_delete.
+ENDCLASS.
+class TABLO_CLASS IMPLEMENTATION.
+  method TABLE_MODIFY.
+  types:ty_table_u001 TYPE STANDARD TABLE OF ZTABLO_U001 WITH NON-UNIQUE KEY sipno.
+  data:gs3_table_u001 TYPE ZTABLO_U001,
+       it3_table_u001 TYPE ty_table_u001,
+       lv_mess        TYPE STRING,
+       lv_TESNO        TYPE STRING.
+  CLear GV_CHANGE.
+  WHILE GV_CHANGE = ''.
+    CALL FUNCTION 'QF05_RANDOM_INTEGER'
+   EXPORTING
+     RAN_INT_MAX         = 99999999
+     RAN_INT_MIN         = 10000000
+   IMPORTING
+     RAN_INT             = gv_tesno
+   EXCEPTIONS
+     INVALID_INPUT       = 1
+     OTHERS              = 2
+            .
+  IF SY-SUBRC <> 0.
+    MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+    WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+  select * FROM ZTABLO_U001 INTO TABLE IT3_TABLE_U001 WHERE TESNO = gV_TESNO.
+  IF IT3_TABLE_U001[] IS NOT INITIAL.
+    GV_CHANGE = ''.
+  else.
+    gv_change = 'X'.
+  ENDIF.
+  ENDWHILE.
+
+  select SINGLE * FROM ZTABLO_U001 INTO GS3_TABLE_U001 WHERE SIPNO = P1_SIPNO.
+  GS3_TABLE_U001-TESNO = GV_TESNO.
+  modify ZTABLO_U001 FROM GS3_TABLE_U001.
+  lv_mess = 'Sipariþiz Onaylandý.Teslimat Numaranýz:'.
+  lv_tesno = gv_tesno.
+  CONCATENATE LV_MESS lv_TESNO INTO LV_MESS SEPARATED BY space.
+  MESSAGE LV_MESS TYPE 'I'.
+  ENDMETHOD.
+  METHOD TABLE_READ.
+        gs_table_s001 = gsi_table_s001.
+        INSERT ZTABLO_S001 FROM GS_TABLE_S001.
+  ENDMETHOD.
+  method TABLE_CONFIR.
+    select single * FROM ZTABLO_S001 INTO GS_TABLE_S001 WHERE SIPNO = iv_sipno.
+    GS_TABLE_S001-ONAYS = 'X'.
+    modify ZTABLO_S001 FROM GS_TABLE_S001.
+    select single * FROM ZTABLO_u001 INTO GS_TABLE_u001 WHERE SIPNO = iv_sipno.
+    GS_TABLE_u001-ONAYS = 'X'.
+    modify ZTABLO_u001 FROM GS_TABLE_u001.
+  endmethod.
+  METHOD TABLE_READ2.
+        gs_table_u001 = gsi_table_u001.
+        INSERT ZTABLO_u001 FROM GS_TABLE_u001.
+  ENDMETHOD.
+  METHOD TABLE_WRITE.
+    select single * FROM ZTABLO_VIEW1 INTO gs_table_view1 WHERE sipno = IV2_SIPNO.
+      gr_table_view1 = gs_table_view1.
+  ENDMETHOD.
+    METHOD TABLE_WRITE2.
+    select single * FROM ZTABLO_u001 INTO Gs_TABLE_U001 WHERE TESNO = iv_tesno.
+      gr_table_u001 = Gs_TABLE_U001.
+  ENDMETHOD.
+*  method constructor.
+*    gs_table_s001-SIPNO = iv_SIPNO.
+*    gs_table_s001-BUKRS = iv_BUKRS.
+*    gs_table_s001-NAME1 = iv_NAME1.
+*    gs_table_s001-NAME2 = iv_NAME2.
+*    gs_table_s001-GJAHR = iv_GJAHR.
+*    gs_table_s001-LIFNR = iv_LIFNR.
+*    gs_table_s001-KUNNR = iv_KUNNR.
+*    gs_table_s001-LAND1 = iv_LAND1.
+*    gs_table_s001-STCD1 = iv_STCD1.
+*    gs_table_s001-STCD2 = iv_STCD2.
+*    gs_table_s001-PARGB = iv_PARGB.
+*    gs_table_s001-NENTR = iv_NENTR.
+*    gs_table_s001-GSBER = iv_GSBER.
+*    gs_table_s001-SSIMA = iv_SSIMA.
+*    gs_table_s001-ASIMA = iv_ASIMA.
+*    gs_table_s001-ATCD1 = iv_ATCD1.
+*    gs_table_s001-ATCD2 = iv_ATCD2.
+*    gs_table_s001-SSUBN = iv_SSUBN.
+*    gs_table_u001-SIPNO = IV_SIPNO.
+*    gs_table_u001-MATNR = iv_MATNR.
+*    gs_table_u001-MBLNR = iv_MBLNR.
+*    gs_table_u001-WEMPF = iv_WEMPF.
+*    gs_table_u001-LGORT = iv_LGORT.
+*    gs_table_u001-MALTR = iv_MALTR.
+*    gs_table_u001-MAADR = iv_MAADR.
+*    gs_table_u001-MGADR = iv_MGADR.
+*    gs_table_u001-FRBNR = iv_FRBNR.
+*    gs_table_u001-XABLN = iv_XABLN.
+*    gs_table_u001-NTGEW = iv_NTGEW.
+*    gs_table_u001-GEWEI = iv_GEWEI.
+*    gs_table_u001-VOLUM = iv_VOLUM.
+*    gs_table_u001-VOLEH = iv_VOLEH.
+*    gs_table_u001-RAUBE = iv_RAUBE.
+*    gs_table_u001-STOFF = iv_STOFF.
+*    gs_table_u001-LAENG = iv_LAENG.
+*    gs_table_u001-BREIT = iv_BREIT.
+*    gs_table_u001-MEABM = iv_MEABM.
+*    gs_table_u001-FUELG = iv_FUELG.
+*    gs_table_u001-SLED_BBD = iv_SLEDB.
+*    gs_table_u001-MFRNR = iv_MFRNR.
+*    gs_table_u001-MHDHB = iv_MHDHB.
+*    gs_table_u001-BILGI = iv_BILGI.
+*    INSERT ZTABLO_S001 FROM GS_TABLE_S001.
+*    INSERT ZTABLO_U001 FROM GS_TABLE_U001.
+*  ENDMETHOD.
+  METHOD TABLE_CANCEL.
+    select single * FROM ZTABLO_S001 INTO GS_TABLE_S001 WHERE SIPNO = iv_sipno.
+    GS_TABLE_S001-IPTAL = 'X'.
+    modify ZTABLO_S001 FROM GS_TABLE_S001.
+    select single * FROM ZTABLO_u001 INTO GS_TABLE_u001 WHERE SIPNO = iv_sipno.
+    GS_TABLE_u001-IPTAL = 'X'.
+    modify ZTABLO_u001 FROM GS_TABLE_u001.
+  ENDMETHOD.
+ENDCLASS.
+data:  go_table TYPE REF TO TABLO_CLASS,
+       gs_table_view1 TYPE ZTABLO_VIEW1,
+       gs_table_u001 TYPE ZTABLO_u001,
+       gv_change(2) TYPE c,
+       gt_table TYPE TABLE OF REF TO TABLO_CLASS.
+  start-OF-SELECTION.
+form form_table_insert.
+    data:gt_table_s001 TYPE STANDARD TABLE OF ZTABLO_S001,
+         gs_table_s001 TYPE ZTABLO_S001,
+         gt_table_u001 TYPE STANDARD TABLE OF ZTABLO_U001,
+         gs_table_u001 TYPE ZTABLO_U001.
+
+    IF P_URUAT = 0.
+      P_URUAT = 1.
+    ENDIF.
+
+    gs_table_s001-SIPNO = p_SIPNO.
+    gs_table_s001-BUKRS = p_BUKRS.
+    gs_table_s001-NAME1 = p_NAME1.
+    gs_table_s001-NAME2 = p_NAME2.
+    gs_table_s001-GJAHR = p_GJAHR.
+    gs_table_s001-LIFNR = p_LIFNR.
+    gs_table_s001-KUNNR = p_KUNNR.
+    gs_table_s001-LAND1 = p_LAND1.
+    gs_table_s001-STCD1 = p_STCD1.
+    gs_table_s001-STCD2 = p_STCD2.
+    gs_table_s001-PARGB = p_PARGB.
+    gs_table_s001-NENTR = p_NENTR.
+    gs_table_s001-GSBER = p_GSBER.
+    gs_table_s001-SSIMA = p_SSIMA.
+    gs_table_s001-ASIMA = p_ASIMA.
+    gs_table_s001-ATCD1 = p_ATCD1.
+    gs_table_s001-ATCD2 = p_ATCD2.
+    gs_table_s001-SSUBN = p_SSUBN.
+    gs_table_s001-ATCD1 = p_FRMAD .
+    gs_table_s001-ATCD2 = p_URNAD .
+    gs_table_s001-SSUBN = p_TELNO .
+    gs_table_u001-SIPNO = p_SIPNO.
+    gs_table_u001-MATNR = p_MATNR.
+    gs_table_u001-MBLNR = p_MBLNR.
+    gs_table_u001-WEMPF = p_WEMPF.
+    gs_table_u001-LGORT = p_LGORT.
+    gs_table_u001-MALTR = p_MALTR.
+    gs_table_u001-MAADR = p_MAADR.
+    gs_table_u001-MGADR = p_MGADR.
+    gs_table_u001-FRBNR = p_FRBNR.
+    gs_table_u001-XABLN = p_XABLN.
+    gs_table_u001-NTGEW = p_NTGEW.
+    gs_table_u001-GEWEI = p_GEWEI.
+    gs_table_u001-VOLUM = p_VOLUM.
+    gs_table_u001-VOLEH = p_VOLEH.
+    gs_table_u001-RAUBE = p_RAUBE.
+    gs_table_u001-uruat = p_uruat.
+    gs_table_u001-STOFF = p_STOFF.
+    gs_table_u001-LAENG = p_LAENG.
+    gs_table_u001-BREIT = p_BREIT.
+    gs_table_u001-HOEHE = p_HOEHE.
+    gs_table_u001-MEABM = p_MEABM.
+    gs_table_u001-FUELG = p_FUELG.
+    gs_table_u001-SLED_BBD = p_SLEDB.
+    gs_table_u001-MFRNR = p_MFRNR.
+    gs_table_u001-MHDHB = p_MHDHB.
+    gs_table_u001-BILGI = p_BILGI.
+    append Gs_TABLE_S001 TO Gt_TABLE_S001.
+    append Gs_TABLE_u001 TO Gt_TABLE_u001.
+
+    create OBJECT GO_TABLE.
+    go_table->TABLE_READ( gs_table_s001 ).
+    create OBJECT GO_TABLE.
+    go_table->TABLE_READ2( gs_table_u001 ).
+
+    message 'Bilgiler Kaydedildi.' TYPE 'I'.
+ENDFORM.
+*form form_table_insert.
+*  create OBJECT go_table TYPE TABLO_CLASS EXPORTING iv_SIPNO =  p_SIPNO
+*                                                    iv_BUKRS =  p_BUKRS
+*                                                    iv_NAME1 =  p_NAME1
+*                                                    iv_NAME2 =  p_NAME2
+*                                                    iv_GJAHR =  p_GJAHR
+*                                                    iv_LIFNR =  p_LIFNR
+*                                                    iv_KUNNR =  p_KUNNR
+*                                                    iv_LAND1 =  p_LAND1
+*                                                    iv_STCD1 =  p_STCD1
+*                                                    iv_STCD2 =  p_STCD2
+*                                                    iv_PARGB =  p_PARGB
+*                                                    iv_NENTR =  p_NENTR
+*                                                    iv_GSBER =  p_GSBER
+*                                                    iv_SSIMA =  p_SSIMA
+*                                                    iv_ASIMA =  p_ASIMA
+*                                                    iv_ATCD1 =  p_ATCD1
+*                                                    iv_ATCD2 =  p_ATCD2
+*                                                    iv_SSUBN =  p_SSUBN
+*                                                    iv_MATNR =  p_MATNR
+*                                                    iv_MBLNR =  p_MBLNR
+*                                                    iv_WEMPF =  p_WEMPF
+*                                                    iv_LGORT =  p_LGORT
+*                                                    iv_MALTR =  p_MALTR
+*                                                    iv_MAADR =  p_MAADR
+*                                                    iv_MGADR =  p_MGADR
+*                                                    iv_FRBNR =  p_FRBNR
+*                                                    iv_XABLN =  p_XABLN
+*                                                    iv_NTGEW =  p_NTGEW
+*                                                    iv_GEWEI =  p_GEWEI
+*                                                    iv_VOLUM =  p_VOLUM
+*                                                    iv_VOLEH =  p_VOLEH
+*                                                    iv_RAUBE =  p_RAUBE
+*                                                    iv_STOFF =  p_STOFF
+*                                                    iv_LAENG =  p_LAENG
+*                                                    iv_BREIT =  p_BREIT
+*                                                    iv_MEABM =  p_MEABM
+*                                                    iv_FUELG =  p_FUELG
+*                                                    iv_SLEDB =  p_SLEDB
+*                                                    iv_MFRNR =  p_MFRNR
+*                                                    iv_MHDHB =  p_MHDHB
+*                                                    iv_BILGI =  p_BILGI.
+*  message 'Bilgiler Kaydedildi.' TYPE 'S'.
+*
+*ENDFORM.
+FORM form_table_delete.
+  clear p_SIPNO.
+  clear p_BUKRS.
+  clear p_NAME1.
+  clear p_NAME2.
+  clear p_GJAHR.
+  clear p_LIFNR.
+  clear p_KUNNR.
+  clear p_LAND1.
+  clear p_STCD1.
+  clear p_STCD2.
+  clear p_PARGB.
+  clear p_NENTR.
+  clear p_GSBER.
+  clear p_SSIMA.
+  clear p_ASIMA.
+  clear p_ATCD1.
+  clear p_ATCD2.
+  clear p_SSUBN.
+  clear p_MATNR.
+  clear p_MBLNR.
+  clear p_WEMPF.
+  clear p_LGORT.
+  clear p_MALTR.
+  clear p_MAADR.
+  clear p_MGADR.
+  clear p_FRBNR.
+  clear p_XABLN.
+  clear p_NTGEW.
+  clear p_GEWEI.
+  clear p_VOLUM.
+  clear p_VOLEH.
+  clear p_RAUBE.
+  clear p_STOFF.
+  clear p_LAENG.
+  clear p_BREIT.
+  clear p_MEABM.
+  clear p_FUELG.
+  clear p_SLEDB.
+  clear p_MFRNR.
+  clear p_MHDHB.
+  clear p_BILGI.
+
+  message 'Tüm Alanlar Temizlendi.' TYPE 'W'.
+ENDFORM.
+form form_table_cancel.
+ select SINGLE * FROM ZTABLO_U001 INTO GS_TABLE_U001 WHERE SIPNO = S_SIPNO.
+  IF GS_TABLE_U001-IPTAL = 'X'.
+    MESSAGE 'Bu Sipariþ Zaten Ýptal Edildi' TYPE 'E'.
+  elseif GS_TABLE_U001-ONAYS = 'X'.
+    MESSAGE 'Sipariþ Onaylanmýþtýr.Ýptal Edilemez!' TYPE 'E'.
+  ELSE.
+     CREATE OBJECT GO_TABLE.
+     go_table->TABLE_CANCEL( p1_sipno ).
+     MESSAGE 'Sipariþ Ýptal Edilmiþtir!' TYPE 'I'.
+  ENDIF.
+ENDFORM.
+FORM TABLE_WRITE.
+   dATA:it_table_view1 TYPE STANDARD TABLE OF ZTABLO_VIEW1 WITH HEADER LINE.
+   SELECT * FROM ZTABLO_VIEW1 INTO TABLE IT_TABLE_VIEW1.
+   clear GV_CHANGE.
+   LOOP AT it_table_view1 WHERE SIPNO = S_SIPNO.
+     GV_CHANGE = 'X'.
+   ENDLOOP.
+
+   IF GV_CHANGE = 'X'.
+        create OBJECT go_table.
+        gs_table_view1 = go_table->TABLE_WRITE( S_SIPNO ).
+
+         p1_SIPNO = gs_table_view1-SIPNO.
+         p1_BUKRS = gs_table_view1-BUKRS.
+         p1_NAME1 = gs_table_view1-NAME1.
+         p1_NAME2 = gs_table_view1-NAME2.
+         p1_GJAHR = gs_table_view1-GJAHR.
+         p1_LIFNR = gs_table_view1-LIFNR.
+         p1_LAND1 = gs_table_view1-LAND1.
+         p1_STCD1 = gs_table_view1-STCD1.
+         p1_STCD2 = gs_table_view1-STCD2.
+         p1_NENTR = gs_table_view1-NENTR.
+         p1_GSBER = gs_table_view1-GSBER.
+         p1_SSIMA = gs_table_view1-SSIMA.
+         p1_MATNR = gs_table_view1-MATNR.
+         p1_MBLNR = gs_table_view1-MBLNR.
+         p1_WEMPF = gs_table_view1-WEMPF.
+         p1_LGORT = gs_table_view1-LGORT.
+         p1_MALTR = gs_table_view1-MALTR.
+         p1_MAADR = gs_table_view1-MAADR.
+         p1_MGADR = gs_table_view1-MGADR.
+         p1_FRBNR = gs_table_view1-FRBNR.
+         p1_XABLN = gs_table_view1-XABLN.
+         p1_MFRNR = gs_table_view1-MFRNR.
+     ENDIF.
+ENDFORM.
+FORM TABLE_WRITE2.
+   dATA:it_table_u001 TYPE STANDARD TABLE OF ZTABLO_u001 WITH HEADER LINE.
+   SELECT * FROM ZTABLO_u001 INTO TABLE it_table_u001.
+   clear GV_CHANGE.
+   LOOP AT it_table_u001 WHERE TESNO = S_TESNO.
+     GV_CHANGE = 'X'.
+   ENDLOOP.
+
+   IF GV_CHANGE = 'X'.
+        create OBJECT go_table.
+        gs_table_u001 = go_table->TABLE_WRITE2( S_TESNO ).
+
+         P2_SIPNO = gs_table_u001-SIPNO.
+         P2_TESNO = gs_table_u001-TESNO.
+         P2_MATNR = gs_table_u001-MATNR.
+         P2_MBLNR = gs_table_u001-MBLNR.
+         P2_WEMPF = gs_table_u001-WEMPF.
+         P2_LGORT = gs_table_u001-LGORT.
+         P2_FRBNR = gs_table_u001-FRBNR.
+         P2_XABLN = gs_table_u001-XABLN.
+         P2_NTGEW = gs_table_u001-NTGEW.
+         P2_GEWEI = gs_table_u001-GEWEI.
+         P2_MALTR = gs_table_u001-MALTR.
+         P2_VOLEH = gs_table_u001-VOLEH.
+         P2_VOLUM = gs_table_u001-VOLUM.
+         P2_FUELG = gs_table_u001-FUELG.
+         P2_LAENG = gs_table_u001-LAENG.
+         P2_BREIT = gs_table_u001-BREIT.
+         P2_HOEHE = gs_table_u001-HOEHE.
+         P2_MFRNR = gs_table_u001-MFRNR.
+         P2_MHDHB = gs_table_u001-MHDHB.
+         P2_SLEDB = gs_table_u001-SLED_BBD.
+         P2_MAADR = gs_table_u001-MAADR.
+         P2_MGADR = gs_table_u001-MGADR.
+         P2_BILGI = gs_table_u001-BILGI.
+     ENDIF.
+ENDFORM.
+FORM table_tesno_append.
+  select SINGLE * FROM ZTABLO_U001 INTO GS_TABLE_U001 WHERE SIPNO = S_SIPNO.
+  IF GS_TABLE_U001-IPTAL = 'X'.
+    MESSAGE 'Bu Sipariþ Ýptal Edilmiþtir.Lütfen Tekrar Oluþturunuz.' TYPE 'E'.
+  Elseif GS_TABLE_U001-ONAYS = 'X'.
+    MESSAGE 'Bu Sipariþ Zaten Onaylanmýþtýr.' TYPE 'E'.
+  else.
+*      data:gs3_table_u001 TYPE ZTABLO_U001,
+*       it3_table_u001 TYPE STANDARD TABLE OF ZTABLO_U001 WITH HEADER LINE,
+*       lv_mess        TYPE STRING,
+*       lv_TESNO        TYPE STRING.
+*  CLear GV_CHANGE.
+*  WHILE GV_CHANGE = ''.
+*    CALL FUNCTION 'QF05_RANDOM_INTEGER'
+*   EXPORTING
+*     RAN_INT_MAX         = 99999999
+*     RAN_INT_MIN         = 10000000
+*   IMPORTING
+*     RAN_INT             = gv_tesno
+*   EXCEPTIONS
+*     INVALID_INPUT       = 1
+*     OTHERS              = 2
+*            .
+*  IF SY-SUBRC <> 0.
+*    MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*    WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+*  ENDIF.
+*
+*  select * FROM ZTABLO_U001 INTO TABLE IT3_TABLE_U001 WHERE TESNO = gV_TESNO.
+*  IF IT3_TABLE_U001[] IS NOT INITIAL.
+*    GV_CHANGE = ''.
+*  else.
+*    gv_change = 'X'.
+*  ENDIF.
+*  ENDWHILE.
+*
+*  select SINGLE * FROM ZTABLO_U001 INTO GS3_TABLE_U001 WHERE SIPNO = P1_SIPNO.
+*  GS3_TABLE_U001-TESNO = GV_TESNO.
+*  modify ZTABLO_U001 FROM GS3_TABLE_U001.
+*  lv_mess = 'Sipariþiz Onaylandý.Teslimat Numaranýz:'.
+*  lv_tesno = gv_tesno.
+*  CONCATENATE LV_MESS lv_TESNO INTO LV_MESS SEPARATED BY space.
+*  MESSAGE LV_MESS TYPE 'I'.
+    create OBJECT GO_TABLE.
+    GO_TABLE->TABLE_MODIFY( s_sipno ).
+    GO_TABLE->TABLE_CONFIR( s_sipno ).
+  ENDIF.
+ENDFORM.
+FORM CALL_SMARTFORMS.
+  DATA:ls_tablo_wiew1 TYPE ZTABLO_VIEW1,
+       LS_TABLO_SFORM TYPE ZTABlo_sFORM,
+       IT_TABLO_SFORM TYPE TABLE OF ZTABlo_sFORM.
+
+  DELETE FROM ZTABlo_sFORM.
+  SELECT SINGLE * FROM ZTABLO_VIEW1 INTO ls_tablo_wiew1 WHERE SIPNO = s2_Sipno.
+
+  LS_TABLO_SFORM-SIPNO = ls_tablo_wiew1-SIPNO.
+  LS_TABLO_SFORM-URNAD = ls_tablo_wiew1-URNAD.
+  LS_TABLO_SFORM-URUAT = ls_tablo_wiew1-URUAT.
+  LS_TABLO_SFORM-NENTR = ls_tablo_wiew1-NENTR.
+  LS_TABLO_SFORM-KDV   = ( ls_tablo_wiew1-NENTR * 8 ) / 100 .
+  LS_TABLO_SFORM-TOPTR = ls_tablo_wiew1-NENTR + LS_TABLO_SFORM-KDV .
+  APPEND LS_TABLO_SFORM TO IT_TABLO_SFORM.
+  INSERT INTO ZTABlo_sFORM VALUES LS_TABLO_SFORM.
+
+  CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+  EXPORTING
+    formname = 'ZTABLO_IRSALIYE'
+  IMPORTING
+    FM_NAME = FM_NAME
+  EXCEPTIONS
+    NO_FORM = 1
+    NO_FUNCTION_MODULE = 2
+    OTHERS = 3.
+
+CALL FUNCTION FM_NAME
+  TABLES
+    it_vbak = IT_TABLO_SFORM
+  EXCEPTIONS
+    FORMATTING_ERROR = 1
+    INTERNAL_ERROR = 2
+    SEND_ERROR = 3
+    USER_CANCELED = 4
+    OTHERS = 5.
+
+ENDFORM.
+
+FORM SEND_MAIL.
+  DATA:LS_TABLO_S001 TYPE ZTABLO_S001.
+
+  SELECT SINGLE * FROM ZTABLO_S001 INTO LS_TABLO_S001 WHERE SIPNO = S2_SIPNO.
+
+  IF LS_TABLO_S001-SSIMA IS INITIAL OR LS_TABLO_S001-ASIMA IS INITIAL.
+*    MESSAGE 'MAÝL ADRESLERÝ EKSÝK!LÜTFEN EKLEYÝN.' TYPE 'I'.
+    CALL SCREEN 0006 STARTING AT 15 15.
+  ELSE.
+    PERFORM MAIL_SEND.
+  ENDIF.
+ENDFORM.
+
+FORM APPEND_MAIL_ADRES.
+  DATA:LS_TABLO_S001 TYPE ZTABLO_S001.
+
+  SELECT SINGLE * FROM ZTABLO_S001 INTO LS_TABLO_S001 WHERE SIPNO = S2_SIPNO.
+
+  IF LS_TABLO_S001-SSIMA IS INITIAL AND LS_TABLO_S001-ASIMA IS NOT INITIAL.
+    LS_TABLO_S001-SSIMA = P_INPUT8.
+    MODIFY  ZTABLO_S001 FROM LS_TABLO_S001.
+  ELSEIF LS_TABLO_S001-ASIMA IS INITIAL AND LS_TABLO_S001-SSIMA IS NOT INITIAL.
+    LS_TABLO_S001-ASIMA = P_INPUT9.
+    MODIFY  ZTABLO_S001 FROM LS_TABLO_S001.
+  ELSEIF LS_TABLO_S001-ASIMA IS INITIAL AND LS_TABLO_S001-SSIMA IS INITIAL.
+    LS_TABLO_S001-SSIMA = P_INPUT8.
+    LS_TABLO_S001-ASIMA = P_INPUT9.
+    MODIFY  ZTABLO_S001 FROM LS_TABLO_S001.
+  ENDIF.
+
+  MESSAGE 'MAÝL ADRESLERÝ EKLENMÝSTÝR.' TYPE 'I'.
+
+ENDFORM.
+
+FORM MAIL_SEND.
+  DATA:I_OTF        TYPE ITCOO OCCURS 0 WITH HEADER LINE,
+       I_TLINE      TYPE TABLE OF TLINE WITH HEADER LINE,
+       I_RECEIVERS  TYPE TABLE OF SOMLRECI1 WITH HEADER LINE,
+       I_RECORD     LIKE SOLISTI1 OCCURS 0 WITH HEADER LINE,
+       I_OBJPACK    LIKE SOPCKLSTI1 OCCURS 0 WITH HEADER LINE,
+       I_OBJTXT     LIKE SOLISTI1 OCCURS 0 WITH HEADER LINE,
+       I_OBJBIN     LIKE SOLISTI1 OCCURS 0 WITH HEADER LINE,
+       I_RECLIST    LIKE SOMLRECI1 OCCURS 0 WITH HEADER LINE,
+       ls_OBJHEAD   TYPE SOLI_TAB,
+       ls_CTRLOP    TYPE SSFCTRLOP,
+       ls_COMPOP    TYPE SSFCOMPOP,
+       ls_RETURN    TYPE SSFCRESCL,
+       ls_DOC_CHNG  TYPE SODOCCHGI1,
+       ls_DATA      TYPE SODOCCHGI1,
+       ls_BUFFER    TYPE STRING,
+       lV_FORM_NAME TYPE RS38L_FNAM,
+       LV_LEN_IN    LIKE SOOD-OBJLEN,
+       LV_LEN_OUT   LIKE SOOD-OBJLEN,
+       LV_LEN_OUTN  TYPE I,
+       LV_LINES_TXT TYPE I,
+       LV_LINES_BIN TYPE I,
+       LS_TABLO_S001  TYPE ZTABLO_S001,
+       ls_tablo_wiew1 TYPE ZTABLO_VIEW1,
+       LS_TABLO_SFORM TYPE ZTABlo_sFORM,
+       IT_TABLO_SFORM TYPE TABLE OF ZTABlo_sFORM.
+
+  DELETE FROM ZTABlo_sFORM.
+  SELECT SINGLE * FROM ZTABLO_VIEW1 INTO ls_tablo_wiew1 WHERE SIPNO = s2_Sipno.
+
+  LS_TABLO_SFORM-SIPNO = ls_tablo_wiew1-SIPNO.
+  LS_TABLO_SFORM-URNAD = ls_tablo_wiew1-URNAD.
+  LS_TABLO_SFORM-URUAT = ls_tablo_wiew1-URUAT.
+  LS_TABLO_SFORM-NENTR = ls_tablo_wiew1-NENTR.
+  LS_TABLO_SFORM-KDV   = ( ls_tablo_wiew1-NENTR * 8 ) / 100 .
+  LS_TABLO_SFORM-TOPTR = ls_tablo_wiew1-NENTR + LS_TABLO_SFORM-KDV .
+  APPEND LS_TABLO_SFORM TO IT_TABLO_SFORM.
+  INSERT INTO ZTABlo_sFORM VALUES LS_TABLO_SFORM.
+
+  SELECT SINGLE * FROM ZTABLO_S001 INTO LS_TABLO_S001 WHERE SIPNO = S2_SIPNO.
+
+  CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+  EXPORTING
+    formname           = 'ZTABLO_IRSALIYE'
+  IMPORTING
+    fm_name            = LV_FORM_NAME
+  EXCEPTIONS
+    no_form            = 1
+    no_function_module = 2
+    OTHERS             = 3.
+  IF sy-subrc <> 0.
+    MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+    WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+  ls_CTRLOP-GETOTF    = 'X'.
+  ls_CTRLOP-NO_DIALOG = 'X'.
+  ls_COMPOP-TDNOPREV  = 'X'.
+
+  CALL FUNCTION LV_FORM_NAME
+  EXPORTING
+    control_parameters = ls_CTRLOP
+    output_options     = ls_COMPOP
+    user_settings      = 'X'
+  IMPORTING
+    job_output_info    = ls_RETURN
+  EXCEPTIONS
+    formatting_error   = 1
+    internal_error     = 2
+    send_error         = 3
+    user_canceled      = 4
+    OTHERS             = 5.
+  IF sy-subrc <> 0.
+      MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+    WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+  I_OTF[] = LS_RETURN-OTFDATA[].
+  CALL FUNCTION 'CONVERT_OTF'
+  EXPORTING
+    format                = 'PDF'
+    max_linewidth         = 132
+  IMPORTING
+    bin_filesize          = LV_LEN_IN
+  TABLES
+    otf                   = I_OTF
+    lines                 = I_TLINE
+  EXCEPTIONS
+    err_max_linewidth     = 1
+    err_format            = 2
+    err_conv_not_possible = 3
+    OTHERS                = 4.
+  IF sy-subrc <> 0.
+  ENDIF.
+
+  LOOP AT I_TLINE.
+    TRANSLATE I_TLINE USING '~'.
+    CONCATENATE LS_BUFFER I_TLINE INTO LS_BUFFER.
+  ENDLOOP.
+  TRANSLATE LS_BUFFER USING '~'.
+  DO.
+    I_RECORD = LS_BUFFER.
+    APPEND I_RECORD.
+    SHIFT LS_BUFFER LEFT BY 255 PLACES.
+    IF LS_BUFFER IS INITIAL.
+      EXIT.
+    ENDIF.
+  ENDDO.
+  REFRESH:I_RECLIST,
+          I_OBJTXT,
+          I_OBJBIN,
+          I_OBJPACK.
+  CLEAR LS_OBJHEAD.
+  I_OBJBIN[] = I_RECORD[].
+  I_OBJTXT = 'SMARTFORM PDF OLARAK GONDERILDÝ.'.
+  APPEND I_OBJTXT.
+  DESCRIBE TABLE I_OBJTXT LINES LV_LINES_TXT.
+  READ TABLE I_OBJTXT INDEX LV_LINES_TXT.
+  ls_DOC_CHNG-OBJ_NAME = 'smartform'.
+  ls_DOC_CHNG-EXPIRY_DAT = SY-DATUM + 10.
+  ls_DOC_CHNG-OBJ_DESCR = 'smartform'.
+  ls_DOC_CHNG-SENSITIVTY = 'F'.
+  ls_DOC_CHNG-DOC_SIZE = lV_LINES_TXT * 255.
+  CLEAR I_OBJPACK-TRANSF_BIN.
+  I_OBJPACK-HEAD_START = 1.
+  I_OBJPACK-HEAD_NUM = 0.
+  I_OBJPACK-BODY_START = 1.
+  I_OBJPACK-BODY_NUM = LV_LINES_TXT.
+  I_OBJPACK-DOC_TYPE = 'RAW'.
+  APPEND I_OBJPACK.
+  I_OBJPACK-TRANSF_BIN = 'X'.
+  I_OBJPACK-HEAD_START = 1.
+  I_OBJPACK-HEAD_NUM = 0.
+  I_OBJPACK-BODY_START = 1.
+  DESCRIBE TABLE I_OBJBIN LINES LV_LINES_BIN.
+  READ TABLE I_OBJBIN INDEX LV_LINES_BIN.
+  I_OBJPACK-DOC_SIZE = LV_LINES_BIN * 255 .
+  I_OBJPACK-BODY_NUM = LV_LINES_BIN.
+  I_OBJPACK-DOC_TYPE = 'PDF'.
+  I_OBJPACK-OBJ_NAME = 'SMART'.
+  I_OBJPACK-OBJ_DESCR = LS_TABLO_S001-FRMAD.
+  APPEND I_OBJPACK.
+  CLEAR I_RECLIST.
+  I_RECLIST-RECEIVER = LS_TABLO_S001-ASIMA.
+  I_RECLIST-REC_TYPE = 'U'.
+  APPEND I_RECLIST.
+
+  CALL FUNCTION 'SO_NEW_DOCUMENT_ATT_SEND_API1'
+  EXPORTING
+    document_data              = LS_DOC_CHNG
+    put_in_outbox              = 'X'
+    commit_work                = 'X'
+  TABLES
+    packing_list               = I_OBJPACK
+    object_header              = LS_OBJHEAD
+    contents_bin               = I_OBJBIN
+    contents_txt               = I_OBJTXT
+    receivers                  = I_RECLIST
+  EXCEPTIONS
+    too_many_receivers         = 1
+    document_not_sent          = 2
+    document_type_not_exist    = 3
+    operation_no_authorization = 4
+    parameter_error            = 5
+    x_error                    = 6
+    enqueue_error              = 7
+    OTHERS                     = 8.
+  IF sy-subrc <> 0.
+    MESSAGE 'HATA!MAÝL GÖNDERÝLEMEDÝ.' TYPE 'I'.
+  ELSE.
+    MESSAGE 'MESAJ GÖDERÝLDÝ.' TYPE 'I'.
+  ENDIF.
+
+ENDFORM.
+FORM MALIYET_APPEND.
+  "zamaným kalmadýgý ýcýn bunlarý class yapýsýnda yapamadým daha sonra gecýrebýlýrým.
+  DATA:LS_TABLO_MAPS TYPE ZTABLO_MAPS.
+
+  SELECT SINGLE *  FROM ZTABLO_MAPS INTO LS_TABLO_MAPS WHERE TESNO = S_TESNO.
+
+  LS_TABLO_MAPS-KTPYL = P_MKARA.
+  LS_TABLO_MAPS-PTPYL = P_MHAVA.
+  LS_TABLO_MAPS-GTPYL = P_MDENIZ.
+  LS_TABLO_MAPS-TOPTR = P_MALYT.
+  LS_TABLO_MAPS-KARCT = P_AKARA.
+  LS_TABLO_MAPS-DARCT = P_ADENIZ.
+  LS_TABLO_MAPS-HARCT = P_AHAVA.
+  LS_TABLO_MAPS-DATUM = SY-DATUM.
+  MODIFY ZTABLO_MAPS FROM LS_TABLO_MAPS.
+
+  MESSAGE 'TESLÝMAT OLUÞTURULDU.' TYPE 'I'.
+
+ENDFORM.

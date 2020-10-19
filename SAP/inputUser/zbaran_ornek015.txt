@@ -1,0 +1,103 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK015
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK015.
+
+*&---------------------------------------------------------------------*
+*& input from the user
+*&---------------------------------------------------------------------*
+TABLES:saplane.
+SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-001.
+SELECT-OPTIONS:so_gir1 for saplane-planetype,
+               so_gir2 for saplane-producer.
+SELECTION-SCREEN END OF BLOCK blok1.
+
+START-OF-SELECTION.
+PERFORM ucak_verileri.
+
+FORM ucak_verileri.
+DATA: lt_ucak_tablo TYPE TABLE OF saplane,"internal table"
+      ls_ucak_str   TYPE  saplane."workarea"
+SELECT * FROM saplane INTO TABLE lt_ucak_tablo WHERE planetype
+in so_gir1 and producer in so_gir2.
+
+if sy-subrc = 0."sy-subrc sistem veri almada basarýlýmý basarýsýzmý oldugunu kontrol eder."
+  WRITE:/ 'planetype','produced by','max. seats'.
+  SKIP.
+  LOOP AT lt_ucak_tablo INTO ls_ucak_str.
+    WRITE:/ ls_ucak_str-planetype,
+            ls_ucak_str-producer,
+            ls_ucak_str-seatsmax.
+    ENDLOOP.
+else.
+  WRITE:/ 'kayýt yok...'.
+ENDif.
+ENDFORM.
+
+*&---------------------------------------------------------------------*
+*& improved version
+*&---------------------------------------------------------------------*
+**TABLES saplane.
+**TYPES:BEGIN OF gty_ucak,
+**      planetype  TYPE s_planetye,
+**      seatsmax   TYPE s_seatsmax,
+**      produced_by like saplane-producer,
+**end OF gty_ucak.
+**
+**SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-001.
+**SELECT-OPTIONS:so_gir1 for saplane-planetype,
+**               so_gir2 for saplane-producer.
+**SELECTION-SCREEN END OF BLOCK blok1.
+**
+**START-OF-SELECTION.
+**PERFORM ucak_verileri.
+**
+**FORM ucak_verileri.
+**DATA: lt_ucak_tablo TYPE TABLE OF gty_ucak,"internal table"
+**      ls_ucak_str   TYPE  gty_ucak."workarea"
+**SELECT * FROM saplane INTO CORRESPONDING FIELDS OF TABLE lt_ucak_tablo WHERE planetype
+**in so_gir1 and producer in so_gir2.
+**
+**if sy-subrc = 0."sy-subrc sistem veri almada basarýlýmý basarýsýzmý oldugunu kontrol eder."
+**  WRITE:/ 'planetype','produced by','max. seats'.
+**  SKIP.
+**  LOOP AT lt_ucak_tablo INTO ls_ucak_str.
+**    WRITE:/ ls_ucak_str-planetype,ls_ucak_str-produced_by,ls_ucak_str-seatsmax.
+**    ENDLOOP.
+**else.
+**  WRITE:/ 'kayýt yok...'.
+**ENDif.
+**ENDFORM.
+
+*"str olusturup ordan cekme".
+**ZBARAN_STR
+*TABLES saplane.
+*
+*SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-001.
+*SELECT-OPTIONS:so_gir1 for saplane-planetype,
+*               so_gir2 for saplane-producer.
+*SELECTION-SCREEN END OF BLOCK blok1.
+*
+*START-OF-SELECTION.
+*PERFORM ucak_verileri.
+*
+*FORM ucak_verileri.
+*DATA: lt_ucak_tablo TYPE TABLE OF ZBARAN_STR,
+*      ls_ucak_str   TYPE  ZBARAN_STR.
+*SELECT * FROM saplane INTO CORRESPONDING FIELDS OF TABLE lt_ucak_tablo WHERE planetype
+*in so_gir1 and producer in so_gir2.
+*
+*if sy-subrc = 0.
+*  WRITE:/ 'planetype','produced by','max. seats'.
+*  SKIP.
+*  LOOP AT lt_ucak_tablo INTO ls_ucak_str.
+*    WRITE:/ ls_ucak_str-planetype,ls_ucak_str-produced_by,ls_ucak_str-seatsmax.
+*    ENDLOOP.
+*else.
+*  WRITE:/ 'kayýt yok...'.
+*ENDif.
+*ENDFORM.

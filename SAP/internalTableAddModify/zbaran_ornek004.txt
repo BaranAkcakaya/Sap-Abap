@@ -1,0 +1,131 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK4
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT ZBARAN_ORNEK004.
+*&---------------------------------------------------------------------*
+*& internal Table Add
+*&---------------------------------------------------------------------*
+**DATA:BEGIN OF gt_baran,
+**     marka       TYPE c,
+**     urun        TYPE c,
+**     serino      TYPE i,
+**     adet        type i,
+**     uretimt     type d,
+**     skt         TYPE d,
+**END OF gt_baran.
+**
+**data:itab_bar LIKE STANDARD TABLE OF gt_baran WITH HEADER LINE.
+**
+**itab_bar-marka   = 'ülker'.
+**itab_bar-urun    = 'goflet'.
+**itab_bar-serino  = 12345689.
+**itab_bar-adet    = 1212123.
+**itab_bar-uretimt = '20180611'.
+**itab_bar-skt     = '20200811'.
+**append itab_bar.
+**
+**itab_bar-marka   = 'eti'.
+**itab_bar-urun    = 'tutku'.
+**itab_bar-serino  = 23423344.
+**itab_bar-adet    = 2342342.
+**itab_bar-uretimt = '20180614'.
+**itab_bar-skt     = '20200814'.
+**append itab_bar.
+**
+**itab_bar-marka   = 'algida'.
+**itab_bar-urun    = 'cornetto'.
+**itab_bar-serino  = 64646466.
+**itab_bar-adet    = 8765433.
+**itab_bar-uretimt = '20180619'.
+**itab_bar-skt     = '20200819'.
+**append itab_bar.
+**
+**itab_bar-marka   = 'fritolay'.
+**itab_bar-urun    = 'ruffles'.
+**itab_bar-serino  = 43213222.
+**itab_bar-adet    = 4681276.
+**itab_bar-uretimt = '20180622'.
+**itab_bar-skt     = '20200822'.
+**append itab_bar.
+**
+**
+**itab_bar-marka   = 'alfabe'.
+**itab_bar-urun    = 'abc'.
+**itab_bar-serino  = 3213222.
+**itab_bar-adet    = 1231276.
+**itab_bar-uretimt = '20180722'.
+**itab _bar-skt     = '20200922'.
+**COLLECT itab_bar.
+**
+**
+**LOOP AT itab_bar.
+**  WRITE:/ itab_bar-marka   ,
+**          itab_bar-urun    ,
+**          itab_bar-serino  ,
+**          itab_bar-adet    ,
+**          itab_bar-uretimt ,
+**          itab_bar-skt     .
+**
+**ENDLOOP.
+
+DATA : BEGIN OF gt_itab OCCURS 0,
+       numara LIKE ZBARAN_TABLO_1-numara,
+       ad     LIKE ZBARAN_TABLO_1-ad,
+       soyad  LIKE ZBARAN_TABLO_1-soyad,
+       notu   LIKE ZBARAN_TABLO_1-notu,
+ END OF gt_itab.
+
+DATA:gs_01  like gt_itab.
+
+gs_01-numara = 100.
+gs_01-ad     = 'AK'.
+gs_01-soyad  = 'kara'.
+gs_01-notu   = 51.
+INSERT gs_01 INTO TABLE gt_itab.
+
+gs_01-numara = 101.
+gs_01-ad     = 'AK'.
+gs_01-soyad  = 'kara'.
+gs_01-notu   = 34.
+INSERT gs_01 INTO TABLE gt_itab.
+
+gs_01-numara = 102.
+gs_01-ad     = 'AK'.
+gs_01-soyad  = 'kara'.
+gs_01-notu   = 65.
+INSERT gs_01 INTO TABLE gt_itab.
+
+gs_01-numara = 103.
+gs_01-ad     = 'AK'.
+gs_01-soyad  = 'kara'.
+gs_01-notu   = 93.
+INSERT gs_01 INTO TABLE gt_itab.
+
+*&---------------------------------------------------------------------*
+*& internal Table Modify
+*&---------------------------------------------------------------------*
+
+*CLEAR gs_01.
+*gs_01-numara = 100.
+*gs_01-ad     = 'AK'.
+*gs_01-soyad  = 'kara'.
+*gs_01-notu   = 65.
+*MODIFY TABLE gt_itab FROM gs_01.
+*
+*gs_01-numara = 107.
+*gs_01-ad     = 'AK'.
+*gs_01-soyad  = 'kara'.
+*gs_01-notu   = 64.
+*MODIFY TABLE gt_itab FROM gs_01 TRANSPORTING numara ad soyad notu.
+
+loop at gt_itab.
+write :/ gt_itab-numara ,
+         gt_itab-ad,
+         gt_itab-soyad,
+         gt_itab-notu.
+ENDLOOP.

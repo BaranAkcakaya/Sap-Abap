@@ -1,0 +1,205 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK016
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK016.
+
+*&---------------------------------------------------------------------*
+*& league table
+*&---------------------------------------------------------------------*
+*TYPE-POOLS:slis.
+*tables:saplane.
+*SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-001.
+*SELECT-OPTIONS:so_ptype  for saplane-planetype,
+*               so_prod   for saplane-producer.
+*SELECTION-SCREEN END OF BLOCK blok1.
+*DATA:gt_planes TYPE TABLE OF saplane,
+*     gt_fcat   TYPE slis_t_fieldcat_alv,
+*     gs_layout TYPE slis_layout_alv.
+*START-OF-SELECTION.
+*
+*PERFORM read_planes.
+*
+*if gt_planes IS INITIAL.
+*  MESSAGE s886(f4).
+*ELSE.
+*  PERFORM display_planes.
+*ENDIF.
+*
+*FORM read_planes .
+*  SELECT * FROM saplane INTO TABLE gt_planes
+*  WHERE planetype in so_ptype and producer in so_prod.
+*ENDFORM.
+*
+*form display_planes.
+*DATA:lv_repýd    LIKE sy-repýd,
+*     lv_tabname  TYPE slis_tabname  VALUE 'gt_planes',
+*     lv_strname  LIKE dd02l-tabname VALUE 'saplane',
+*     ls_fcat     TYPE slis_fieldcat_alv.
+*
+*lv_repid = sy-repid."sy-repid degýskený suanda calýstýgýmýz programýn adýný verýr.
+*
+*CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+*"bu fonksýyon býzým gýdýp tablodaký verý turlerýne bakmamýzý
+*"kolaylastýrýp kendýsý verýlerý getýrýr.
+* EXPORTING
+*   I_PROGRAM_NAME               = LV_REPID
+*   I_INTERNAL_TABNAME           = lv_tabname
+*   I_STRUCTURE_NAME             = lv_strname
+*  CHANGING
+*    ct_fieldcat                  = gt_fcat
+* EXCEPTIONS
+*   INCONSISTENT_INTERFACE       = 1
+*   PROGRAM_ERROR                = 2
+*   OTHERS                       = 3
+*          .
+*IF sy-subrc <> 0.
+*MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+*WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+*ENDIF.
+*
+*gs_layout-zebra = 'X'.
+*gs_layout-colwýdth_optýmýze = 'X'.
+*
+*CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+* EXPORTING
+*   I_BYPASSING_BUFFER                = ' '
+*   I_GRID_TITLE                      = 'please'
+*   IS_LAYOUT                         = gs_layout
+*   IT_FIELDCAT                       = gt_fcat
+*
+*  TABLES
+*    t_outtab                          = gt_planes
+* EXCEPTIONS
+*   PROGRAM_ERROR                     = 1
+*   OTHERS                            = 2
+*          .
+*IF sy-subrc <> 0.
+*MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+*WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+*ENDIF.
+*ENDFORM.
+
+TABLES:zbaran_futbol.
+TYPE-POOLS:slis.
+
+DATA:gt_futbol  TYPE TABLE OF zbaran_futbol,
+     gt_fcat    TYPE slis_t_fieldcat_alv,"secilen satýrlarý alýr
+     gs_layout  TYPE slis_layout_alv.
+*     gs_fcat    TYPE slis_fieldcat_alv.
+
+SELECTION-SCREEN BEGIN OF BLOCK blok WITH FRAME TITLE text-001.
+SELECT-OPTIONS:so_sýra  FOR zbaran_futbol-sýra,
+               so_t_adý FOR zbaran_futbol-ftbltkm,
+               so_puan  FOR zbaran_futbol-puan.
+SELECTION-SCREEN END OF BLOCK blok.
+
+PERFORM tabloyu_oku.
+PERFORM layout_duzenle.
+PERFORM tabloyu_yaz.
+
+FORM tabloyu_oku.
+SELECT * FROM zbaran_futbol INTO TABLE gt_futbol
+WHERE ftbltkm in so_t_adý AND puan in so_puan
+ AND sýra in so_sira.
+ENDFORM.
+
+FORM layout_duzenle.
+gs_layout-zebra = 'X'.
+gs_layout-colwýdth_optýmýze = 'X'.
+ENDFORM.
+
+FORM tabloyu_yaz.
+DATA:lv_repid   LIKE sy-repid,
+     lv_tabname TYPE slis_tabname VALUE 'gt_futbol',
+     ls_fcat    TYPE slis_fieldcat_alv,
+     lv_strname LIKE dd02l-tabname VALUE 'zbaran_futbol'.
+lv_repid = sy-repid.
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid
+   I_INTERNAL_TABNAME           = lv_tabname
+   I_STRUCTURE_NAME             = lv_strname
+  CHANGING
+    ct_fieldcat                 = gt_fcat
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+
+LOOP AT GT_FCAT INTO LS_FCAT.
+  CASE LS_FCAT-fieldname.
+    WHEN 'FTBLTKM'.
+      ls_fcat-seltext_s = 'TAKIM'.
+      ls_fcat-seltext_m = 'TAKIM ADI'.
+      ls_fcat-seltext_l = 'FUTBOL TAKIMI'.
+      MODIFY gt_fcat FROM ls_fcat.
+    WHEN 'SIRA'.
+      LS_FCAT-SELTEXT_S = 'SIRA'.
+      LS_FCAT-SELTEXT_M = 'SIRALAMA'.
+      LS_FCAT-SELTEXT_L = 'TAKIM SIRALAMALARI'.
+      MODIFY gt_fcat FROM ls_fcat.
+    WHEN 'ATGL'.
+      LS_FCAT-SELTEXT_L = 'LIGDE ATILAN GOL'.
+      LS_FCAT-SELTEXT_M = 'ATILAN GOL'.
+      LS_FCAT-SELTEXT_S = 'AT.GOL'.
+      MODIFY gt_fcat FROM ls_fcat.
+    WHEN 'YDGL'.
+      LS_FCAT-SELTEXT_L = 'LIGDE YENILEN GOL'.
+      LS_FCAT-SELTEXT_M = 'YENILEN GOL'.
+      LS_FCAT-SELTEXT_S = 'YEN.GOL'.
+      MODIFY gt_fcat FROM ls_fcat.
+    WHEN 'AVRJ'.
+      LS_FCAT-SELTEXT_L = 'LIGDE AVERAJ'.
+      LS_FCAT-SELTEXT_M = 'AVERAJ'.
+      LS_FCAT-SELTEXT_S = 'AVRJ'.
+      MODIFY gt_fcat FROM ls_fcat.
+    WHEN 'PUAN'.
+      LS_FCAT-SELTEXT_L = 'LIGIN PUAN DURUMU'.
+      LS_FCAT-SELTEXT_M = 'PUAN DURUMU'.
+      LS_FCAT-SELTEXT_S = 'PUAN'.
+      MODIFY gt_fcat FROM ls_fcat.
+  ENDCASE.
+ENDLOOP.
+
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+*  i_callback_program      = sy-repid
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'SPOR TOTO SUPER LIG'
+   IS_LAYOUT                         = gs_layout
+   IT_FIELDCAT                       = gt_fcat
+*  i_save                  = 'A'
+*  i_callback_user_command = 'USERCOMMAND'
+  TABLES
+    t_outtab                          = gt_futbol
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.
+
+*FORM usercommand USING r_ucomm LIKE sy-ucomm
+*                       rs_selfield TYPE slis_selfield.      "#EC CALLED
+*
+*  CASE r_ucomm.
+*      WHEN'&IC1'.
+*      CASE rs_selfield-fieldname.
+*          WHEN'MATNR'.
+*          SET PARAMETER ID 'MAT'FIELD rs_selfield-value.
+*          SET PARAMETER ID 'WRK'FIELD'0001'.
+*          CALL TRANSACTION 'MD04'AND SKIP FIRST SCREEN.
+*      ENDCASE.
+*
+*  ENDCASE.
+*ENDFORM.

@@ -1,0 +1,771 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_CONTAINER
+*&---------------------------------------------------------------------*
+*PROCESS BEFORE OUTPUT.
+DATA:      lv_url(2048),
+           p_input  TYPE ZTABLO_U001-TESNO,
+           p_input2 TYPE ZTABLO_U001-SIPNO,
+           p_input7 TYPE ZTABLO_U001-SIPNO.
+
+ MODULE STATUS_0001 OUTPUT.
+
+ SET PF-STATUS 'PF_STATUS'.
+
+ DATA:LV_custon_container TYPE REF TO CL_GUI_CUSTOM_CONTAINER,
+      lv_html_viewer      TYPE REF TO CL_GUI_HTML_VIEWER,
+      ls_tablo_maps       TYPE ztablo_maps.
+
+IF LV_custon_container IS NOT INITIAL.
+ LV_custon_container->FREE( ).
+ clear LV_custon_container.
+ENDIF.
+ CREATE OBJECT LV_custon_container
+ EXPORTING
+ CONTAINER_NAME = 'CONTAINER_MAPS'
+ EXCEPTIONS
+ others = 1.
+*
+IF lv_html_viewer IS NOT INITIAL.
+* lv_html_viewer->FREE( ).
+ clear lv_html_viewer.
+ENDIF.
+ IF lv_html_viewer IS INITIAL.
+   CREATE OBJECT lv_html_viewer
+   EXPORTING
+     PARENT = LV_CUSTON_CONTAINER.
+ ENDIF.
+ IF NOT lv_url IS INITIAL.
+ CALL METHOD lv_html_viewer->show_url
+ EXPORTING
+   url = lv_url
+ EXCEPTIONS
+   cnht_error_parameter = 1
+   OTHERS = 2.
+ ENDIF.
+
+ CALL METHOD CL_GUI_CFW=>FLUSH
+ EXCEPTIONS
+  cntl_system_error = 1
+  cntl_error        = 2.
+
+ ENDMODULE.
+
+*PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0001 INPUT.
+CASE sy-UCOMM.
+*  WHEN '&F03'.
+  WHEN 'BACK'.
+    BACK.
+*  WHEN '&F15'.
+  WHEN 'UP'.
+    LEAVE PROGRAM.
+*  WHEN '&F12'.
+  WHEN 'EXIT'.
+    LEAVE TO SCREEN 0.
+ENDCASE.
+ ENDMODULE.
+
+ FORM MAPS_ALICI.
+*   DATA:lv_url(2048).
+ SELECT SINGLE * FROM ZTABLO_MAPS INTO ls_tablo_maps WHERE TESNO = p2_tesno.
+
+ CONCATENATE 'https://www.google.com/maps/place/' ls_tablo_maps-MAADR '/@'
+ ls_tablo_maps-MALAT ',' ls_tablo_maps-MALNG  INTO lv_url.
+ ENDFORM.
+
+ FORM MAPS_GIDICI.
+ SELECT SINGLE * FROM ZTABLO_MAPS INTO ls_tablo_maps WHERE TESNO = p2_tesno.
+
+ CONCATENATE 'https://www.google.com/maps/place/' ls_tablo_maps-MGADR '/@'
+ ls_tablo_maps-MGLAT ',' ls_tablo_maps-MGLNG  INTO lv_url.
+ ENDFORM.
+
+ FORM MAPS_DISTANCE.
+ SELECT SINGLE * FROM ZTABLO_MAPS INTO ls_tablo_maps WHERE TESNO = p2_tesno.
+ DATA:P_MGLNG TYPE string,
+      P_MGLAT TYPE string,
+      P_MALAT TYPE string,
+      P_MALNG TYPE string.
+
+ CLEAR :P_MGLNG,P_MGLAT,P_MALAT,P_MALNG.
+"bu olayýn amacý negatýv verince koordinatlarý bulmuyor bunun icin stringe bir ayar atýp oyle url olusturuyoru.
+ IF ls_tablo_maps-MGLNG < 0.
+   P_MGLNG = 0 - ls_tablo_maps-MGLNG.
+   CONCATENATE '-' P_MGLNG INTO P_MGLnG.
+ ELSE.
+   P_MGLNG = ls_tablo_maps-MGLNG.
+ ENDIF.
+
+ IF ls_tablo_maps-MALAT < 0.
+   P_MALAT = 0 - ls_tablo_maps-MALAT.
+   CONCATENATE '-' P_MALAT INTO P_MALAT.
+ ELSE.
+   P_MALAT = ls_tablo_maps-MALAT.
+ ENDIF.
+
+ IF ls_tablo_maps-MGLAT < 0.
+   P_MGLAT = 0 - ls_tablo_maps-MGLAT.
+   CONCATENATE '-' P_MGLAT INTO P_MGLAT.
+ ELSE.
+   P_MGLAT = ls_tablo_maps-MGLAT.
+ ENDIF.
+
+ IF ls_tablo_maps-MALNG < 0.
+   P_MALNG = 0 - ls_tablo_maps-MALNG.
+   CONCATENATE '-' P_MALNG INTO P_MALNG.
+ ELSE.
+   P_MALNG = ls_tablo_maps-MALNG.
+ ENDIF.
+
+ CONCATENATE 'https://www.google.com/maps/dir/' P_MALAT ','
+ P_MALNG '/' P_MGLAT ',' P_MGLNG INTO lv_url.
+ ENDFORM.
+
+*PROCESS BEFORE OUTPUT.
+ MODULE STATUS_0002 OUTPUT.
+   SET PF-STATUS 'ZSTATUS'.
+
+   DATA:lv_custom_cont  TYPE REF TO CL_GUI_CUSTOM_CONTAINER,
+        lv_picture      TYPE REF TO CL_GUI_PICTURE,
+        lv_url2         TYPE cndp_url.
+
+   IF lv_custom_cont IS NOT INITIAL.
+     lv_custom_cont->FREE( ).
+     clear lv_custom_cont.
+   ENDIF.
+*   create OBJECT LV_CUSTOM_CONT
+*   EXPORTING
+*     CONTAINER_NAME = 'CONTAINER_PIC'
+*   EXCEPTIONS
+*     cntl_error                  = 1
+*     cntl_system_error           = 2
+*     create_error                = 3
+*     lifetime_error              = 4
+*     lifetime_dynpro_dynpro_link = 5
+*     OTHERS                      = 6.
+*
+*   IF LV_PICTURE IS NOT INITIAL.
+*     lv_html_viewer->FREE( ).
+*     clear LV_PICTURE.
+*   ENDIF.
+*   CREATE OBJECT LV_PICTURE
+*   EXPORTING
+*     PARENT = LV_CUSTOM_CONT
+*   EXCEPTIONS
+*     error  = 1
+*     OTHERS = 2.
+*
+*    CALL FUNCTION 'DP_PUBLISH_WWW_URL'
+*      EXPORTING
+*        objid    = 'ZLOJISTIK'
+*        lifetime = 'T'
+*      IMPORTING
+*        url      = lv_url2
+*      EXCEPTIONS
+*        OTHERS   = 1.
+
+    CALL FUNCTION 'ZEARC_FG001_05'
+      EXPORTING
+        CONTAINER       = 'CONTAINER_PIC'
+        IMAGENAME       = 'ZTIR'
+*       FIT_IMAGE       = 'X'
+              .
+
+
+*   IF sy-subrc = 0.
+*    CALL METHOD LV_PICTURE->load_picture_from_url
+*      EXPORTING
+*        url = lv_url2.
+*   ENDIF.
+
+*   CALL METHOD LV_PICTURE->set_display_mode
+*   EXPORTING
+*     display_mode = cl_gui_picture=>display_mode_stretch.
+
+ ENDMODULE.
+*
+*PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0002 INPUT.
+ CASE sy-UCOMM.
+  WHEN '&F03'.
+    LEAVE TO SCREEN blok1.
+  WHEN '&F15'.
+    LEAVE PROGRAM.
+  WHEN '&F12'.
+    LEAVE TO SCREEN 0.
+  WHEN 'BTN11' or 'PICK'.
+    s_tesno = p_input.
+    PERFORM TABLE_WRITE2.
+    IF GV_CHANGE = 'X'.
+      perform measure_distance.
+      CALL SELECTION-SCREEN 200.
+    ELSE.
+      MESSAGE 'HATALI GÝRÝÞ' TYPE 'W'.
+    ENDIF.
+ENDCASE.
+ ENDMODULE.
+
+
+*PROCESS BEFORE OUTPUT.
+ MODULE STATUS_0003 OUTPUT.
+      SET PF-STATUS 'ZSTATUS'.
+
+   DATA:lv_custom_cont2  TYPE REF TO CL_GUI_CUSTOM_CONTAINER,
+        lv_picture2      TYPE REF TO CL_GUI_PICTURE,
+        lv_url22         TYPE cndp_url.
+
+   IF lv_custom_cont2 IS NOT INITIAL.
+     lv_custom_cont2->FREE( ).
+     clear lv_custom_cont2.
+   ENDIF.
+
+    CALL FUNCTION 'ZEARC_FG001_05'
+      EXPORTING
+        CONTAINER       = 'CONTAINER_SIPNO'
+        IMAGENAME       = 'ZSIP'.
+*       FIT_IMAGE       = 'X'
+
+ ENDMODULE.
+*
+*PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0003 INPUT.
+  CASE sy-UCOMM.
+  WHEN '&F03'.
+    LEAVE TO SCREEN blok1.
+  WHEN '&F15'.
+    LEAVE PROGRAM.
+  WHEN '&F12'.
+    LEAVE TO SCREEN 0.
+  WHEN 'BTN10' or 'PICK'.
+    s_sipno = p_input2.
+    PERFORM TABLE_WRITE.
+    IF GV_CHANGE = 'X'.
+      CALL SELECTION-SCREEN 300.
+    ELSE.
+      MESSAGE 'HATALI GÝRÝÞ' TYPE 'W'.
+    ENDIF.
+ENDCASE.
+ ENDMODULE.
+
+* PROCESS BEFORE OUTPUT.
+ MODULE STATUS_0004 OUTPUT.
+   SET PF-STATUS 'ZSTATUS'.
+ ENDMODULE.
+*
+*PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0004 INPUT.
+     CASE sy-UCOMM.
+  WHEN '&F03'.
+    BACK.
+  WHEN '&F15'.
+    LEAVE PROGRAM.
+  WHEN '&F12'.
+    LEAVE TO SCREEN 0.
+  WHEN 'BTN17'.
+    PERFORM HAVA_ADRES_EKLE.
+    MESSAGE 'HAVALÝMANLARI EKLENDÝ' TYPE 'I'.
+    perform measure_distance.
+    LEAVE TO SCREEN 0.
+ENDCASE.
+ ENDMODULE.
+ FORM HAVA_ADRES_EKLE.
+   DATA:lt_tablo_maps  TYPE STANDARD TABLE OF ZTABLO_MAPS,
+        ls_tablo_maps  TYPE ZTABLO_MAPS,
+        ls_tablo_maps2 TYPE ZTABLO_MAPS,
+        go_ulasým      TYPE REF TO KARA_ULASIM.
+
+   SELECT SINGLE *  FROM ZTABLO_MAPS INTO ls_tablo_maps WHERE TESNO = P2_TESNO.
+   create OBJECT go_ulasým.
+   plane_maps_coor = 1.
+   go_ulasým->MAPS_COOR( P2_TESNO ).
+   lt_tablo_maps[] = go_ulasým->gt_tablo_maps[].
+   LOOP AT LT_TABLO_MAPS INTO LS_TABLO_MAPS2 WHERE TESNO = P2_TESNO.
+     ls_tablo_maps-PAADR = LS_TABLO_MAPS2-PAADR.
+     ls_tablo_maps-PALAT = LS_TABLO_MAPS2-PALAT.
+     ls_tablo_maps-PALNG = LS_TABLO_MAPS2-PALNG.
+     ls_tablo_maps-PGADR = LS_TABLO_MAPS2-PGADR.
+     ls_tablo_maps-PGLAT = LS_TABLO_MAPS2-PGLAT.
+     ls_tablo_maps-PGLNG = LS_TABLO_MAPS2-PGLNG.
+     MODIFY ZTABLO_MAPS FROM ls_tablo_maps.
+   ENDLOOP.
+ ENDFORM.
+
+* PROCESS BEFORE OUTPUT.
+ MODULE STATUS_0005 OUTPUT.
+   SET PF-STATUS 'ZSTATUS'.
+
+   DATA:lv_custom_cont3  TYPE REF TO CL_GUI_CUSTOM_CONTAINER,
+        lv_picture3      TYPE REF TO CL_GUI_PICTURE,
+        lv_url3         TYPE cndp_url.
+
+   IF lv_custom_cont3 IS NOT INITIAL.
+     lv_custom_cont3->FREE( ).
+     clear lv_custom_cont3.
+   ENDIF.
+
+    CALL FUNCTION 'ZEARC_FG001_05'
+      EXPORTING
+        CONTAINER       = 'CONTAINER_IRSALIYE'
+        IMAGENAME       = 'E_IRSALIYE'.
+*       FIT_IMAGE       = 'X'
+
+ ENDMODULE.
+*
+*PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0005 INPUT.
+  DATA:ls_tablo_u001 TYPE ztablo_u001.
+  SELECT SINGLE * FROM ztablo_u001 INTO LS_TABLO_U001 WHERE SIPNO = P_INPUT7.
+CASE sy-UCOMM.
+  WHEN '&F03'.
+    LEAVE TO SCREEN 0.
+  WHEN '&F15'.
+    LEAVE PROGRAM.
+  WHEN '&F12'.
+    EXIT.
+  WHEN 'BTN18'.
+    IF LS_TABLO_U001 IS INITIAL.
+      MESSAGE 'HATALI GÝRÝÞ YAPTINIZ!TEKRAR DENEYÝNÝZ.' TYPE 'E'.
+    ELSE.
+      s2_sipno = P_INPUT7.
+      perform CALL_SMARTFORMS.
+    ENDIF.
+  WHEN 'BTN19'.
+    IF LS_TABLO_U001 IS INITIAL.
+      MESSAGE 'HATALI GÝRÝÞ YAPTINIZ!TEKRAR DENEYÝNÝZ.' TYPE 'E'.
+    ELSE.
+      s2_sipno = P_INPUT7.
+      PERFORM SEND_MAIL.
+    ENDIF.
+ENDCASE.
+ENDMODULE.
+
+*PROCESS BEFORE OUTPUT.
+ MODULE STATUS_0006 OUTPUT.
+  SET PF-STATUS 'ZSTATUS'.
+  DATA:LS_TABLO_S001 TYPE ZTABLO_S001.
+
+  SELECT SINGLE * FROM ZTABLO_S001 INTO LS_TABLO_S001 WHERE SIPNO = S2_SIPNO.
+
+  IF LS_TABLO_S001-SSIMA IS INITIAL AND LS_TABLO_S001-ASIMA IS NOT INITIAL.
+    CLEAR P_INPUT8.
+    CLEAR P_INPUT9.
+    MESSAGE 'MAÝL ADRESÝ EKSÝK!LÜTFEN EKLEYÝN.' TYPE 'I'.
+    LOOP AT SCREEN.
+      IF SCREEN-NAME = 'P_INPUT9'.
+        SCREEN-INPUT = 0.
+        MODIFY SCREEN.
+      ENDIF.
+    ENDLOOP.
+     P_INPUT9 = LS_TABLO_S001-ASIMA.
+  ELSEIF LS_TABLO_S001-ASIMA IS INITIAL AND LS_TABLO_S001-SSIMA IS NOT INITIAL.
+     CLEAR P_INPUT8.
+    CLEAR P_INPUT9.
+    MESSAGE 'MAÝL ADRESÝ EKSÝK!LÜTFEN EKLEYÝN.' TYPE 'I'.
+    LOOP AT SCREEN.
+      IF SCREEN-NAME = 'P_INPUT8'.
+        SCREEN-INPUT = 0.
+        MODIFY SCREEN.
+      ENDIF.
+    ENDLOOP.
+     P_INPUT8 = LS_TABLO_S001-SSIMA.
+  ELSEIF LS_TABLO_S001-ASIMA IS INITIAL AND LS_TABLO_S001-SSIMA IS INITIAL.
+     CLEAR P_INPUT8.
+    CLEAR P_INPUT9.
+    MESSAGE 'MAÝL ADRESLERÝ EKSÝK!LÜTFEN EKLEYÝN.' TYPE 'I'.
+    LOOP AT SCREEN.
+      IF SCREEN-NAME = 'P_INPUT8' OR SCREEN-NAME = 'P_INPUT9'.
+        SCREEN-INPUT = 1.
+        MODIFY SCREEN.
+      ENDIF.
+    ENDLOOP.
+  ENDIF.
+ ENDMODULE.
+*
+*PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0006 INPUT.
+CASE sy-UCOMM.
+  WHEN '&F03'.
+    LEAVE TO SCREEN 0.
+  WHEN '&F15'.
+    LEAVE PROGRAM.
+  WHEN '&F12'.
+    LEAVE TO SCREEN 0.
+  WHEN 'BTN20'.
+    PERFORM APPEND_MAIL_ADRES.
+    LEAVE TO SCREEN 0.
+ENDCASE.
+ ENDMODULE.
+
+*PROCESS BEFORE OUTPUT.
+ MODULE STATUS_0007 OUTPUT.
+   SET PF-STATUS 'ZSTATUS'.
+   DATA:KBUT    TYPE i VALUE 1,
+        HBUT    TYPE i VALUE 1,
+        DBUT    TYPE i VALUE 1,
+        INPUTK1 TYPE STRING,
+        INPUTK2 TYPE STRING,
+        INPUTK3 TYPE STRING,
+        INPUTK4 TYPE STRING,
+        INPUTK5 TYPE STRING,
+        INPUTK6 TYPE STRING,
+        INPUTK7 TYPE STRING,
+        INPUTK8 TYPE STRING,
+        INPUTK9 TYPE STRING,
+        INPUTH1 TYPE STRING,
+        INPUTH2 TYPE STRING,
+        INPUTH3 TYPE STRING,
+        INPUTH4 TYPE STRING,
+        INPUTH5 TYPE STRING,
+        INPUTH6 TYPE STRING,
+        INPUTH7 TYPE STRING,
+        INPUTH8 TYPE STRING,
+        INPUTD1 TYPE STRING,
+        INPUTD2 TYPE STRING,
+        INPUTD3 TYPE STRING,
+        INPUTD4 TYPE STRING,
+        INPUTD5 TYPE STRING,
+        INPUTD6 TYPE STRING,
+        INPUTD7 TYPE STRING,
+        INPUTD8 TYPE STRING,
+        INPUTD9 TYPE STRING,
+        LV_DATUM       TYPE i,
+        LS_TABLO_MAPS1 TYPE ZTABLO_MAPS,
+        LS_TABLO_KARA  TYPE ZTABLO_KARA1,
+        LS_TABLO_HAVA  TYPE ZTABLO_HAVA,
+        LS_TABLO_DENIZ TYPE ZTABLO_DENIZ,
+        LV_TOPLAMGUN   TYPE i.
+   IF kbut = 1.
+     LOOP AT SCREEN.
+      IF SCREEN-NAME EQ 'INPUTK1' OR SCREEN-NAME EQ 'KARA1'
+                                  or SCREEN-NAME EQ 'INPUTK2' or SCREEN-NAME EQ 'KARA2'
+                                  or SCREEN-NAME EQ 'INPUTK3' or SCREEN-NAME EQ 'KARA3'
+                                  or SCREEN-NAME EQ 'INPUTK4' or SCREEN-NAME EQ 'KARA4'
+                                  or SCREEN-NAME EQ 'INPUTK5' or SCREEN-NAME EQ 'KARA5'
+                                  or SCREEN-NAME EQ 'INPUTK6' or SCREEN-NAME EQ 'KARA6'
+                                  or SCREEN-NAME EQ 'INPUTK7' or SCREEN-NAME EQ 'KARA7'
+                                  or SCREEN-NAME EQ 'INPUTK8' or SCREEN-NAME EQ 'KARA8'
+                                  or SCREEN-NAME EQ 'INPUTK9' or SCREEN-NAME EQ 'KARA9'.
+        SCREEN-ACTIVE = '0'.
+        MODIFY SCREEN.
+      ENDIF.
+     ENDLOOP.
+   ELSE.
+     LOOP AT SCREEN.
+      IF SCREEN-NAME EQ 'INPUTK1' OR SCREEN-NAME EQ 'KARA1'
+                                  or SCREEN-NAME EQ 'INPUTK2' or SCREEN-NAME EQ 'KARA2'
+                                  or SCREEN-NAME EQ 'INPUTK3' or SCREEN-NAME EQ 'KARA3'
+                                  or SCREEN-NAME EQ 'INPUTK4' or SCREEN-NAME EQ 'KARA4'
+                                  or SCREEN-NAME EQ 'INPUTK5' or SCREEN-NAME EQ 'KARA5'
+                                  or SCREEN-NAME EQ 'INPUTK6' or SCREEN-NAME EQ 'KARA6'
+                                  or SCREEN-NAME EQ 'INPUTK7' or SCREEN-NAME EQ 'KARA7'
+                                  or SCREEN-NAME EQ 'INPUTK8' or SCREEN-NAME EQ 'KARA8'
+                                  or SCREEN-NAME EQ 'INPUTK9' or SCREEN-NAME EQ 'KARA9'.
+        SCREEN-ACTIVE = '1'.
+        MODIFY SCREEN.
+      ENDIF.
+     ENDLOOP.
+   ENDIF.
+  IF Hbut = 1.
+     LOOP AT SCREEN.
+      IF SCREEN-NAME EQ 'INPUTH1' OR SCREEN-NAME EQ 'HAVA1'
+                                  or SCREEN-NAME EQ 'INPUTH2' or SCREEN-NAME EQ 'HAVA2'
+                                  or SCREEN-NAME EQ 'INPUTH3' or SCREEN-NAME EQ 'HAVA3'
+                                  or SCREEN-NAME EQ 'INPUTH4' or SCREEN-NAME EQ 'HAVA4'
+                                  or SCREEN-NAME EQ 'INPUTH5' or SCREEN-NAME EQ 'HAVA5'
+                                  or SCREEN-NAME EQ 'INPUTH6' or SCREEN-NAME EQ 'HAVA6'
+                                  or SCREEN-NAME EQ 'INPUTH7' or SCREEN-NAME EQ 'HAVA7'
+                                  or SCREEN-NAME EQ 'INPUTH8' or SCREEN-NAME EQ 'HAVA8'
+                                  or SCREEN-NAME EQ 'INPUTH9' or SCREEN-NAME EQ 'HAVA9'.
+        SCREEN-ACTIVE = '0'.
+        MODIFY SCREEN.
+      ENDIF.
+     ENDLOOP.
+   ELSE.
+     LOOP AT SCREEN.
+      IF SCREEN-NAME EQ 'INPUTH1' OR SCREEN-NAME EQ 'HAVA1'
+                                  or SCREEN-NAME EQ 'INPUTH2' or SCREEN-NAME EQ 'HAVA2'
+                                  or SCREEN-NAME EQ 'INPUTH3' or SCREEN-NAME EQ 'HAVA3'
+                                  or SCREEN-NAME EQ 'INPUTH4' or SCREEN-NAME EQ 'HAVA4'
+                                  or SCREEN-NAME EQ 'INPUTH5' or SCREEN-NAME EQ 'HAVA5'
+                                  or SCREEN-NAME EQ 'INPUTH6' or SCREEN-NAME EQ 'HAVA6'
+                                  or SCREEN-NAME EQ 'INPUTH7' or SCREEN-NAME EQ 'HAVA7'
+                                  or SCREEN-NAME EQ 'INPUTH8' or SCREEN-NAME EQ 'HAVA8'
+                                  or SCREEN-NAME EQ 'INPUTH9' or SCREEN-NAME EQ 'HAVA9'.
+        SCREEN-ACTIVE = '1'.
+        MODIFY SCREEN.
+      ENDIF.
+     ENDLOOP.
+   ENDIF.
+IF Dbut = 1.
+     LOOP AT SCREEN.
+      IF SCREEN-NAME EQ 'INPUTD1' OR SCREEN-NAME EQ 'DENIZ1'
+                                  or SCREEN-NAME EQ 'INPUTD2' or SCREEN-NAME EQ 'DENIZ2'
+                                  or SCREEN-NAME EQ 'INPUTD3' or SCREEN-NAME EQ 'DENIZ3'
+                                  or SCREEN-NAME EQ 'INPUTD4' or SCREEN-NAME EQ 'DENIZ4'
+                                  or SCREEN-NAME EQ 'INPUTD5' or SCREEN-NAME EQ 'DENIZ5'
+                                  or SCREEN-NAME EQ 'INPUTD6' or SCREEN-NAME EQ 'DENIZ6'
+                                  or SCREEN-NAME EQ 'INPUTD7' or SCREEN-NAME EQ 'DENIZ8'
+                                  or SCREEN-NAME EQ 'INPUTD8' or SCREEN-NAME EQ 'DENIZ7'
+                                  or SCREEN-NAME EQ 'INPUTD9' or SCREEN-NAME EQ 'DENIZ9'.
+        SCREEN-ACTIVE = '0'.
+        MODIFY SCREEN.
+      ENDIF.
+     ENDLOOP.
+   ELSE.
+     LOOP AT SCREEN.
+      IF SCREEN-NAME EQ 'INPUTD1' OR SCREEN-NAME EQ 'DENIZ1'
+                                  or SCREEN-NAME EQ 'INPUTD2' or SCREEN-NAME EQ 'DENIZ2'
+                                  or SCREEN-NAME EQ 'INPUTD3' or SCREEN-NAME EQ 'DENIZ3'
+                                  or SCREEN-NAME EQ 'INPUTD4' or SCREEN-NAME EQ 'DENIZ4'
+                                  or SCREEN-NAME EQ 'INPUTD5' or SCREEN-NAME EQ 'DENIZ5'
+                                  or SCREEN-NAME EQ 'INPUTD6' or SCREEN-NAME EQ 'DENIZ6'
+                                  or SCREEN-NAME EQ 'INPUTD7' or SCREEN-NAME EQ 'DENIZ8'
+                                  or SCREEN-NAME EQ 'INPUTD8' or SCREEN-NAME EQ 'DENIZ7'
+                                  or SCREEN-NAME EQ 'INPUTD9' or SCREEN-NAME EQ 'DENIZ9'.
+        SCREEN-ACTIVE = '1'.
+        MODIFY SCREEN.
+      ENDIF.
+     ENDLOOP.
+   ENDIF.
+
+ LOOP AT SCREEN.
+  IF SCREEN-NAME EQ 'INPUTD1' or SCREEN-NAME EQ 'INPUTD2' OR SCREEN-NAME EQ 'INPUTH1' OR SCREEN-NAME EQ 'INPUTK1'
+                              or SCREEN-NAME EQ 'INPUTD3' or SCREEN-NAME EQ 'INPUTH2' or SCREEN-NAME EQ 'INPUTK2'
+                              or SCREEN-NAME EQ 'INPUTD4' or SCREEN-NAME EQ 'INPUTH3' or SCREEN-NAME EQ 'INPUTK3'
+                              or SCREEN-NAME EQ 'INPUTD5' or SCREEN-NAME EQ 'INPUTH4' or SCREEN-NAME EQ 'INPUTK4'
+                              or SCREEN-NAME EQ 'INPUTD6' or SCREEN-NAME EQ 'INPUTH5' or SCREEN-NAME EQ 'INPUTK5'
+                              or SCREEN-NAME EQ 'INPUTD7' or SCREEN-NAME EQ 'INPUTH6' or SCREEN-NAME EQ 'INPUTK6'
+                              or SCREEN-NAME EQ 'INPUTD8' or SCREEN-NAME EQ 'INPUTH7' or SCREEN-NAME EQ 'INPUTK7'
+                              or SCREEN-NAME EQ 'INPUTD9' or SCREEN-NAME EQ 'INPUTH8' or SCREEN-NAME EQ 'INPUTK8'
+                              or SCREEN-NAME EQ 'INPUTK9'.
+    SCREEN-INPUT = '0'.
+    MODIFY SCREEN.
+  ENDIF.
+ ENDLOOP.
+
+ CLEAR:INPUTK1,INPUTK2,INPUTK3,INPUTK4,INPUTK5,INPUTK6,INPUTK7,INPUTK8,INPUTK9,
+       INPUTH1,INPUTH2,INPUTH3,INPUTH4,INPUTH5,INPUTH6,INPUTH7,INPUTH8,INPUTD1,
+       INPUTD2,INPUTD3,INPUTD4,INPUTD5,INPUTD6,INPUTD7,INPUTD8,INPUTD9.
+
+ SELECT SINGLE * FROM ZTABLO_MAPS INTO LS_TABLO_MAPS1 WHERE TESNO = S2_TESNO.
+
+   IF LS_TABLO_MAPS1-KARCT is NOT INITIAL.
+
+     SELECT SINGLE * FROM zTABLO_KARA1 INTO LS_TABLO_KARA WHERE KATNO = LS_TABLO_MAPS1-KARCT.
+
+     INPUTK1 = LS_TABLO_KARA-CARNM.
+     INPUTK2 = LS_TABLO_KARA-CARSR.
+     INPUTK3 = LS_TABLO_KARA-CARCN.
+     INPUTK4 = LS_TABLO_KARA-CARMG.
+     INPUTK5 = LS_TABLO_KARA-CARTK.
+     INPUTK6 = LS_TABLO_KARA-CARYD.
+     INPUTK7 = LS_TABLO_KARA-CARYT.
+     INPUTK8 = LS_TABLO_KARA-CARHU.
+     INPUTK9 = LS_TABLO_KARA-CARAT.
+   ENDIF.
+
+  IF LS_TABLO_MAPS1-HARCT is NOT INITIAL.
+
+     SELECT SINGLE * FROM ZTABLO_HAVA INTO LS_TABLO_HAVA WHERE UATNO = LS_TABLO_MAPS1-HARCT.
+
+     INPUTH1 = LS_TABLO_HAVA-PLANM.
+     INPUTH2 = LS_TABLO_HAVA-PLAUN.
+     INPUTH3 = LS_TABLO_HAVA-PLAGN.
+     INPUTH4 = LS_TABLO_HAVA-PLAHC.
+     INPUTH5 = LS_TABLO_HAVA-PLAMA.
+     INPUTH6 = LS_TABLO_HAVA-PLAHZ.
+     INPUTH7 = LS_TABLO_HAVA-PLAYT.
+     INPUTH8 = LS_TABLO_HAVA-PLASU.
+   ENDIF.
+
+     IF LS_TABLO_MAPS1-DARCT is NOT INITIAL.
+
+     SELECT SINGLE * FROM ZTABLO_DENIZ INTO LS_TABLO_DENIZ WHERE BATNO = LS_TABLO_MAPS1-DARCT.
+
+     INPUTD1 = LS_TABLO_DENIZ-BOANM.
+     INPUTD2 = LS_TABLO_DENIZ-BOAUN.
+     INPUTD3 = LS_TABLO_DENIZ-BOAGN.
+     INPUTD4 = LS_TABLO_DENIZ-BOATN.
+     INPUTD5 = LS_TABLO_DENIZ-BOACP.
+     INPUTD6 = LS_TABLO_DENIZ-BOASP.
+     INPUTD7 = LS_TABLO_DENIZ-BOATR.
+     INPUTD8 = LS_TABLO_DENIZ-BOAGY.
+     INPUTD9 = LS_TABLO_DENIZ-BOAGK.
+
+   ENDIF.
+
+   SELECT SINGLE * FROM ZTABLO_MAPS INTO LS_TABLO_MAPS WHERE TESNO = S2_TESNO.
+   lv_datum = ( SY-DATUM - LS_TABLO_MAPS-DATUM ).
+   PERFORM GUN_HESAP.
+
+   IF lv_datum LE 2.
+*     lv_url6 = 'https://i.ibb.co/ysxjLbp/firstprogressbar.jpg'.
+     lv_url6 = 'https://i.imgur.com/FkdLyZI.jpg'.
+   ELSEIF LV_DATUM GT 2 AND LV_DATUM LE 3.
+*     lv_url6 = 'https://i.ibb.co/R92PFxF/secondprogressbar.jpg'.
+     lv_url6 = 'https://i.imgur.com/J7FImJT.jpg'.
+   ELSEIF LV_DATUM GT 3 AND LV_DATUM LE ( LV_TOPLAMGUN + 3 ).
+*     lv_url6 = 'https://i.ibb.co/Tw5Xhph/thirdprogressbar.jpg'.
+     lv_url6 = 'https://i.imgur.com/zWHsUDr.jpg'.
+   ELSEIF LV_DATUM GT ( LV_TOPLAMGUN + 3 ) AND LV_DATUM LE ( LV_TOPLAMGUN + 5 ).
+*     lv_url6 = 'https://i.ibb.co/mXsTKmS/fourthprogressbar.jpg'.
+     lv_url6 = 'https://i.imgur.com/C56WQPU.jpg'.
+   ELSEIF LV_DATUM GT ( LV_TOPLAMGUN + 5 ).
+*     lv_url6 = 'https://i.ibb.co/p4HLBvH/fifthprogressbar.jpg'.
+     lv_url6 = 'https://i.imgur.com/vb4fbfm.jpg'.
+   ENDIF.
+
+   DATA:lv_custom_cont6  TYPE REF TO CL_GUI_CUSTOM_CONTAINER,
+        lv_picture6      TYPE REF TO CL_GUI_PICTURE.
+
+   IF LV_TEMP2 = 0 and lv_custom_cont6 IS NOT INITIAL.
+     lv_custom_cont6->FREE( ).
+     clear lv_custom_cont6.
+     LV_TEMP2 = 1.
+   ENDIF.
+
+  IF lv_custom_cont6 IS  INITIAL.
+     CREATE OBJECT lv_custom_cont6
+     EXPORTING
+       CONTAINER_NAME = 'CONTAINER_PROGRESS'.
+
+     CREATE OBJECT lv_picture6
+     EXPORTING
+       PARENT = lv_custom_cont6.
+
+     CALL METHOD lv_picture6->set_display_mode
+      EXPORTING
+        display_mode = cl_gui_picture=>DISPLAY_MODE_NORMAL.
+
+     CALL METHOD lv_picture6->load_picture_from_url
+      EXPORTING
+        url = lv_url6 .
+  ENDIF.
+
+  IF lv_temp = 0.
+  PERFORM PROGRESS_INDC.
+  LV_TEMP = 1.
+  ENDIF.
+
+ ENDMODULE.
+*
+*PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0007 INPUT.
+ CASE sy-UCOMM.
+  WHEN '&F03'.
+    LV_TEMP  = 0.
+    LV_TEMP2 = 0.
+    LEAVE TO SCREEN 0.
+  WHEN '&F15'.
+    LEAVE PROGRAM.
+  WHEN '&F12'.
+    LEAVE TO SCREEN 0.
+  WHEN 'BTN22'.
+    IF KBUT = 1.
+      KBUT = 0.
+    ELSEIF KBUT = 0.
+      KBUT = 1.
+    ENDIF.
+ WHEN 'BTN23'.
+    IF HBUT = 1.
+      HBUT = 0.
+    ELSEIF HBUT = 0.
+      HBUT = 1.
+    ENDIF.
+ WHEN 'BTN24'.
+    IF DBUT = 1.
+      DBUT = 0.
+    ELSEIF DBUT = 0.
+      DBUT = 1.
+    ENDIF.
+
+ENDCASE.
+ ENDMODULE.
+
+* PROCESS BEFORE OUTPUT.
+ MODULE STATUS_0008 OUTPUT.
+   SET PF-STATUS 'ZSTATUS'.
+
+   DATA:lv_custom_cont4  TYPE REF TO CL_GUI_CUSTOM_CONTAINER,
+        lv_picture4      TYPE REF TO CL_GUI_PICTURE,
+        lv_url4          TYPE cndp_url.
+
+   IF lv_custom_cont4 IS NOT INITIAL.
+     lv_custom_cont4->FREE( ).
+     clear lv_custom_cont4.
+   ENDIF.
+
+    CALL FUNCTION 'ZEARC_FG001_05'
+      EXPORTING
+        CONTAINER       = 'CONTAINER_TES2'
+        IMAGENAME       = 'ZULASIM'.
+*       FIT_IMAGE       = 'X'
+
+ ENDMODULE.
+*
+*PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0008 INPUT.
+
+ CASE sy-UCOMM.
+  WHEN '&F03'.
+    LEAVE TO SCREEN 0.
+  WHEN '&F15'.
+    LEAVE PROGRAM.
+  WHEN '&F12'.
+    EXIT.
+  WHEN 'BTN25'.
+    CLEAR S2_TESNO.
+    s2_tesno = input11.
+    SELECT SINGLE * FROM ZTABLO_MAPS INTO LS_TABLO_MAPS WHERE TESNO = S2_TESNO.
+    IF LS_TABLO_MAPS IS INITIAL.
+      MESSAGE 'YANLIÞ BÝLGÝ GÝRDÝNÝZ! TEKRAR DENEYÝNÝZ.' TYPE 'E'.
+    ELSE.
+      CALL SCREEN 0007.
+    ENDIF.
+ENDCASE.
+
+ ENDMODULE.
+
+ FORM PROGRESS_INDC.
+  DATA: index TYPE i,
+        text  TYPE string.
+
+  DO 25 TIMES.
+  index = sy-index * 4.
+  text = index.
+  CONCATENATE 'LOADING %' text INTO text.
+    CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR'
+         EXPORTING
+              PERCENTAGE = INDEX
+              TEXT       = TExT.
+*    WAIT UP TO 1 SECONDS.
+  ENDDO.
+ ENDFORM.
+
+ FORM GUN_HEsAP.
+   DATA:LV_KARA TYPE p LENGTH 4 DECIMALS 2,
+        LV_HAVA TYPE p LENGTH 4 DECIMALS 2,
+        LV_DENZ TYPE p LENGTH 4 DECIMALS 2.
+
+   SELECT SINGLE * FROM ZTABLO_MAPS  INTO LS_TABLO_MAPS  WHERE TESNO = S2_TESNO.
+   SELECT SINGLE * FROM ZTABLO_KARA1 INTO LS_TABLO_KARA  WHERE KATNO = LS_TABLO_MAPS-KARCT.
+   SELECT SINGLE * FROM ZTABLO_HAVA  INTO LS_TABLO_HAVA  WHERE UATNO = LS_TABLO_MAPS-HARCT.
+   SELECT SINGLE * FROM ZTABLO_DENIZ INTO LS_TABLO_DENIZ WHERE BATNO = LS_TABLO_MAPS-DARCT.
+
+   CLEAR:LV_KARA,LV_HAVA,LV_DENZ.
+
+   IF LS_TABLO_MAPS-TOPYL IS NOT INITIAL.
+     LV_KARA = ( LS_TABLO_MAPS-TOPYL / 700 ).
+   ENDIF.
+
+   IF LS_TABLO_MAPS-PTPYL IS NOT INITIAL.
+     LV_HAVA = ( LS_TABLO_MAPS-PTPYL / LS_TABLO_HAVA-PLAHZ )."saat bulucak
+   ENDIF.
+
+   IF LS_TABLO_MAPS-GTPYL IS NOT INITIAL.
+     LV_DENZ = ( LS_TABLO_MAPS-GTPYL / ( LS_TABLO_DENIZ-BOASP * 185 / 100 ) )."saat bulucak
+   ENDIF.
+
+   LV_TOPLAMGUN = LV_KARA + LV_HAVA + LV_DENZ.
+
+ ENDFORM.

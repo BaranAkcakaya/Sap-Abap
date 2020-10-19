@@ -1,0 +1,21 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZBARAN_UDATA
+*&---------------------------------------------------------------------*
+ DATA:plane_maps_coor TYPE i,
+      plane_maps1     TYPE i,
+      plane_maps2     TYPE i,
+      P_INPUT5(256)   TYPE c,
+      P_INPUT6(256)   TYPE c,
+      lv_meas_dist    TYPE p LENGTH 8 DECIMALS 3,
+      lv_distance1    TYPE ZTABLO_MAPS-TOPYL,
+      lv_distance2    TYPE ZTABLO_MAPS-TOPYL,
+      lv_TOP_DIST1    TYPE ZTABLO_MAPS-TOPYL,
+      s2_sipno        TYPE ZTABLO_view1-SIPNO,
+      P_INPUT8(256)   TYPE C,
+      P_INPUT9(256)   TYPE C,
+      FM_NAME         TYPE rs38l_fnam,
+      INPUT11         TYPE i,
+      lv_URL6         TYPE cndp_url,
+      lv_temp         TYPE i,
+      lv_temp2        TYPE i,
+      LV_CONV_SONUC   TYPE string.

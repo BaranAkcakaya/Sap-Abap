@@ -1,0 +1,697 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK028
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK028.
+"Z28_STRUCT
+
+TABLES:Z28_ODA_TABLOSU,Z28_MUST_TABLOSU,Z28_ODA_MUST,Z28_EXCEL.
+TYPE-POOLS:slis,truxs.
+
+types: begin of gtablo_oda ,
+        mark                    ,
+*        mandt TYPE Z28_ODA_MUST-MANDT,
+        oda_no TYPE Z28_ODA_MUST-ODA_NO,
+        must_grubu   TYPE Z28_ODA_MUST-MUST_GRUBU,
+       end of gtablo_oda.
+
+*types: begin of gt_must ,
+*        mark                    ,
+*        oda_no TYPE Z28_MUST_TABLOSU-ODA_NO,
+*        must_grubu   TYPE Z28_MUST_TABLOSU-MUST_GRUBU,
+*        GIRIS_TARIHI    TYPE Z28_MUST_TABLOSU-GIRIS_TARIHI,
+*        CIKIS_TARIHI    TYPE Z28_MUST_TABLOSU-CIKIS_TARIHI,
+*       end of gt_must.
+
+TYPES:BEGIN OF gt_excel,
+      mark,
+      AID TYPE Z28_EXCEL-AID,
+      AD TYPE Z28_EXCEL-AD,
+      SOYAD TYPE Z28_EXCEL-SOYAD,
+      END OF gt_excel.
+data: lr_columns         type ref to cl_salv_columns_table,
+      lr_column          type ref to cl_salv_column_table,
+      GR_TABLE           TYPE REF TO CL_SALV_TABLE,
+      lt_musteri         TYPE TABLE OF Z28_MUST_TABLOSU,
+      ls_musteri         TYPE Z28_MUST_TABLOSU,
+      ob_salv_selections TYPE REF TO cl_salv_selections,
+      it_rows            TYPE  salv_t_row.
+
+DATA: gt_fcat     TYPE slis_t_fieldcat_alv,
+      gs_fieldcat TYPE slis_fieldcat_alv,
+      p_dosya     TYPE rlgrap-filename,
+      lt_excel    TYPE TABLE OF gt_excel WITH HEADER LINE,
+      lt_kay_kisi TYPE TABLE OF gt_excel WITH HEADER LINE,
+      ls_excel2   TYPE gt_excel,
+      gs_layout   TYPE slis_layout_alv,
+      it_oda      TYPE STANDARD TABLE OF gtablo_oda WITH HEADER LINE,
+      it_must     TYPE STANDARD TABLE OF Z28_MUST_TABLOSU WITH HEADER LINE,
+      ls_must     TYPE Z28_MUST_TABLOSU .
+*      it_must     TYPE STANDARD TABLE OF gt_must WITH HEADER LINE.
+
+SELECTION-SCREEN BEGIN OF BLOCK block_1 WITH FRAME TITLE blok1.
+
+  SELECTION-SCREEN BEGIN OF BLOCK block_2 WITH FRAME.
+    PARAMETERS:r1 RADIOBUTTON GROUP grp1 DEFAULT 'X' USER-COMMAND us1,    "oda durum
+               r2 RADIOBUTTON GROUP grp1,     "musteri kayýt
+               r3 RADIOBUTTON GROUP grp1.     "mudteri cýkýs
+    SELECT-OPTIONS:so_oda  FOR Z28_ODA_TABLOSU-oda_no no intervals modif id ID1.
+
+  SELECTION-SCREEN END OF BLOCK block_2.
+
+  SELECTION-SCREEN: BEGIN OF LINE.
+    SELECTION-SCREEN PUSHBUTTON 5(25) btn1 USER-COMMAND usr1.
+  SELECTION-SCREEN: END OF LINE.
+
+SELECTION-SCREEN END OF BLOCK block_1.
+
+at SELECTION-SCREEN OUTPUT.
+
+if r1 eq 'X'.
+  loop at screen.
+    case screen-group1.
+      when 'ID1'.
+        screen-active = 1.
+        modify screen.
+    endcase.
+  endloop.
+elseif r2 eq 'X'.
+  loop at screen.
+    case screen-group1.
+      when 'ID1'.
+        screen-active = 0.
+        modify screen.
+    endcase.
+  endloop.
+else.
+  loop at screen.
+    case screen-group1.
+      when 'ID1'.
+        screen-active = 0.
+        modify screen.
+    endcase.
+  endloop.
+endif.
+
+at SELECTION-SCREEN.
+CASE sy-UCOMM.
+  WHEN 'USR1'.
+    CASE 'X'.
+      WHEN r1.
+        perform oda_durum.
+      WHEN r2.
+        perform musteri_giris.
+      WHEN r3.
+        call SCREEN 0001.
+    ENDCASE.
+ENDCASE.
+
+INITIALIZATION.
+btn1 = 'Devam Et'.
+
+form oda_durum.
+  data:V_LINES TYPE i.
+  clear IT_ODA.
+  select * from Z28_ODA_MUST INTO CORRESPONDING FIELDS OF TABLE IT_ODA WHERE ODA_NO in so_oda.
+  DESCRIBE TABLE IT_ODA LINES V_LINES.
+    IF V_LINES > 0.
+      clear GS_LAYOUT.
+      clear GT_FCAT.
+      PERFORM layout_duzenle.
+      PERFORM tabloyu_yaz.
+    else.
+      MESSAGE 'Böyle Bir Oda Yok!' TYPE 'E'.
+    ENDIF.
+ENDFORM.
+
+FORM layout_duzenle.
+gs_layout-zebra = 'X'.
+gs_layout-colwýdth_optýmýze = 'X'.
+gs_layout-BOX_FIELDNAME  = 'MARK'.
+ENDFORM.
+
+FORM tabloyu_yaz.
+DATA:lv_repid   LIKE sy-repid,
+     ls_fcat    TYPE SLIS_FIELDCAT_ALV,
+     lv_tabname TYPE slis_tabname VALUE 'IT_ODA',
+     lv_strname LIKE dd02l-tabname VALUE 'Z28_ODA_MUST'.
+     lv_repid = sy-repid.
+
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid
+   I_INTERNAL_TABNAME           = lv_tabname
+   I_STRUCTURE_NAME             = lv_strname
+ CHANGING
+    ct_fieldcat                 = gt_fcat
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+
+LOOP AT gt_fcat INTO ls_fcat.
+  CASE ls_fcat-fieldname.
+    when 'MARK'.
+      ls_fcat-NO_OUT = 'X'.
+      MODIFY GT_FCAT FROM LS_FCAT INDEX SY-TABIX.
+    WHEN 'ODA_NO'.
+      ls_fcat-seltext_s = 'ODA'.
+      ls_fcat-seltext_m = 'ODA NUM'.
+      ls_fcat-seltext_l = 'ODA NUMARASI'.
+      MODIFY gt_fcat FROM ls_fcat.
+    WHEN 'MUST_GRUBU'.
+      ls_fcat-seltext_s = 'MUS'.
+      ls_fcat-seltext_m = 'MUST GRUBU'.
+      ls_fcat-seltext_l = 'MUSTERI GRUBU'.
+      MODIFY gt_fcat FROM ls_fcat.
+  ENDCASE.
+ENDLOOP.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+   I_CALLBACK_PROGRAM                = lv_repid
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'UCUS BÝLGÝLERÝ'
+   I_CALLBACK_USER_COMMAND           = 'USER_COMMAND'
+   IS_LAYOUT                         = gs_layout
+   IT_FIELDCAT                       = gt_fcat
+
+  TABLES
+    t_outtab                          = it_ODA
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2
+          .
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.
+FORM user_command USING r_ucomm LIKE sy-ucomm
+                        rs_selfield TYPE slis_selfield.
+  CASE r_ucomm.
+      WHEN'&IC1'.
+      CASE rs_selfield-fieldname.
+          WHEN'MUST_GRUBU'.
+          SET PARAMETER ID 'MUST_GRB' FIELD rs_selfield-value.
+          PERFORM alv2.
+      ENDCASE.
+   ENDCASE.
+ENDFORM.
+form alv2.
+  perform must_bilgi.
+endform.
+form must_bilgi.
+  GET PARAMETER ID 'MUST_GRB' FIELD LS_MUST-MUST_GRUBU.
+  SELECT * FROM Z28_MUST_TABLOSU INTO TABLE it_must WHERE MUST_GRUBU eq LS_MUST-MUST_GRUBU.
+  clear GS_LAYOUT.
+  clear GT_FCAT.
+  PERFORM layout_duzenle2.
+  PERFORM tabloyu_yaz2.
+ENDFORM.
+FORM layout_duzenle2.
+gs_layout-zebra = 'X'.
+gs_layout-colwýdth_optýmýze = 'X'.
+gs_layout-WINDOW_TITLEBAR = 'POP-UP'.
+ENDFORM.
+
+FORM tabloyu_yaz2.
+DATA:lv_repid2   LIKE sy-repid,
+     ls_fcat2    TYPE SLIS_FIELDCAT_ALV,
+     lv_tabname2 TYPE slis_tabname VALUE 'it_must',
+     lv_strname2 LIKE dd02l-tabname VALUE 'Z28_MUST_TABLOSU'.
+     lv_repid2 = sy-repid.
+
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid2
+   I_INTERNAL_TABNAME           = lv_tabname2
+   I_STRUCTURE_NAME             = lv_strname2
+ CHANGING
+    ct_fieldcat                 = gt_fcat[]
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+
+*delete GT_FCAT WHERE FIELDNAME = 'MID'.
+*LOOP AT gt_fcat INTO ls_fcat2.
+*  CASE ls_fcat2-fieldname.
+*    WHEN 'ODA_NO'.
+*      ls_fcat2-seltext_s = 'ODA'.
+*      ls_fcat2-seltext_m = 'ODA NUM'.
+*      ls_fcat2-seltext_l = 'ODA NUMARASI'.
+*      MODIFY gt_fcat FROM ls_fcat2.
+*    WHEN 'MUST_GRUBU'.
+*      ls_fcat2-seltext_s = 'MUS'.
+*      ls_fcat2-seltext_m = 'MUST GRUBU'.
+*      ls_fcat2-seltext_l = 'MUSTERI GRUBU'.
+*      MODIFY gt_fcat FROM ls_fcat2.
+*    WHEN 'GIRIS_TARIH'.
+*      ls_fcat2-seltext_s = 'GIRIS'.
+*      ls_fcat2-seltext_l = 'GIRIS TARIHI'.
+*      MODIFY gt_fcat FROM ls_fcat2.
+*    WHEN 'CIKIS_TARIH'.
+*      ls_fcat2-seltext_s = 'CIKIS'.
+*      ls_fcat2-seltext_l = 'CIKIS TARIHI'.
+*      MODIFY gt_fcat FROM ls_fcat2.
+*  ENDCASE.
+*ENDLOOP.
+
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+   I_CALLBACK_PROGRAM                = lv_repid2
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'MUSTERI BILGILERI'
+*   I_CALLBACK_USER_COMMAND           = 'USER_COMMAND'
+   IS_LAYOUT                         = gs_layout
+   IT_FIELDCAT                       = gt_fcat[]
+   I_SCREEN_START_COLUMN             = 75
+   I_SCREEN_START_LINE               = 1
+   I_SCREEN_END_COLUMN               = 150
+   I_SCREEN_END_LINE                 = 25
+
+  TABLES
+    t_outtab                          = IT_MUST[]
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2
+          .
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.
+
+FORM musteri_giris.
+*P_DOSYA = 'C:\Users\lenovoz\Desktop\Abap-sap\TABLO 1.xlsx'.
+TYPES:BEGIN OF t_tab,
+      deger2(20) TYPE c,
+      deger3(20) TYPE c,
+      END OF t_tab.
+
+DATA:it_yukle  TYPE STANDARD TABLE OF t_tab,
+     ls_yukle TYPE t_tab,
+     temp TYPE I,
+     t_yukle TYPE STANDARD TABLE OF t_tab ,
+     ls_excel TYPE Z28_EXCEL,
+     it_type  TYPE truxs_t_text_data.
+
+
+CALL FUNCTION 'F4_FILENAME'
+ EXPORTING
+   FIELD_NAME          = 'p_dosya'
+ IMPORTING
+   FILE_NAME           = p_dosya.
+
+CALL FUNCTION 'TEXT_CONVERT_XLS_TO_SAP'
+  EXPORTING
+    i_tab_raw_data             = it_type
+    i_filename                 = p_dosya
+  TABLES
+    i_tab_converted_data       = it_yukle
+ EXCEPTIONS
+   CONVERSION_FAILED          = 1
+   OTHERS                     = 2.
+
+IF sy-subrc NE 0.
+MESSAGE ID sy-msgid
+TYPE sy-msgty
+NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+
+temp = 1.
+loop at IT_YUKLE INTO LS_YUKLE.
+  LS_EXCEL-AID = temp.
+  LS_EXCEL-AD = LS_YUKLE-DEGER2.
+  LS_EXCEL-SOYAD = LS_YUKLE-DEGER3.
+  LS_EXCEL2-AID = temp.
+  LS_EXCEL2-AD = LS_YUKLE-DEGER2.
+  LS_EXCEL2-SOYAD = LS_YUKLE-DEGER3.
+  insert LS_EXCEL2 INTO TABLE LT_EXCEL.
+  insert into Z28_EXCEL VALUES LS_EXCEL.
+  temp = temp + 1.
+ENDLOOP.
+
+clear GT_FCAT.
+clear GS_LAYOUT.
+gs_layout-zebra = 'X'.
+gs_layout-colwýdth_optýmýze = 'X'.
+gs_layout-BOX_FIELDNAME  = 'MARK'.
+
+DATA:lv_repid2   LIKE sy-repid,
+     ls_fcat2    TYPE SLIS_FIELDCAT_ALV,
+     lv_tabname2 TYPE slis_tabname VALUE 'lt_EXCEL',
+     lv_strname2 LIKE dd02l-tabname VALUE 'Z28_EXCEL'.
+     lv_repid2 = sy-repid.
+
+CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+ EXPORTING
+   I_PROGRAM_NAME               = lv_repid2
+   I_INTERNAL_TABNAME           = lv_tabname2
+   I_STRUCTURE_NAME             = lv_strname2
+ CHANGING
+    ct_fieldcat                 = gt_fcat[]
+ EXCEPTIONS
+   INCONSISTENT_INTERFACE       = 1
+   PROGRAM_ERROR                = 2
+   OTHERS                       = 3.
+
+LOOP AT gt_fcat INTO ls_fcat2.
+  CASE ls_fcat2-fieldname.
+    when 'MARK'.
+      ls_fcat2-NO_OUT = 'X'.
+      MODIFY GT_FCAT FROM LS_FCAT2 INDEX SY-TABIX.
+   endcase.
+ENDLOOP.
+
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+   i_callback_program                = lv_repid2
+   I_BYPASSING_BUFFER                = ' '
+   I_GRID_TITLE                      = 'EXCEL TABLOSU'
+   I_CALLBACK_PF_STATUS_SET          = 'MY_STATUS'
+   i_callback_user_command           = 'USER_COMMAND_E'
+   IS_LAYOUT                         = gs_layout
+   IT_FIELDCAT                       = gt_fcat[]
+  TABLES
+    t_outtab                         = LT_EXCEL[]
+ EXCEPTIONS
+   PROGRAM_ERROR                     = 1
+   OTHERS                            = 2.
+IF sy-subrc <> 0.
+MESSAGE id sy-msgýd TYPE sy-msgty NUMBER sy-msgno
+WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+ENDIF.
+ENDFORM.
+
+form my_status USING r_extab TYPE slis_t_extab.
+  set PF-STATUS 'ZSTANDARD' EXCLUDING R_EXTAB.
+ENDFORM.
+form user_command_E  USING r_ucomm LIKE sy-ucomm rs_selfield TYPE SLIS_SELFIELD .
+  CASE r_ucomm.
+    when '&BTN'.
+      read table LT_EXCEL INTO LS_EXCEL2.
+      loop at LT_EXCEL INTO LS_EXCEL2.
+        if LS_EXCEL2-MARK ne 'X'.
+          delete from Z28_EXCEL WHERE AID = LS_EXCEL2-AID.
+        ENDIF.
+      endloop.
+      clear LT_EXCEL.
+      perform kisileri_kaydet.
+      message 'KÝSÝLER KAYDEDÝLDÝ.' TYPE 'I'.
+  ENDCASE.
+endform.
+FORM kisileri_kaydet.
+  data: lv_tutucu TYPE I,
+        t_tabix TYPE sy-TABIX,
+        lv_sayac TYPE I,
+        lv_tutucu2(5) TYPE c,
+        lv_tutucu4(5) TYPE c,
+        lv_tutucu3(25) TYPE c,
+        V_LINES TYPE I,
+        lt_must1 TYPE TABLE OF Z28_MUST_TABLOSU,
+        lt_must2 TYPE TABLE OF Z28_MUST_TABLOSU,
+        ls_must1 TYPE Z28_MUST_TABLOSU,
+        ls_must2 TYPE Z28_MUST_TABLOSU,
+        lt_oda_t TYPE TABLE OF Z28_ODA_TABLOSU,
+        ls_oda_t TYPE Z28_ODA_TABLOSU,
+        ls_om    TYPE Z28_ODA_MUST,
+        lt_om    TYPE TABLE OF Z28_ODA_MUST.
+
+clear LT_MUST1.
+select * from Z28_MUST_TABLOSU INTO TABLE lt_must1.
+
+sort LT_EXCEL ASCENDING BY SOYAD.
+DESCRIBE TABLE LT_EXCEL LINES V_LINES.
+LV_TUTUCU = 1.    "MID
+LV_TUTUCU2 = 1.   "MUSTERÝ_GRUBU
+clear LV_TUTUCU3. "EN SOn SOYAD ait müsteri grubu
+clear LV_TUTUCU4. "AYNI SOYAD
+if V_LINES > 0.
+   LOOP AT LT_EXCEL INTO LS_EXCEL2 WHERE MARK = 'X'.
+     if LS_EXCEL2-SOYAD = LV_TUTUCU3.
+       LV_TUTUCU = LV_TUTUCU + 1.
+       ls_must1-MID = LV_TUTUCU.
+       LS_MUST1-AD = LS_EXCEL2-AD.
+       LS_MUST1-SOYAD = LS_EXCEL2-SOYAD.
+       LS_MUST1-GIRIS_TARIHI = sy-DATUM.
+       LS_MUST1-MUST_GRUBU = LV_TUTUCU2.
+       clear LS_MUST1-ODA_NO.
+       insert LS_MUST1 INTO TABLE LT_MUST1.
+     else.
+      LOOP AT lt_must1 INTO ls_must1.
+        IF ls_must1-MID = LV_TUTUCU.
+          LV_TUTUCU = LV_TUTUCU + 1.
+        ENDIF.
+      ENDLOOP.
+      LOOP AT lt_must1 INTO ls_must1.
+        if LS_MUST1-SOYAD = LS_EXCEL2-SOYAD.
+          lv_tutucu4 = LS_MUST1-MUST_GRUBU.
+        ENDIF.
+      ENDLOOP.
+      if LV_TUTUCU4 IS INITIAL.
+        LOOP AT lt_must1 INTO ls_must1 FROM sy-INDEX.
+          SHIFT LV_TUTUCU2 LEFT DELETING LEADING ' '.
+          IF LV_TUTUCU2 = LS_MUST1-MUST_GRUBU.
+            LV_TUTUCU2 = LV_TUTUCU2 + 1.
+            sy-INDEX = 1.
+          ENDIF.
+        ENDLOOP.
+      ENDIF.
+      ls_must1-MID = LV_TUTUCU.
+      LS_MUST1-AD = LS_EXCEL2-AD.
+      LS_MUST1-SOYAD = LS_EXCEL2-SOYAD.
+      LS_MUST1-GIRIS_TARIHI = sy-DATUM.
+      if LV_TUTUCU4 is INITIAL.
+        SHIFT LV_TUTUCU2 LEFT DELETING LEADING ' '.
+        LS_MUST1-MUST_GRUBU = LV_TUTUCU2.
+      else.
+        LS_MUST1-MUST_GRUBU = LV_TUTUCU4.
+        clear LV_TUTUCU4.
+      ENDIF.
+      clear LS_MUST1-ODA_NO.
+      LV_TUTUCU3 = LS_EXCEL2-SOYAD.
+      insert LS_MUST1 INTO TABLE LT_MUST1.
+     ENDIF.
+  ENDLOOP.
+ENDIF.
+
+LV_SAYAC = 1.
+
+SORT LT_MUST1 ASCENDING BY SOYAD.
+
+LOOP AT LT_MUST1 INTO LS_MUST1 FROM sy-TABIX WHERE ODA_NO = ''.
+  T_TABIX = sy-TABIX.
+  LOOP AT LT_MUST1 INTO LS_MUST2 FROM T_TABIX + 1 WHERE ODA_NO = ''.
+    IF LS_MUST1-SOYAD = LS_MUST2-SOYAD.
+      lv_sayac = LV_SAYAC + 1.
+    ENDIF.
+  ENDLOOP.
+  select * from Z28_ODA_MUST INTO TABLE LT_OM WHERE MUST_GRUBU = ''.
+  IF lt_om IS INITIAL.
+    Message 'Boþta Oda Kalmamýþtýr.' type 'E'.
+  else.
+    IF LV_SAYAC = 1.
+      DO 5 TIMES.
+            LOOP AT LT_OM INTO LS_OM.
+                select * from Z28_ODA_TABLOSU INTO TABLE LT_ODA_T WHERE ODA_KAP = LV_SAYAC and ODA_NO = LS_OM-ODA_NO.
+                IF LT_ODA_T is INITIAL.
+                else.
+                  read TABLE LT_ODA_T INTO LS_ODA_T INDEX 1.
+                  LOOP AT LT_MUST1 INTO LS_MUST1 WHERE MID = LS_MUST1-MID.
+                    LS_MUST1-ODA_NO = LS_ODA_T-ODA_NO.
+                    SHIFT LS_MUST1-MUST_GRUBU LEFT DELETING LEADING ' '.
+                    modify LT_MUST1 FROM LS_MUST1.
+                  ENDLOOP.
+                  ls_om-MUST_GRUBU = LS_MUST1-MUST_GRUBU.
+                  modify Z28_ODA_MUST FROM LS_OM.
+                  exit.
+                ENDIF.
+            ENDLOOP.
+            IF LS_MUST1-ODA_NO = ''.
+              LV_SAYAC = LV_SAYAC + 1.
+            else.
+              exit.
+            ENDIF.
+      ENDDO.
+    ENDIF.
+    IF LV_SAYAC = 2.
+      DO 4 TIMES.
+            LOOP AT LT_OM INTO LS_OM.
+                select * from Z28_ODA_TABLOSU INTO TABLE LT_ODA_T WHERE ODA_KAP = LV_SAYAC and ODA_NO = LS_OM-ODA_NO.
+                IF LT_ODA_T is INITIAL.
+                else.
+                  read TABLE LT_ODA_T INTO LS_ODA_T INDEX 1.
+                  LOOP AT LT_MUST1 INTO LS_MUST1 WHERE SOYAD = LS_MUST1-SOYAD and ODA_NO = ''.
+                    LS_MUST1-ODA_NO = LS_ODA_T-ODA_NO.
+                    SHIFT LS_MUST1-MUST_GRUBU LEFT DELETING LEADING ' '.
+                    modify LT_MUST1 FROM LS_MUST1.
+                  ENDLOOP.
+                  ls_om-MUST_GRUBU = LS_MUST1-MUST_GRUBU.
+                  modify Z28_ODA_MUST FROM LS_OM.
+                  exit.
+                ENDIF.
+            ENDLOOP.
+            IF LS_MUST1-ODA_NO = ''.
+              LV_SAYAC = LV_SAYAC + 1.
+            else.
+              exit.
+            ENDIF.
+      ENDDO.
+    ENDIF.
+    IF LV_SAYAC > 4 or LV_SAYAC = 4.
+        LOOP AT LT_OM INTO LS_OM.
+            select * from Z28_ODA_TABLOSU INTO TABLE LT_ODA_T WHERE ODA_KAP = LV_SAYAC and ODA_NO = LS_OM-ODA_NO.
+            IF LT_ODA_T is INITIAL.
+            else.
+              read TABLE LT_ODA_T INTO LS_ODA_T INDEX 1.
+              LOOP AT LT_MUST1 INTO LS_MUST1 WHERE SOYAD = LS_MUST1-SOYAD and ODA_NO = ''.
+                LS_MUST1-ODA_NO = LS_ODA_T-ODA_NO.
+                SHIFT LS_MUST1-MUST_GRUBU LEFT DELETING LEADING ' '.
+                modify LT_MUST1 FROM LS_MUST1.
+                ls_om-MUST_GRUBU = LS_MUST1-MUST_GRUBU.
+                modify Z28_ODA_MUST FROM LS_OM.
+              ENDLOOP.
+              exit.
+            ENDIF.
+        ENDLOOP.
+    ENDIF.
+    LV_SAYAC = 1.
+  ENDIF.
+ENDLOOP.
+LOOP AT LT_MUST1 INTO LS_MUST1.
+  modify Z28_MUST_TABLOSU from LS_MUST1.
+ENDLOOP.
+ENDFORM.
+
+ MODULE STATUS_0001 OUTPUT.
+ DATA:LV_custon_container TYPE REF TO CL_GUI_CUSTOM_CONTAINER.
+IF LV_custon_container IS NOT INITIAL.
+ LV_custon_container->FREE( ).
+ clear LV_custon_container.
+ENDIF.
+ CREATE OBJECT LV_custon_container
+ EXPORTING
+ CONTAINER_NAME = 'CONTAINER_SALV'
+ EXCEPTIONS
+ others = 1.
+
+ CALL METHOD CL_GUI_CFW=>FLUSH
+ EXCEPTIONS
+  cntl_system_error = 1
+  cntl_error        = 2.
+
+perform musteri_cikis.
+ ENDMODULE.
+
+*PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0001 INPUT.
+CASE sy-UCOMM.
+*  WHEN '&F03'.
+  WHEN 'BACK' or 'B'.
+    BACK.
+*  WHEN '&F15'.
+  WHEN 'UP' or 'U'.
+    LEAVE PROGRAM.
+*  WHEN '&F12'.
+  WHEN 'E' or 'EXIT'.
+    LEAVE TO SCREEN 0.
+  when 'BTN2'.
+    PERFORM cikis_yap.
+ENDCASE.
+ ENDMODULE.
+
+form MUSTERI_cikis.
+SELECT * FROM Z28_MUST_TABLOSU INTO TABLE lt_musteri WHERE ODA_NO > 0.
+
+"özel alv methodu
+CALL METHOD CL_SALV_TABLE=>FACTORY
+  EXPORTING
+    r_container    = LV_custon_container
+    container_name = 'CONTAINER_SALV'
+  IMPORTING
+    R_SALV_TABLE   = GR_TABLE
+  CHANGING
+    T_TABLE        = lt_musteri.
+
+"burada sutun baslýklarýný ayarlýyoruz
+  lr_columns = GR_TABLE->get_columns( ).
+  lr_columns->set_optimize( abap_true ).
+*  try.
+*      lr_column ?= lr_columns->get_column( 'DEGER2' ).
+*      lr_column->set_short_text( 'AD' ).
+*      lr_column->set_medium_text( 'MUST ADI' ).
+*      lr_column->set_long_text( 'MUSTERÝ ADI' ).
+*      lr_column ?= lr_columns->get_column( 'DEGER3' ).
+*      lr_column->set_short_text( 'SOYAD' ).
+*      lr_column->set_medium_text( 'MUST SOYADI' ).
+*      lr_column->set_long_text( 'MUSTERÝ SOYADI' ).
+*    catch cx_salv_not_found.
+*  endtry.
+
+"buradada mark alaný ekliyoruz
+ob_salv_selections = GR_TABLE->get_selections( ).
+ob_salv_selections->set_selection_mode( if_salv_c_selection_mode=>row_column ).
+
+*data: lr_func TYPE REF TO CL_SALV_FUNCTIONS_LIST.
+*lr_func = GR_TABLE->get_functions( ).
+*lr_func->set_all( ).
+
+CALL METHOD GR_TABLE->DISPLAY.
+
+endform.
+form cikis_yap.
+data: ls_row            TYPE i,
+      lt_mon            TYPE TABLE OF Z28_ODA_MUST,
+      ls_mon            TYPE Z28_ODA_MUST.
+
+CALL METHOD GR_TABLE->get_metadata.
+it_rows = ob_salv_selections->get_selected_rows( ).
+
+LOOP AT it_rows INTO ls_row.
+  READ TABLE lt_musteri INTO ls_musteri INDEX ls_row.
+  select * from Z28_ODA_MUST INTO TABLE lt_mon WHERE ODA_NO = LS_MUSTERI-ODA_NO.
+  ls_musteri-CIKIS_TARIHI = sy-DATUM.
+  clear LS_MUSTERI-ODA_NO.
+  modify Z28_MUST_TABLOSU FROM LS_MUSTERI.
+  LOOP AT lt_mon INTO ls_mon.
+    clear LS_MON-MUST_GRUBU.
+    modify Z28_ODA_MUST FROM LS_MON.
+  ENDLOOP.
+ENDLOOP.
+
+endform.
+
+
+*Selection texts
+*----------------------------------------------------------
+* R1         Oda Durum Sorgulama
+* R2         Müþteri Kayýt
+* R3         Müþteri Çýkýþ
+* SO_ODA         Oda Numarasý
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: Hard coded
+*   Böyle Bir Oda Yok!

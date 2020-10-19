@@ -1,0 +1,246 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBARAN_ORNEK1
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBARAN_ORNEK001.
+
+*&---------------------------------------------------------------------*
+*& Creating an internal table
+*&---------------------------------------------------------------------*
+
+*data:BEGIN OF ogrenci,
+*     no        TYPE i,
+*     ad(20)    TYPE c,
+*     soyad(20) TYPE c,
+*     notu      TYPE p DECIMALS 2,
+*end of ogrenci.
+*DATA: vize  type f,
+*      final TYPE f,
+*      sonuc TYPE p DECIMALS 1.
+*selection-screen begin of block block_01 with frame title text-001.
+*parameters : p_deg1 type i LENGTH 3,
+*             p_deg2 type i LENGTH 3.
+*selection-screen end of block block_01.
+*at selection-screen.
+*if p_deg1 > 100  or p_deg2 > 100.
+*  message 'LÜTFEN 1-100 ARASI BÝR DEGER GÝRÝNÝZ' TYPE 'E'.
+*endif.
+*end-of-selection.
+*START-OF-SELECTION.
+*vize  = p_deg1.
+*final = p_deg2.
+*sonuc = vize * '0.30' + final * '0.70'.
+* DATA:itab_ogr like STANDARD TABLE OF ogrenci WITH HEADER LINE.
+*
+* itab_ogr-no    = 100.
+* itab_ogr-ad    = 'sabah'.
+* itab_ogr-soyad = 'aksam'.
+* itab_ogr-notu  = sonuc.
+* append itab_ogr.
+*
+* itab_ogr-no    = 101.
+* itab_ogr-ad    = 'sabah'.
+* itab_ogr-soyad = 'aksam'.
+* itab_ogr-notu  = 89.
+* append itab_ogr.
+*
+* itab_ogr-no    = 102.
+* itab_ogr-ad    = 'sabah'.
+* itab_ogr-soyad = 'aksam'.
+* itab_ogr-notu  = 75.
+* append itab_ogr.
+*
+* itab_ogr-no    = 103.
+* itab_ogr-ad    = 'sabah'.
+* itab_ogr-soyad = 'aksam'.
+* itab_ogr-notu  = 32.
+* append itab_ogr.
+*
+* itab_ogr-no    = 103.
+* itab_ogr-ad    = 'sabah'.
+* itab_ogr-soyad = 'aksam'.
+* itab_ogr-notu  = 67.
+* append itab_ogr.
+*
+* LOOP AT itab_ogr.
+* WRITE:/ itab_ogr-no,
+*         itab_ogr-ad,
+*         itab_ogr-soyad,
+*         itab_ogr-notu.
+* ENDLOOP.
+
+*************& OR
+
+**SELECTION-SCREEN BEGIN OF BLOCK blok1 WITH FRAME TITLE text-006
+**NO INTERVALS.
+**
+**PARAMETERS : p_sayi1 type p,
+**             p_sayi2 type p,
+**             p_sonuc type char20.
+**
+**SELECTION-SCREEN end OF BLOCK blok1.
+**
+**SELECTION-SCREEN BEGIN OF BLOCK blok WITH FRAME TITLE text-005
+**NO INTERVALS.
+**
+**SELECTION-SCREEN : PUSHBUTTON  10(4) text_001 USER-COMMAND topla,
+**                   PUSHBUTTON  16(4) text_002 USER-COMMAND cikar,
+**                   PUSHBUTTON  22(4) text_003 USER-COMMAND carp,
+**                   PUSHBUTTON  28(4) text_004 USER-COMMAND bol.
+**
+**SELECTION-SCREEN end OF BLOCK blok.
+**
+**
+**AT SELECTION-SCREEN.
+**
+**CASE sy-ucomm.
+**  WHEN 'TOPLA'.
+**    p_sonuc = p_sayi1 + p_sayi2.
+**  WHEN 'CIKAR'.
+**    p_sonuc = p_sayi1 - p_sayi2.
+**  WHEN 'CARP'.
+**    p_sonuc = p_sayi1 * p_sayi2.
+**  WHEN 'BOL'.
+**    p_sonuc = p_sayi1 / p_sayi2.
+**  WHEN OTHERS.
+**ENDCASE.
+************************************************************************
+
+*&---------------------------------------------------------------------*
+*& Sorting process
+*&---------------------------------------------------------------------*
+*SELECTION-SCREEN BEGIN OF BLOCK blok_1 WITH FRAME TITLE text-001.
+*PARAMETERS:a TYPE i,
+*           b TYPE i,
+*           c TYPE i,
+*           d TYPE i.
+*SELECTION-SCREEN END OF BLOCK blok_1.
+*data bs TYPE i.
+*bs = 0.
+*do 3 times.
+*    if a < b.
+*      bs = b.
+*      b = a.
+*      a = bs.
+*    ENDIF.
+*    IF b < c.
+*      bs = c.
+*      c = b.
+*      b = bs.
+*    ENDIF.
+*    IF c < d.
+*      bs = d.
+*      d = c.
+*      c = bs.
+*    ENDIF.
+*ENDDO.
+*WRITE:/ a,
+*        b,
+*        c,
+*        d.
+
+*************& OR
+
+*DATA:it_futbol TYPE TABLE OF ZBARAN_futbol,
+*     gv_dosya_adi TYPE string.
+*
+*SELECT * FROM ZBARAN_futbol INTO TABLE it_futbol.
+*  CALL FUNCTION 'WS_FILENAME_GET'
+*  EXPORTING
+*  MODE                   = 'S'
+*  TITLE                  = 'SÝRKET DOSYA SECÝMÝ '
+*  IMPORTING
+*  FILENAME               = GV_DOSYA_adi
+*  EXCEPTIONS
+*  INV_WINSYS             = 1
+*  NO_BATCH               = 2
+*  SELECTION_CANCEL       = 3
+*  SELECTION_ERROR        = 4
+*  OTHERS                 = 5.
+*            .
+*  IF sy-subrc <> 0.
+*   MESSAGE 'hata olustu' TYPE 'E'.
+*  ENDIF.
+*  CALL FUNCTION 'GUI_DOWNLOAD'
+*    EXPORTING
+*     filename     = gv_dosya_adi
+*     FILETYPE     = 'ASC'
+*    tables
+*     data_tab     = it_futbol.
+
+**********& OR
+
+*TABLES  : ZBARAN_futbol.
+* DATA    : it_futbol  LIKE ZBARAN_futbol OCCURS 0  WITH HEADER LINE.
+* SELECT * FROM ZBARAN_futbol  INTO  TABLE it_futbol UP TO 150 ROWS.
+*
+* CALL  FUNCTION  'WS_DOWNLOAD'
+* EXPORTING
+*   FILENAME    =   'C:\deneme\Deneme.xls'
+*   FILETYPE    =   'DAT'
+* TABLES
+*   DATA_TAB    =   it_futbol.
+*************************************************************************
+
+*&---------------------------------------------------------------------*
+*& Progress bar
+*&---------------------------------------------------------------------*
+*data: index type i.
+*do 4 times.
+*index = sy-index * 25.
+*
+*  call function 'SAPGUI_PROGRESS_INDICATOR'
+*       exporting
+*            percentage = index
+*            text       = 'Processing Data'.
+*  wait up to 1 seconds.
+*enddo.
+
+data:lv_bersan1(256) type c.
+data:lv_bersan2(256) type c.
+*lv_bersan1 = 'çðýöþü'.
+*CALL FUNCTION 'SCP_REPLACE_STRANGE_CHARS'
+*  EXPORTING
+*    INTEXT                  = lv_bersan1
+* IMPORTING
+*   OUTTEXT                 = lv_bersan2.
+*write / :lv_bersan1,lv_bersan2.
+
+DATA: BEGIN OF LV_CONVERT,
+  convert1   VALUE 'Ü',
+  convert1_t VALUE 'U',
+  convert2   VALUE 'Ö',
+  convert2_t VALUE 'O',
+ END OF LV_CONVERT.
+
+FIELD-SYMBOLS: <lv_bersan1>, <lv_bersan2>.
+DATA LV_STRING TYPE string.
+DATA outp(40).
+DATA: zaehler TYPE i VALUE 1.
+
+LV_STRING = 'asygdüö'.
+TRANSLATE LV_STRING TO UPPER CASE.
+
+DO.
+  ASSIGN COMPONENT zaehler OF STRUCTURE LV_CONVERT TO <lv_bersan1>.
+  IF sy-subrc <> 0.
+    EXIT.
+  ENDIF.
+  zaehler = zaehler + 1.
+  ASSIGN COMPONENT zaehler OF STRUCTURE LV_CONVERT TO <lv_bersan2>.
+  IF sy-subrc <> 0.
+    MESSAGE e000(yp).
+  ENDIF.
+  IF LV_STRING CA <lv_bersan1>.
+    sy-subrc = 0.
+    WHILE sy-subrc = 0.
+      REPLACE <lv_bersan1> WITH <lv_bersan2> INTO LV_STRING.
+    ENDWHILE.
+  ENDIF.
+  zaehler = zaehler + 1.
+ENDDO.
+
+WRITE: 'String: ', / LV_STRING.
